@@ -258,11 +258,11 @@ HeadMaster has layered token reduction built in:
 
 | Threshold      | Action                                 |
 |----------------|----------------------------------------|
-| 🟡 50k tokens  | Notice — session getting long          |
-| 🟠 100k tokens | Warning — run `/handoff` soon          |
-| ⛔ 150k tokens  | Auto-handoff written + context cleared |
+| 🟡 15 turns    | Notice — session getting long          |
+| 🟠 25 turns    | Warning — run `/handoff` soon          |
+| ⛔ 35 turns     | Auto-handoff written + context cleared |
 
-> Estimates use `chars ÷ 4`. Code-heavy sessions may hit the limit 20-30% earlier. Run `/handoff` proactively at 🟠.
+> Heavy file reads (>500KB) downgrade thresholds by 5 turns. Run `/handoff` proactively at 🟠.
 
 **Security scanning tools** — all optional. Missing tools are reported, never silently skipped:
 
