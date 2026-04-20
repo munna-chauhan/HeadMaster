@@ -26,7 +26,7 @@ using a structured pipeline of specialized AI agents, each with a single job and
 ```
 You type:   /navigate "Add rate limiting to the public API"
 
-AI does:    Requirements Q&A → 14-section PRD → System design + ADRs
+AI does:    Requirements Q&A → PRD → System design + ADRs
             → TDD blueprint → Jira stories → Code + tests → Security scan
             → Code review → QA integration tests → System audit → PR
 
@@ -55,11 +55,28 @@ Each arrow is a hard gate — the pipeline cannot advance until the gate conditi
 
 | You provide                   | AI handles                       | You decide              |
 |-------------------------------|----------------------------------|-------------------------|
-| Feature description           | 14-section PRD                   | ✅ Requirements approval |
+| Feature description           | PRD (6, 10, or 14 sections)     | ✅ Requirements approval |
 | Jira ticket / Confluence page | System design + ADRs             | ✅ Architecture sign-off |
 | Bug description               | Code + unit tests                | ✅ Story prioritization  |
 |                               | Security scan + code review      | ✅ Final PR merge        |
 |                               | Integration tests + system audit |                         |
+
+---
+
+## Complexity Tiers
+
+Not every feature needs a 14-section PRD and 11-section TDD. HeadMaster auto-classifies complexity at `/navigate` and
+scales artifact depth accordingly:
+
+| Tier | Stories | PRD Sections | Design Artifact | Review |
+|------|---------|-------------|-----------------|--------|
+| **Lite** | 1-2, single repo | 6 | IMPLEMENTATION_BRIEF.md (5 sections) | No TDD review |
+| **Standard** | 3-5, 1-2 repos | 10 | TDD.md (8 sections) | TDD review |
+| **Full** | 6+, multi-repo | 14 | TDD.md (11 sections) or TDD_MASTER + per-repo TDDs | TDD review |
+
+Override anytime: `/navigate <slug> --tier <lite|standard|full>`
+
+Lite tier skips the Architect stage entirely — goes straight from PRD to IMPLEMENTATION_BRIEF to breakdown.
 
 ---
 
@@ -129,12 +146,12 @@ Then edit `.claude/settings.local.json` — update the draw.io path for your mac
 **`config.yml`** — edit at repo root:
 
 ```yaml
-project_key: "PROJ"   # Jira project key. Leave empty if no Jira.
-jira_push: false      # true = push stories to Jira after human approval
-max_loops: 3          # Max review iterations before human escalation
-parallel: false       # true = run independent stories simultaneously
-interactive: true     # true = ask at decision points
-# false = auto-decide, log rationale, never pause
+project_key: "PROJ"    # Jira project key. Leave empty if no Jira.
+jira_push: false       # true = push stories to Jira after human approval
+max_loops: 3           # Max review iterations before human escalation
+parallel: false        # true = run independent stories simultaneously
+interactive: true      # true = ask at decision points. false = auto-decide, log rationale
+default_tier: "full"   # Default complexity tier if /navigate can't determine. Options: lite, standard, full
 ```
 
 > Epic key is **not** in config — it's per-feature. Provide it in `FEATURE_INPUT.md` or as a Jira link. `/breakdown`
@@ -177,8 +194,8 @@ claude --name "my-feature"
 /navigate "Add rate limiting to the public API"
 ```
 
-> `/navigate` classifies the route, detects any existing progress, and tells you exactly what to run next. Always start
-> here when unsure.
+> `/navigate` classifies the route and complexity tier, detects any existing progress, and tells you exactly what to run
+> next. Always start here when unsure.
 
 ---
 
@@ -188,11 +205,15 @@ claude --name "my-feature"
 
 | Skill        | What it does                                             | Usage                             |
 |--------------|----------------------------------------------------------|-----------------------------------|
-| `/navigate`  | Dashboard · route classifier · resume from any state     | `/navigate [slug or description]` |
+| `/navigate`  | Dashboard · route classifier · tier assessment · resume  | `/navigate [slug or description]` |
 | `/plan`      | Requirements: Init → Discover → Draft → Review           | `/plan {slug} [message]`          |
 | `/design`    | Design: Architect → Engineer → Review                    | `/design {slug} [message]`        |
 | `/breakdown` | TDD → stories · Jira push · merge gate                   | `/breakdown {slug} [merge-gate]`  |
 | `/execute`   | Per-story: implement → scan → review → QA → system audit | `/execute {slug}`                 |
+
+Each pipeline skill uses **lazy-loaded stage files** — only the active stage's instructions are loaded into context,
+keeping token usage minimal. For example, `/plan` dispatches to `stages/init.md`, `stages/discover.md`,
+`stages/draft.md`, or `stages/review.md` based on detected state.
 
 ### Execution Phases *(run by `/execute` per story)*
 
@@ -212,7 +233,7 @@ claude --name "my-feature"
 | `/compress`     | Compress memory/working files — saves tokens every session            |
 | `/jira-ops`     | Jira API: fetch, create, update, link, transition                     |
 | `/commit`       | Atomic commit with secret scan + conventional format                  |
-| `/handoff`      | Save session state (≤100 lines) + clear context                       |
+| `/handoff`      | Save session state (≤100 lines) + clear context                      |
 | `/create-pr`    | Validate branch hierarchy + create PR with human gate                 |
 
 ---
@@ -225,10 +246,10 @@ claude --name "my-feature"
 |------------------------|-------------------------------------|--------------------------------|
 | `solutions-architect`  | System design + ADRs                | **opus** — deep reasoning only |
 | `requirements-analyst` | Surface gaps, Q&A                   | sonnet                         |
-| `prd-author`           | Write 14-section PRD                | sonnet                         |
+| `prd-author`           | Write PRD (6/10/14 sections)        | sonnet                         |
 | `tdd-author`           | Implementation blueprints           | sonnet                         |
 | `developer`            | Code + tests per TDD                | sonnet                         |
-| `review-agent`         | Security scan + code review         | sonnet                         |
+| `review-agent`         | Code review + system audit          | sonnet                         |
 | `qa-engineer`          | Integration tests                   | sonnet                         |
 | `release-agent`        | Story breakdown + merge gate        | sonnet                         |
 | `prd-reviewer`         | Stress-test PRD (24-item checklist) | **haiku** — mechanical only    |
@@ -245,22 +266,25 @@ scan tasks.
 
 HeadMaster has layered token reduction built in:
 
-| Layer                  | What it does                                                   | Saving                    |
-|------------------------|----------------------------------------------------------------|---------------------------|
-| Model routing          | Right model for each task                                      | 60-80% vs opus everywhere |
-| `read_compressor` hook | Compresses large `.md` reads before Claude sees them           | 30-60% per read           |
-| `input_extractor`      | Strips Jira/Confluence API noise on fetch                      | 70-85% per input file     |
-| `/compress` skill      | Compresses memory/working files persistently                   | 38-60% per file           |
-| Context discipline     | Each phase loads only what it needs                            | Prevents 2-3x bloat       |
-| Auto-handoff           | Saves state at limit, clears context — session continues clean | Prevents runaway cost     |
+| Layer                    | What it does                                                 | Saving                    |
+|--------------------------|--------------------------------------------------------------|---------------------------|
+| Model routing            | Right model for each task                                    | 60-80% vs opus everywhere |
+| Complexity tiers         | Lite features produce 6-section PRD, not 14                  | 40-60% fewer artifacts    |
+| Lazy stage loading       | Skills split into stage files — only active stage loaded     | 250-350 lines saved/skill |
+| Deterministic stop hooks | Python scripts replace haiku agents for gate checks          | ~10 haiku calls saved     |
+| `read_compressor` hook   | Compresses memory + input `.md` reads before Claude sees them | 30-60% per read          |
+| `input_extractor`        | Strips Jira/Confluence API noise on fetch                    | 70-85% per input file     |
+| `/compress` skill        | Compresses memory/working files persistently                 | 38-60% per file           |
+| Context discipline       | Each phase loads only what it needs                          | Prevents 2-3x bloat      |
+| Auto-handoff             | Saves state at turn limit, clears context                    | Prevents runaway cost     |
 
-**Session budget** — tracked automatically per session:
+**Session age tracking** — turn-based (the only reliable signal without API token counts):
 
 | Threshold      | Action                                 |
 |----------------|----------------------------------------|
 | 🟡 15 turns    | Notice — session getting long          |
 | 🟠 25 turns    | Warning — run `/handoff` soon          |
-| ⛔ 35 turns     | Auto-handoff written + context cleared |
+| ⛔ 35 turns    | Auto-handoff written + context cleared |
 
 > Heavy file reads (>500KB) downgrade thresholds by 5 turns. Run `/handoff` proactively at 🟠.
 
@@ -276,34 +300,123 @@ HeadMaster has layered token reduction built in:
 
 ---
 
+## Reliability Features
+
+### Convergence Checking
+Review loops (Plan Review, Design Review) use `convergence_check.py` to detect oscillation — if a blocker that was
+previously resolved reappears, the system escalates to human instead of looping forever. Uses word-overlap normalization
+so the same issue described differently is still caught.
+
+### Failure Ledger
+When `/implement` fails, the failure is recorded in an append-only ledger (`failure_ledger.py`). On retry, the developer
+agent must read all prior failures and choose a structurally different approach. 70%+ word overlap with a prior failed
+approach triggers a warning.
+
+### Crash Recovery
+If a session dies mid-`/execute` (token limit, network, terminal closed), the resume pre-flight checks each IN PROGRESS
+story branch for dirty working trees and broken builds before continuing. Offers to stash, reset, or escalate.
+
+### Subagent Artifact Validation
+After every review subagent returns (PRD review, TDD review), the system validates the expected artifact file exists on
+disk and contains the expected verdict structure before advancing the pipeline. Missing or malformed artifacts trigger a
+retry, then escalation.
+
+### Git Guard
+`git_guard.py` runs as a PreToolUse hook on every Bash command. Blocks destructive operations (`push --force`,
+`reset --hard`, `rebase`, `cherry-pick`, `filter-branch`) and validates branch names match HeadMaster conventions.
+Fail-closed: unknown git subcommands are blocked by default.
+
+---
+
 ## Artifact Structure
 
 Every feature gets its own workspace under `docs/features/{slug}/`:
 
 ```
 docs/features/{slug}/
-├── input/               ← Jira, Confluence, local docs (raw + extracted)
+├── input/                     ← Jira, Confluence, local docs (raw + extracted .md)
 ├── planning/
 │   ├── FEATURE_DRAFT.md       ← Init output
 │   ├── DISCOVERY_NOTES.md     ← Q&A resolved
 │   ├── PRD.md                 ← ✅ Source of truth after approval
 │   └── PRD_REVIEW.md          ← Review findings
 ├── design/
-│   ├── SYSTEM_DESIGN_NOTES.md ← Architecture + ADRs
+│   ├── SYSTEM_DESIGN_NOTES.md ← Architecture + ADRs (standard/full tier)
+│   ├── IMPLEMENTATION_BRIEF.md← Design output (lite tier only)
 │   ├── TDD.md                 ← Single repo (or TDD_MASTER + TDD_{REPO} for multi)
-│   ├── TDD_REVIEW.md          ← 27-item checklist review
+│   ├── TDD_REVIEW.md          ← Checklist review (standard/full tier)
 │   ├── MIGRATION_PLAN.md      ← Conditional
 │   └── diagrams/              ← draw.io + PNG (or Mermaid fallback)
 ├── breakdown/
 │   └── JIRA_BREAKDOWN.md      ← Stories + execution tracker
-└── execution/reviews/
-    ├── security-scan-*.md
-    ├── code-review-*.md
-    ├── qa-report-*.md
-    └── system-review.md
+├── execution/reviews/
+│   ├── security-scan-*.md
+│   ├── code-review-*.md
+│   ├── qa-report-*.md
+│   └── escalation-*.md        ← Failed stories with full failure ledger
+└── retrospective/
+    └── system-review.md       ← Post-execution design-vs-actual audit
 
-memory/features/{slug}/        ← Loop state, decisions, session handoffs
+memory/features/{slug}/        ← Loop state, failure ledgers, session handoffs
 memory/agents/{name}/          ← Cross-feature agent learnings
+```
+
+---
+
+## Directory Structure
+
+```
+HeadMaster/
+├── .claude/
+│   ├── skills/                 # 13 skills (pipeline + execution + utility)
+│   │   ├── plan/
+│   │   │   ├── SKILL.md        # Dispatch + state detection (~94 lines)
+│   │   │   └── stages/         # Lazy-loaded: init, discover, draft, review
+│   │   ├── design/
+│   │   │   ├── SKILL.md        # Dispatch + state detection (~130 lines)
+│   │   │   └── stages/         # Lazy-loaded: architect, engineer, review
+│   │   ├── execute/
+│   │   │   ├── SKILL.md        # Dispatch (~60 lines)
+│   │   │   └── stages/         # Lazy-loaded: setup, story-loop, finalize
+│   │   ├── breakdown/SKILL.md
+│   │   ├── navigate/SKILL.md
+│   │   └── ...                 # implement, security-scan, review-code, qa-integration, etc.
+│   ├── agents/                 # 12 AI specialists
+│   ├── commands/               # 5 atomic operations (commit, handoff, create-pr, etc.)
+│   ├── workflows/              # 5 route definitions + complexity tiers
+│   ├── hooks/
+│   │   ├── stop_checks/        # 4 deterministic Python gate checks
+│   │   ├── read_compressor.py  # PreToolUse — compress memory/input reads
+│   │   ├── write_compressor.py # PostToolUse — compress memory writes only
+│   │   ├── token_budget.py     # UserPromptSubmit — turn-based session tracking
+│   │   ├── git_guard.py        # PreToolUse — block destructive git ops (via scripts/)
+│   │   └── ...                 # activate, feature_context, session_reset, etc.
+│   ├── CLAUDE.md               # System prompt (~71 lines)
+│   └── ARCHITECTURE.md         # Model routing + context budget reference
+│
+├── scripts/                    # 11 Python utilities
+│   ├── gate_transition.py      # Atomic pipeline state transitions
+│   ├── convergence_check.py    # Review loop oscillation detection
+│   ├── failure_ledger.py       # Append-only retry history per story
+│   ├── metrics.py              # Per-feature JSONL event collection
+│   ├── diff_scanner.py         # Security scan: secrets + SAST + deps
+│   ├── secret_scanner.py       # Pre-commit secret detection
+│   ├── git_guard.py            # Branch validation + destructive op blocking
+│   ├── input_extractor.py      # Strip Jira/Confluence API noise → lean .md
+│   ├── input_sanitizer.py      # Prompt injection detection in external data
+│   ├── jira_ops.py             # Jira API operations
+│   └── test_infra_detector.py  # Detect available test infrastructure per repo
+│
+├── docs/
+│   ├── features/{slug}/        # Feature workspaces (generated)
+│   └── examples/               # 4 artifact samples
+│
+├── memory/                     # Persistent state (generated)
+│   ├── features/{slug}/        # Per-feature: loop_state, failure ledgers, handoffs
+│   └── agents/{name}/          # Cross-feature agent learnings
+│
+├── config.yml                  # Project configuration
+└── requirements.txt            # Python dependencies
 ```
 
 ---
@@ -330,18 +443,18 @@ story/{STORY-KEY}  →  feature/{slug}  →  main
 | Review loop stuck     | Check `memory/features/{slug}/loop_state.json` → `last_blocker_type`                                             |
 | Jira push failing     | `echo $env:ATLASSIAN_DOMAIN` · verify `jira_push: true` in config                                                |
 | Build failing         | Check `execution/reviews/escalation-{STORY-KEY}.md`                                                              |
-| Session expensive     | `/handoff` — saves state, clears context, session continues                                                      |
+| Session too long      | `/handoff` — saves state, clears context, session continues                                                      |
 | draw.io not found     | Falls back to Mermaid automatically. Install from [diagrams.net](https://www.diagrams.net/) for complex diagrams |
-| `/compress` failing   | `claude --version` — needs `claude` CLI on PATH                                                                  |
+| Hook errors           | Check `~/.claude/.HeadMaster-hook-errors.log` — statusline shows ⚠️ if errors in current session                |
+| Crash mid-execute     | `/execute {slug}` — pre-flight checks branch integrity before resuming                                           |
 
 ---
 
 ## Examples
 
-See `docs/examples/` for complete artifact samples:
+See `docs/examples/` for artifact samples:
 
-`FEATURE_DRAFT` · `DISCOVERY_NOTES` · `PRD` · `PRD_REVIEW` · `SYSTEM_DESIGN_NOTES` · `TDD` · `TDD_REVIEW` ·
-`JIRA_BREAKDOWN` · `code-review` · `qa-report` · `system-review`
+`FEATURE_DRAFT` · `PRD_REVIEW` · `code-review` · `qa-report`
 
 ---
 
