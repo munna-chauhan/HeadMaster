@@ -1,0 +1,99 @@
+# Feature Route Workflow Definition
+# Purpose: Full SDLC for new capabilities requiring requirements, design, and implementation
+
+name: Feature Route
+description: New capability requiring requirements gathering, design, and implementation
+route_id: feature
+
+triggers:
+  - condition: New capability needed
+  - condition: Requires formal requirements
+  - condition: Design complexity warrants TDD
+  - condition: Multiple stories expected (3+)
+
+planning:
+  - id: P1-P4
+    name: Plan
+    skill: plan
+    agent: requirements-analyst / prd-author / prd-reviewer
+    outputs:
+      - docs/features/{slug}/planning/PRD.md
+    gate: "PRD Status: APPROVED"
+    notes: |
+      Smart auto-detect. Runs Init → Discover → Draft → Review.
+      Working files (FEATURE_DRAFT.md, DISCOVERY_NOTES.md) kept for traceability.
+      Two modes: /plan <slug> (auto-resume) or /plan <slug> <message> (act on intent).
+    max_iterations: 3
+
+design:
+  - id: D1
+    name: System Design
+    skill: design
+    agent: solutions-architect
+    depends_on: [ P1-P4 ]
+    outputs:
+      - docs/features/{slug}/design/SYSTEM_DESIGN_NOTES.md
+    gate: "Architecture Locked: YES"
+
+  - id: D2
+    name: Create TDD
+    skill: design
+    agent: tdd-author
+    depends_on: [ D1 ]
+    outputs:
+      - docs/features/{slug}/design/TDD*.md
+    gate: All 11 sections complete
+
+  - id: D3
+    name: Review TDD
+    skill: design
+    agent: tdd-reviewer
+    depends_on: [ D2 ]
+    gate: 0 blockers (internal pass)
+    on_failure: loop_to_D2 (TDD_ISSUE) or loop_to_D1 (DESIGN_GAP)
+    max_iterations: 3
+
+execution:
+  - id: BK1
+    name: Breakdown
+    skill: breakdown
+    agent: release-agent
+    depends_on: [ D3 ]
+    outputs:
+      - docs/features/{slug}/breakdown/JIRA_BREAKDOWN.md
+    gate: Human approval (unconditional)
+
+  - id: EX
+    name: Execute
+    skill: execute
+    agents: developer, review-agent, qa-engineer
+    depends_on: [ BK1 ]
+    phases: [ implement, security-scan, review-code, qa-integration, review-system ]
+    gate: All stories COMPLETE + system review PASS
+
+  - id: MG
+    name: Merge Gate
+    skill: breakdown merge-gate
+    agent: release-agent/gate
+    depends_on: [ EX ]
+    gate: Human merges PR
+    notes: |
+      PR created by /execute after review-system passes.
+      Human merges — no auto-merge to main/master.
+
+branches:
+  base: master (or epic/{EPIC-KEY})
+  feature: feature/{slug}
+  stories: story/{STORY-KEY}
+  merge_sequence:
+    - story → epic/feature (auto-merge, direct, no PR)
+    - epic → feature (auto-merge, direct, no PR)
+    - feature → main/master (PR + human gate always)
+
+artifacts:
+  features: docs/features/{slug}/
+  planning: docs/features/{slug}/planning/
+  design: docs/features/{slug}/design/
+  breakdown: docs/features/{slug}/breakdown/
+  execution: docs/features/{slug}/execution/reviews/
+  examples: docs/examples/

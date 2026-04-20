@@ -1,0 +1,75 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "Bash(/path/to/draw.io *)",
+      "Bash(where drawio)",
+      "Bash(start *)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(git *)",
+      "Bash(python3 scripts/*)",
+      "Bash(python .claude/hooks/*)"
+    ],
+    "deny": [],
+    "defaultMode": "bypassPermissions",
+    "additionalDirectories": [
+      "__HOME__"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": true,
+  "env": {
+    "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/session_reset.py",
+            "statusMessage": "Resetting session budget..."
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/activate.py",
+            "statusMessage": "Loading project status..."
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/feature_context.py",
+            "statusMessage": "Loading active feature context..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/read_compressor.py",
+            "statusMessage": "Compressing file read..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/token_budget.py"
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/mode_tracker.py \"$PROMPT\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+# Story Route Workflow Definition
+# Purpose: Single Jira story with existing TDD or simple enough to skip PRD
+
+name: Story Development
+description: Single Jira story with an existing TDD (or a story simple enough to skip PRD)
+route_id: story
+
+triggers:
+  - condition: Single Jira story
+  - condition: TDD already exists OR simple change
+  - condition: No formal requirements needed
+
+planning:
+  - id: S1
+    name: Create TDD (optional)
+    skill: design
+    agent: tdd-author
+    optional: true
+    gate: TDD exists or simple change documented
+
+execution:
+  - id: S2
+    name: Implement
+    skill: implement
+    agent: developer
+    depends_on: [ S1 ]
+    gate: All ACs implemented, build green
+
+  - id: S3
+    name: Code Review (includes security)
+    skill: review-code
+    agent: review-agent
+    depends_on: [ S2 ]
+    gate: 0 critical/high issues, no secrets
+    on_failure: loop_to_S2
+    max_iterations: 3
+
+  - id: S4
+    name: QA Integration
+    skill: qa-integration
+    agent: qa-engineer
+    depends_on: [ S3 ]
+    gate: All ACs verified, APPROVED
+    on_failure: loop_to_S2
+    max_iterations: 3
+
+  - id: S5
+    name: Create PR
+    command: create-pr
+    depends_on: [ S4 ]
+    gate: Human merges PR (if to main)
+
+branches:
+  base: feature/{slug} (or master if standalone)
+  story: story/{STORY-KEY}
+  merge_sequence:
+    - story → feature/master (after S4)

@@ -1,0 +1,118 @@
+# Spike Route Workflow Definition
+# Purpose: Exploratory prototype, research task, or proof-of-concept
+# Duration: Hours to 1 day
+# Phases: 2 (SP1-SP2)
+
+name: Spike (Prototype)
+description: Exploratory prototype, research task, or proof-of-concept before committing to a full feature
+route_id: spike
+estimated_duration: hours to 1 day
+
+# Trigger conditions
+triggers:
+  - condition: Exploratory question ("Can we...?")
+  - condition: Proof-of-concept needed
+  - condition: Technical feasibility unknown
+  - condition: Research before commitment
+  - condition: Risk reduction
+
+# Brief Phase
+planning:
+  - id: SP1
+    name: Brief
+    skill: none  # User describes exploration goal
+    agent: none
+    inputs:
+      - User describes what to explore
+      - Key questions to answer
+    outputs:
+      - Verbal confirmation of scope
+    gate:
+      condition: User confirms scope
+      validation: Clear exploration goal
+    on_failure: halt
+
+# Prototype Phase
+execution:
+  - id: SP2
+    name: Prototype
+    skill: implement
+    agent: developer
+    depends_on: [ SP1 ]
+    mode: spike  # Special mode: no tests required, exploratory
+    inputs:
+      - User description
+      - Repo context (from user or config)
+    outputs:
+      - Code on spike/<description> branch
+      - Learnings captured (comment or file)
+    gate:
+      condition: Code written, learnings captured
+      validation: Key questions answered
+    on_failure: halt
+
+# Decision Gate (post-execution)
+decision:
+  - id: SP-DECISION
+    name: Decision Gate
+    agent: none  # Human decides
+    depends_on: [ SP2 ]
+    inputs:
+      - Prototype code
+      - Learnings
+    outputs:
+      - Decision: KEEP or DISCARD
+    options:
+      keep:
+        action: Convert to feature route
+        next_steps:
+          - Write PRD/TDD
+          - Implement properly with tests
+          - Refactor prototype code
+      discard:
+        action: Delete branch, capture learnings
+        next_steps:
+          - Document learnings in memory/features/{slug}/ or session handoff
+          - Delete spike branch
+    gate:
+      condition: Human decision made
+      validation: Next steps documented
+    on_failure: halt
+
+# Branch Strategy
+branches:
+  base: master (or main)
+  spike: spike/<description>  # NOT story/<key>
+  lifecycle:
+    - spike branch created
+    - prototype code written
+    - decision made
+    - if KEEP: refactor and convert to feature
+    - if DISCARD: capture learnings, delete branch
+
+# Artifact Locations
+artifacts:
+  no_formal_artifacts: true  # No PRD, no TDD, no reviews
+  learnings: Capture in session memory via /handoff, or docs/features/<name>/DISCOVERY_NOTES.md
+
+# Quality Standards
+quality:
+  - No tests required (exploratory code)
+  - No code review gate (prototype quality)
+  - No formal documentation (learnings only)
+  - No QA gate
+
+# Use Cases
+examples:
+  - question: "Can we use library X to solve problem Y?"
+    approach: Create spike, integrate library, test basic functionality
+  - question: "What does the performance look like with approach A vs B?"
+    approach: Create spike, implement both, benchmark, compare
+  - question: "How complex would it be to integrate with system Z?"
+    approach: Create spike, implement integration stub, assess effort
+
+# Estimated Timings
+timings:
+  prototyping: 2-6 hours
+  decision: 30 min
+  total: hours to 1 day

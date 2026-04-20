@@ -1,0 +1,9 @@
+# HeadMaster configuration
+# Single file. Skills read this directly — missing keys use hardcoded defaults.
+# Credentials stay in env vars: ATLASSIAN_DOMAIN, JIRA_USER_EMAIL, JIRA_API_TOKEN
+
+project_key: "PWRE"  # Jira project key (e.g. PWRE, PROJ). Leave empty if no Jira.
+jira_push: false     # true = push stories to Jira after human approval
+max_loops: 3         # Max review iterations before human escalation
+parallel: false      # true = run independent stories simultaneously
+interactive: true    # true = ask user at decision points. false = auto-select, log rationale, never ask.
