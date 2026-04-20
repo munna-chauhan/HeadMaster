@@ -21,6 +21,8 @@ planning:
     gate: "PRD Status: APPROVED"
     notes: |
       Smart auto-detect. Runs Init → Discover → Draft → Review.
+      Section count determined by complexity_tier in loop_state.json:
+        lite=6, standard=10, full=14.
       Working files (FEATURE_DRAFT.md, DISCOVERY_NOTES.md) kept for traceability.
       Two modes: /plan <slug> (auto-resume) or /plan <slug> <message> (act on intent).
     max_iterations: 3
@@ -41,8 +43,12 @@ design:
     agent: tdd-author
     depends_on: [ D1 ]
     outputs:
-      - docs/features/{slug}/design/TDD*.md
-    gate: All 11 sections complete
+      - docs/features/{slug}/design/TDD*.md  # or IMPLEMENTATION_BRIEF.md for lite tier
+    gate: Tier-required sections complete (lite=5, standard=8, full=11)
+    notes: |
+      Lite tier: produces IMPLEMENTATION_BRIEF.md (5 sections), skips D1 and D3.
+      Standard tier: produces TDD.md (8 sections).
+      Full tier: produces TDD.md (11 sections) or TDD_MASTER + TDD_{REPO} for multi-repo.
 
   - id: D3
     name: Review TDD
@@ -58,18 +64,26 @@ execution:
     name: Breakdown
     skill: breakdown
     agent: release-agent
-    depends_on: [ D3 ]
+    depends_on: [ D2 ]  # D3 (Review) skipped for lite tier; D2 gate is sufficient
     outputs:
       - docs/features/{slug}/breakdown/JIRA_BREAKDOWN.md
     gate: Human approval (unconditional)
+    notes: |
+      Lite tier: D1 (Architect) and D3 (Review) are skipped.
+      Breakdown depends on D2 output existing (TDD or IMPLEMENTATION_BRIEF).
+      For standard/full, D3 must pass before D2 is considered complete.
 
   - id: EX
     name: Execute
     skill: execute
-    agents: developer, review-agent, qa-engineer
+    agents: developer (inline), review-agent (subagent), qa-engineer (subagent)
     depends_on: [ BK1 ]
     phases: [ implement, security-scan, review-code, qa-integration, review-system ]
     gate: All stories COMPLETE + system review PASS
+    notes: |
+      Phase A (implement) + Phase B (security-scan) run inline in main session.
+      Phase C (review-code), Phase D (qa-integration), Phase E (review-system) run as
+      isolated subagents for genuine cognitive isolation between author and reviewer.
 
   - id: MG
     name: Merge Gate

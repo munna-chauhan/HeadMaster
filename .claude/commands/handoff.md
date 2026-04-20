@@ -33,7 +33,8 @@ git diff --stat HEAD
 ```markdown
 # Handoff: {slug} {YYYYMMDD-HHMM}
 
-Branch: {branch} | Phase: {phase} | Story: {STORY-KEY or —}
+Phase: {planning|design|breakdown|execute} | Stage: {Init|Discover|Draft|Review|Architect|Engineer|implement|scan|review|qa}
+Branch: {branch} | Story: {STORY-KEY or —}
 
 ## Done
 - {task}: {file or result}
@@ -60,6 +61,8 @@ Build: {PASS|FAIL} | Tests: {N/N} | Branch: {clean|dirty}
 cd {repo} && git checkout {branch}
 {exact next command}
 ```
+
+> `Phase:` tag is required — `feature_context.py` uses it to inject only phase-relevant handoffs into new sessions.
 
 ## Step 3: Cleanup old sessions
 

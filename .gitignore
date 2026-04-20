@@ -39,6 +39,7 @@ env/
 
 # Logs
 .claude/logs/
+console.log
 
 # Claude Code local settings (machine-specific, not shared)
 # Copy .claude/settings.local.json.example → .claude/settings.local.json and customize
@@ -46,24 +47,17 @@ env/
 .claude/settings.local.json
 
 # Feature memory (project-specific work, never commit)
-memory/agents/
 memory/features/
-memory/.archive/
 
 # Agent memory (cross-feature learnings, optional to commit)
 # memory/agents/
 
-# Workspace-level files (live at PWR-Workstation root, not in repo)
-WORKSPACE.md
-workspace.json
-
 # Project-specific state (changes per project/session)
 FEATURE_INPUT.md
-docs/features
+docs/features/
 
 
 # Test artifacts
-.archive
 .pytest_cache/
 .coverage
 htmlcov/

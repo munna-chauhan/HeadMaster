@@ -12,8 +12,11 @@ SESSION_FILE = Path.home() / ".claude" / ".HeadMaster-session-budget.json"
 def main() -> None:
     SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
     data = {
-        "total_tokens": 0,
         "turn_count": 0,
+        "prompt_chars": 0,
+        "bytes_read": 0,
+        "tool_calls": 0,
+        "total_tokens": 0,
         "session_start": datetime.now(timezone.utc).isoformat(),
     }
     tmp = SESSION_FILE.with_suffix(".tmp")

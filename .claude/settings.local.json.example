@@ -8,12 +8,34 @@
       "Bash(start *)",
       "Bash(gh pr *)",
       "Bash(gh api *)",
-      "Bash(git *)",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(git fetch *)",
+      "Bash(git stash *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git merge *)",
+      "Bash(git push *)",
+      "Bash(git remote *)",
+      "Bash(git rev-parse *)",
+      "Bash(git show-ref *)",
+      "Bash(git ls-files *)",
+      "Bash(git config *)",
+      "Bash(git pull *)",
       "Bash(python3 scripts/*)",
       "Bash(python .claude/hooks/*)"
     ],
-    "deny": [],
-    "defaultMode": "bypassPermissions",
+    "deny": [
+      "Bash(git push * --force *)",
+      "Bash(git push * -f *)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean *)"
+    ],
+    "defaultMode": "default",
     "additionalDirectories": [
       "__HOME__"
     ]
@@ -23,6 +45,7 @@
   "env": {
     "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
   },
+  "statusLine": "python .claude/hooks/statusline.py",
   "hooks": {
     "SessionStart": [
       {
@@ -53,6 +76,28 @@
             "type": "command",
             "command": "python .claude/hooks/read_compressor.py",
             "statusMessage": "Compressing file read..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/git_guard.py",
+            "statusMessage": "Validating git operation..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/write_compressor.py",
+            "statusMessage": "Compressing written file..."
           }
         ]
       }

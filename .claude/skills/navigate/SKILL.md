@@ -44,6 +44,42 @@ Scan `docs/features/*/` — for each feature found:
 
 No features found → "No features in progress. Run `/navigate <description>` to start one."
 
+### Metrics Summary (after feature table)
+
+Run aggregation:
+
+```bash
+python3 scripts/metrics.py aggregate
+```
+
+Parse JSON output. If `totals.features > 0`, append metrics block:
+
+```markdown
+## Pipeline Health
+
+| Metric | Value |
+|--------|-------|
+| Features tracked | {totals.features} |
+| Stories completed | {totals.stories} |
+| First-pass rate | {totals.first_pass_rate}% |
+| Total retries | {totals.retries} |
+| Escalations | {totals.escalations} |
+| Gate failures | {totals.gate_failures} |
+```
+
+Per feature with metrics (from `features[]` array), show one-line summary:
+
+```markdown
+### Per-Feature
+
+| Slug | Stories | First-Pass | Retries | Escalations | Est. Tokens |
+|------|---------|------------|---------|-------------|-------------|
+| my-feature | 5/5 | 80% | 1 | 0 | ~45k |
+| auth-refactor | 2/3 | 100% | 0 | 0 | ~22k |
+```
+
+If no metrics data exists for any feature, show: `No metrics recorded yet. Metrics begin collecting on next gate transition.`
+
 ---
 
 ## RESUME / NEW MODE
@@ -68,7 +104,15 @@ block first, then continue to full execution plan.
 
 ### Step 1: Artifact Detection
 
-Scan `docs/features/{slug}/`:
+**PRIMARY:** Read `memory/features/{slug}/loop_state.json` → check `pipeline` key:
+
+```json
+{"pipeline": {"phase": "design", "stage": "Engineer", "gate_passed": "ISO-date"}}
+```
+
+If `pipeline` key exists → use it as authoritative state. Skip artifact scanning.
+
+**FALLBACK (no pipeline key):** Scan `docs/features/{slug}/`:
 
 ```
 planning/PRD.md + "PRD Status: APPROVED"    → Planning complete
@@ -76,6 +120,7 @@ planning/PRD.md exists (no gate string)      → /plan {slug} (resume)
 planning/DISCOVERY_NOTES.md exists           → /plan {slug} (resume)
 planning/FEATURE_DRAFT.md exists             → /plan {slug} (resume)
 Nothing in planning/                         → /plan {slug} (start)
+design/IMPLEMENTATION_BRIEF.md exists        → Design complete (lite tier) → /breakdown {slug}
 design/SYSTEM_DESIGN_NOTES.md exists         → Architect done → /design {slug} (resume)
 design/TDD*.md exists                        → Engineer done → /design {slug} (resume)
 design/TDD_REVIEW.md + APPROVED              → Design complete
@@ -115,6 +160,34 @@ Resume from first missing gate. Never restart.
 
 Ambiguous → start `story`, escalate to `feature` if complexity emerges.
 
+### Step 2b: Complexity Tier (feature/epic routes only)
+
+Read `.claude/workflows/complexity-tiers.yml`. Assess tier based on signals:
+
+| Signal | Lite | Standard | Full |
+|--------|------|----------|------|
+| Estimated stories | 1-2 | 3-5 | 6+ |
+| Estimated SP | 1-5 | 6-15 | 16+ |
+| Repos touched | 1 | 1-2 | 2+ |
+| Design complexity | Extends existing | New integration | New architecture |
+
+Score: majority of signals in a tier → assign that tier.
+Ambiguous → default to `standard` (can escalate/downgrade later).
+
+Store in `memory/features/{slug}/loop_state.json`:
+
+```json
+{"complexity_tier": "lite|standard|full", "tier_rationale": "<one line>"}
+```
+
+User override: `/navigate <slug> --tier <lite|standard|full>` updates tier + rationale.
+
+Tier affects:
+- PRD section count (6 / 10 / 14)
+- TDD section count (5 / 8 / 11) — lite produces IMPLEMENTATION_BRIEF.md instead of TDD.md
+- Review checklist depth
+- Token budget expectation
+
 ---
 
 ### Step 3: Plan Output
@@ -123,6 +196,7 @@ Ambiguous → start `story`, escalate to `feature` if complexity emerges.
 # Execution Plan: {Feature/Story Name}
 
 **Route:** {hotfix | story | feature | epic}
+**Tier:** {lite | standard | full} — {rationale}
 **Resuming From:** {Phase — reason}
 **Phases Remaining:** {N}
 **Loop State:** planning {N}/{max} | design {N}/{max} | last blocker: {type or —}

@@ -52,6 +52,7 @@ Every review checks all 10 categories:
 5. **TDD compliance** — every component must trace to TDD. Flag deviations.
 6. **Changed files only** — never review full codebase.
 7. **Never fix anything** — report and return verdict.
+8. **ISOLATION CONSTRAINT** — You have NO knowledge of how this code was implemented. You have not seen the developer's reasoning, approach selection, or implementation decisions. Review the diff as if seeing it for the first time from an unknown author. If you find yourself thinking 'this approach makes sense because...' without evidence from the diff itself, you are leaking context — stop and re-evaluate.
 
 ## Severity Classification
 

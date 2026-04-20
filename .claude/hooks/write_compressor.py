@@ -1,56 +1,33 @@
 #!/usr/bin/env python3
 """
-PreToolUse hook — intercepts Read tool calls on markdown files.
+PostToolUse hook — compresses ONLY working memory files after Claude writes them.
 
-OPT-IN compression model: only compresses files in explicitly allowed
-categories (working memory, extracted input). Everything else passes
-through unmodified.
+Uses an ALLOWLIST model: only files matching explicit patterns get compressed.
+Everything else passes through untouched. This prevents silent corruption of
+formal artifacts (SYSTEM_DESIGN_NOTES.md, JIRA_BREAKDOWN.md, review reports, etc.).
 
-Compressible (opt-in):
-  - memory/**/*.md         — session handoffs, agent working memory
-  - docs/features/*/input/*.md — extracted Jira/Confluence content
+Allowlist (files safe to compress):
+  - memory/**/*.md          — agent memory, session notes, decisions
 
-Never compressed (everything else):
-  - .claude/agents/*.md    — agent behavioral definitions
-  - .claude/skills/**      — skill orchestration logic
-  - .claude/commands/*.md  — command definitions
-  - .claude/workflows/*    — workflow definitions
-  - CLAUDE.md              — system instructions
-  - PRD.md, TDD*.md        — formal specs
-  - SYSTEM_DESIGN_NOTES.md — architecture (immutable ADRs)
-  - JIRA_BREAKDOWN.md      — story definitions + execution state
-  - *_REVIEW.md            — review artifacts
-  - *-review*.md, *-report*.md, *-scan*.md — execution reports
-  - config.yml, *.json     — configuration
-  - All other files        — default is DO NOT compress
-
-Thresholds:
-  < MIN_SIZE_BYTES  → allow raw read (not worth compressing)
-  >= MIN_SIZE_BYTES → compress and serve inline
-
-YAML frontmatter (between opening --- and closing ---) is always
-preserved exactly — hook prompts and metadata must not be altered.
+All other files are formal artifacts or execution state and must not be modified.
 """
 
 import json
-import os
 import re
 import sys
 from pathlib import Path
 
-SESSION_FILE = Path.home() / ".claude" / ".HeadMaster-session-budget.json"
+MIN_SIZE_BYTES = 4_000
 
-MIN_SIZE_BYTES = 4_000  # ~1k tokens — lower threshold to catch more files
+# ALLOWLIST: only these files get compressed. Everything else is untouched.
+# NOTE: FEATURE_DRAFT.md and DISCOVERY_NOTES.md intentionally excluded —
+# they carry semantic hedging words (typically, generally, might) that
+# compression destroys, converting soft constraints into hard requirements.
+ALLOW_COMPRESS_NAMES = set()
 
 COMPRESSIBLE_EXTENSIONS = {".md", ".txt", ".rst"}
 
-# Paths that OPT-IN to compression (only these get compressed)
-COMPRESS_PATH_PATTERNS = [
-    re.compile(r"[/\\]memory[/\\]"),              # memory/**/*
-    re.compile(r"[/\\]input[/\\].*\.md$"),        # docs/features/*/input/*.md
-]
-
-# Explicit NEVER compress — even if path matches opt-in patterns
+# Explicit NEVER compress — even if path matches allowlist patterns
 NEVER_COMPRESS = {
     "PRD.md",
     "SYSTEM_DESIGN_NOTES.md",
@@ -66,20 +43,40 @@ NEVER_COMPRESS_PATTERNS = [
 
 
 def is_compressible(path: Path) -> bool:
-    """Return True only if file is in an explicitly opted-in category."""
+    """Return True only if this file is explicitly allowed for compression."""
+    if path.suffix.lower() not in COMPRESSIBLE_EXTENSIONS:
+        return False
+
     # Check NEVER_COMPRESS first
     if path.name in NEVER_COMPRESS:
         return False
     if any(p.match(path.name) for p in NEVER_COMPRESS_PATTERNS):
         return False
 
-    path_str = str(path)
-    return any(p.search(path_str) for p in COMPRESS_PATH_PATTERNS)
+    # Allow: memory/**/*.md (agent memory, session notes)
+    try:
+        parts = path.resolve().parts
+        if "memory" in parts:
+            return True
+    except Exception as e:
+        try:
+            from datetime import datetime as _dt
+            _log = Path.home() / ".claude" / ".HeadMaster-hook-errors.log"
+            with open(_log, "a") as _f:
+                _f.write(f"{_dt.now().isoformat()} {Path(__file__).name}: {type(e).__name__}: {e}\n")
+        except Exception:
+            pass
+
+    # Allow: specific working file names
+    if path.name in ALLOW_COMPRESS_NAMES:
+        return True
+
+    return False
 
 
 def compress_inline(text: str) -> str:
     """
-    Inline compression for working memory files only.
+    Inline compression — pure regex, no API call.
     Drops filler, hedging, articles.
     Preserves: YAML frontmatter, code blocks, URLs, headings, tables, paths.
     """
@@ -87,7 +84,6 @@ def compress_inline(text: str) -> str:
     out = []
     in_code = False
     in_frontmatter = False
-    frontmatter_done = False
 
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -101,10 +97,8 @@ def compress_inline(text: str) -> str:
             out.append(line)
             if stripped == "---" and i > 0:
                 in_frontmatter = False
-                frontmatter_done = True
             continue
 
-        # Code blocks — never touch
         if stripped.startswith("```") or stripped.startswith("~~~"):
             in_code = not in_code
             out.append(line)
@@ -113,7 +107,6 @@ def compress_inline(text: str) -> str:
             out.append(line)
             continue
 
-        # Headings, table rows, horizontal rules, blank lines — preserve as-is
         if (not stripped
                 or stripped.startswith("#")
                 or stripped.startswith("|")
@@ -122,11 +115,9 @@ def compress_inline(text: str) -> str:
             out.append(line)
             continue
 
-        # Capture indentation before modifying
         original_indent = len(line) - len(line.lstrip())
         indent_str = line[:original_indent]
 
-        # Drop filler phrases
         line = re.sub(
             r"\b(in order to|please note that|it is important to note|"
             r"it should be noted that|as mentioned above|as noted above|"
@@ -134,7 +125,6 @@ def compress_inline(text: str) -> str:
             r"at the end of the day|for all intents and purposes)\b",
             "", line, flags=re.IGNORECASE
         )
-        # Drop hedging
         line = re.sub(
             r"\b(just|really|basically|actually|essentially|generally|"
             r"typically|usually|normally|certainly|definitely|absolutely|"
@@ -143,11 +133,9 @@ def compress_inline(text: str) -> str:
             r"you may want to|you might want to|feel free to)\b",
             "", line, flags=re.IGNORECASE
         )
-        # Drop articles only when no code-like content on line
         if not re.search(r"[`\[\(]", line):
             line = re.sub(r"\b(a |an |the )", " ", line)
 
-        # Restore indentation
         line = indent_str + re.sub(r"  +", " ", line.strip())
         out.append(line)
 
@@ -172,12 +160,11 @@ def main() -> None:
     tool_name  = payload.get("tool_name", "")
     tool_input = payload.get("tool_input", {})
 
-    # Handle both Read tool and str_replace_editor view command
-    is_read = tool_name in ("Read", "read_file")
-    is_view = (tool_name == "str_replace_editor"
-               and tool_input.get("command") == "view")
+    is_write = tool_name in ("Write", "write_file")
+    is_create = (tool_name == "str_replace_editor"
+                 and tool_input.get("command") in ("create", "str_replace"))
 
-    if not is_read and not is_view:
+    if not is_write and not is_create:
         sys.exit(0)
 
     file_path_str = (tool_input.get("path")
@@ -188,9 +175,6 @@ def main() -> None:
 
     path = Path(file_path_str)
 
-    if path.suffix.lower() not in COMPRESSIBLE_EXTENSIONS:
-        sys.exit(0)
-
     if not is_compressible(path):
         sys.exit(0)
 
@@ -198,10 +182,6 @@ def main() -> None:
         sys.exit(0)
 
     size = path.stat().st_size
-
-    # Track bytes read for token budget cost model (always, even if not compressed)
-    _track_bytes_read(size)
-
     if size < MIN_SIZE_BYTES:
         sys.exit(0)
 
@@ -223,37 +203,11 @@ def main() -> None:
     compressed_tokens = max(1, len(compressed) // 4)
     saved_pct         = round((1 - compressed_tokens / raw_tokens) * 100)
 
-    # Not worth blocking if savings are negligible
     if saved_pct < 5:
         sys.exit(0)
 
-    output = {
-        "decision": "block",
-        "reason": f"Compressed {path.name}: {raw_tokens}→{compressed_tokens} tokens (-{saved_pct}%)",
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "additionalContext": (
-                f"[COMPRESSED READ: {path.name} | {raw_tokens}→{compressed_tokens} tokens | -{saved_pct}%]\n\n"
-                f"{compressed}\n\n"
-                f"[END: {path.name}]"
-            )
-        }
-    }
-
-    print(json.dumps(output))
-    sys.exit(0)
-
-
-def _track_bytes_read(size: int) -> None:
-    """Atomically increment bytes_read in the session budget file."""
     try:
-        data = {}
-        if SESSION_FILE.exists():
-            data = json.loads(SESSION_FILE.read_text(encoding="utf-8"))
-        data["bytes_read"] = data.get("bytes_read", 0) + size
-        tmp = SESSION_FILE.with_suffix(".tmp")
-        tmp.write_text(json.dumps(data), encoding="utf-8")
-        os.replace(str(tmp), str(SESSION_FILE))
+        path.write_text(compressed, encoding="utf-8")
     except Exception as e:
         try:
             from datetime import datetime as _dt
@@ -261,7 +215,17 @@ def _track_bytes_read(size: int) -> None:
             with open(_log, "a") as _f:
                 _f.write(f"{_dt.now().isoformat()} {Path(__file__).name}: {type(e).__name__}: {e}\n")
         except Exception:
-            pass  # truly best-effort
+            pass
+        sys.exit(0)
+
+    output = {
+        "hookSpecificOutput": {
+            "hookEventName": "PostToolUse",
+            "additionalContext": f"[WRITE COMPRESSED: {path.name} | {raw_tokens}→{compressed_tokens} tokens | -{saved_pct}%]"
+        }
+    }
+    print(json.dumps(output))
+    sys.exit(0)
 
 
 if __name__ == "__main__":

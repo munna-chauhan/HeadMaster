@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: "Inline phase C of /execute. Reviews git diff only — TDD compliance, OWASP gaps, logic. 80+ confidence. Never fixes."
+description: "Subagent phase C of /execute. Spawned with fresh context — no implementation memory. Reviews git diff only — TDD compliance, OWASP gaps, logic. 80+ confidence. Never fixes."
 argument-hint: <story-key> <slug> <branch> <base> <repo-path>
 ---
 
@@ -8,7 +8,10 @@ argument-hint: <story-key> <slug> <branch> <base> <repo-path>
 
 Load `.claude/agents/review-agent.md` constraints.
 
-Review git diff only. **80+ confidence before flagging. Never fix.**
+Spawned as isolated subagent — no shared context with implementer. Review git diff only. **80+ confidence before
+flagging. Never fix.**
+
+**ISOLATION CONSTRAINT:** You have NO knowledge of how this code was implemented. You have not seen the developer's reasoning, approach selection, or implementation decisions. Review the diff as if seeing it for the first time from an unknown author. If you find yourself thinking 'this approach makes sense because...' without evidence from the diff itself, you are leaking context — stop and re-evaluate.
 
 ---
 

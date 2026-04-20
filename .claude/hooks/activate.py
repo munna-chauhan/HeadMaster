@@ -55,16 +55,65 @@ def _breakdown_phase(breakdown: Path, slug: str) -> tuple[str, str]:
 
 
 def detect_phase(planning: Path, design: Path, breakdown: Path) -> tuple[str, str]:
-    """Return (phase, next_action_hint) by finding the highest completed artifact."""
+    """Return (phase, next_action_hint) by finding the highest completed artifact.
+    PRIMARY: reads pipeline state from loop_state.json.
+    FALLBACK: infers from artifacts if loop_state.json lacks pipeline key.
+    """
+    slug = planning.parent.name
+
+    # PRIMARY: structured state from loop_state.json
+    memory_state = REPO_ROOT / "memory" / "features" / slug / "loop_state.json"
+    if memory_state.exists():
+        try:
+            import json
+            state = json.loads(memory_state.read_text(encoding="utf-8"))
+            pipeline = state.get("pipeline")
+            if pipeline and "phase" in pipeline and "stage" in pipeline:
+                phase = pipeline["phase"]
+                stage = pipeline["stage"]
+                hint_map = {
+                    "planning": f"Run /plan {slug}",
+                    "design": f"Run /design {slug}",
+                    "breakdown": f"Run /breakdown {slug}",
+                    "execute": f"Run /execute {slug}",
+                }
+                hint = hint_map.get(phase, f"Run /navigate {slug}")
+                return f"{phase}/{stage}", hint
+        except Exception:
+            pass
+
+    # FALLBACK: artifact-based detection
+    return _detect_phase_from_artifacts(planning, design, breakdown)
+
+
+def _detect_phase_from_artifacts(planning: Path, design: Path, breakdown: Path) -> tuple[str, str]:
+    """Legacy artifact-based detection."""
     slug = planning.parent.name
 
     # Check breakdown first (most complete)
     if breakdown.is_dir() and (breakdown / "JIRA_BREAKDOWN.md").exists():
         return _breakdown_phase(breakdown, slug)
 
-    # Walk design and planning checks
+    # Check if design is fully complete (TDD_REVIEW approved)
+    tdd_review = design / "TDD_REVIEW.md"
+    if tdd_review.exists():
+        try:
+            # Read only first 500 bytes — verdict is near the top
+            with open(tdd_review, "rb") as f:
+                head = f.read(500).decode("utf-8", errors="ignore")
+            if "APPROVED" in head or "CONDITIONAL" in head:
+                # Design complete — should be at breakdown
+                return "breakdown", f"Run /breakdown {slug}"
+        except Exception:
+            pass
+        # TDD_REVIEW exists but not approved — still in review
+        return "design/Review", f"Run /design {slug}"
+
+    # Walk remaining design and planning checks
     for artifact, folder_key, phase, hint in PHASE_CHECKS:
         if folder_key == "breakdown":
+            continue
+        if artifact in ("TDD_REVIEW.md",):
             continue  # handled above
         folder = design if folder_key == "design" else planning
         if list(folder.glob(artifact)):
@@ -77,10 +126,13 @@ def read_model_from_event() -> str:
     """Read model from SessionStart hook event payload (stdin JSON)."""
     import sys, json
     try:
+        # Only read stdin if it's a pipe (hook context), never block on terminal
         if not sys.stdin.isatty():
-            payload = json.load(sys.stdin)
-            return payload.get("model", "")
-    except (json.JSONDecodeError, Exception):
+            raw = sys.stdin.read(1024)  # cap read — we only need the model field
+            if raw.strip():
+                payload = json.loads(raw)
+                return payload.get("model", "")
+    except Exception:
         pass
     return ""
 

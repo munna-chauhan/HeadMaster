@@ -5,24 +5,9 @@ argument-hint: <feature-slug> [merge-gate]
 hooks:
   Stop:
     - hooks:
-      - type: agent
-        model: haiku
-        timeout: 30
-        prompt: |
-          Check if breakdown is complete or legitimately paused.
-          Context: $ARGUMENTS
-
-          Use Read tool to check:
-          1. Does docs/features/*/breakdown/JIRA_BREAKDOWN.md exist?
-             - If exists: does it contain 'Push Status:'?
-             - If no Push Status → breakdown incomplete
-          2. Check last_assistant_message:
-             - Contains 'AskUserQuestion' → waiting for user, ok to pause
-             - Contains 'Awaiting human approval' → ok to pause
-             - Contains 'PUSHED TO JIRA' or 'LOCAL ONLY' → breakdown complete
-
-          Return {"ok": true} if complete or legitimately paused.
-          Return {"ok": false, "reason": "<what is missing>"} if work remains.
+      - type: command
+        command: "python .claude/hooks/stop_checks/breakdown_stop.py $ARGUMENTS"
+        timeout: 10
   PostToolUse:
     - matcher: "Bash"
       hooks:
@@ -76,9 +61,10 @@ Route = hotfix or spike → HALT. No breakdown needed.
 ### Step 1: Read Inputs (single pass)
 
 1. TDD — single: `docs/features/{slug}/design/TDD.md` | multi: `TDD_MASTER.md` + all `TDD_{REPO}.md`
-   Focus: S8 (slices), S4 (components), S3 (data models)
-2. `docs/features/{slug}/planning/PRD.md` — S6 (stories), S13 (ACs), S9 (scope), S12 (repos)
-3. `docs/features/{slug}/design/SYSTEM_DESIGN_NOTES.md` — S1 (context), S4 (flow), S8 (ADRs)
+   OR lite tier: `docs/features/{slug}/design/IMPLEMENTATION_BRIEF.md`
+   Focus: slices/delivery slice, components, data models
+2. `docs/features/{slug}/planning/PRD.md` — S6 (stories), ACs, scope, repos
+3. `docs/features/{slug}/design/SYSTEM_DESIGN_NOTES.md` — context, flow, ADRs (skip if lite tier — not produced)
 4. `docs/features/{slug}/input/jira/` — prefer `*.md` extracted files. Fall back to `*.json` if `.md` absent. Skip if
    folder absent.
 
@@ -247,7 +233,7 @@ graph TD
 
 **Dev Notes:**
 
-- Files: {specific paths from SYSTEM_DESIGN_NOTES S1 / TDD}
+- Files: {specific paths from design artifact (SYSTEM_DESIGN_NOTES S1 / TDD / IMPLEMENTATION_BRIEF S3)}
 - Key implementation: {from TDD — what matters, not how}
 - Merged from: {absorbed slices | None}
 - ⚠️ Complex: {human checkpoint recommended if 5 SP}
@@ -379,6 +365,10 @@ Push Status → `PUSH FAILED — see JIRA_MANUAL_LOG.md`.
 
 ### Breakdown Completion
 
+```bash
+python3 scripts/gate_transition.py {slug} breakdown approved --artifact docs/features/{slug}/breakdown/JIRA_BREAKDOWN.md
+```
+
 ```
 Breakdown complete: {slug}
 
@@ -412,7 +402,7 @@ Next: /execute {slug}
 - [ ] PR created from feature/{slug} to target branch
 - [ ] PR body includes system-review summary
 - [ ] Human reviewer assigned
-- [ ] Rollback procedure documented (from SYSTEM_DESIGN_NOTES S12)
+- [ ] Rollback procedure documented (from SYSTEM_DESIGN_NOTES S12 or IMPLEMENTATION_BRIEF, if applicable)
 ```
 
 ### PR Body Template
@@ -434,7 +424,7 @@ Next: /execute {slug}
 {Coverage summary from QA integration reports}
 
 ### Rollback
-{From SYSTEM_DESIGN_NOTES.md S12}
+{From SYSTEM_DESIGN_NOTES.md S12 or N/A for lite tier}
 ```
 
 ### Gate
@@ -456,7 +446,7 @@ Update `memory/features/{slug}/agents/release-agent.md` after Breakdown:
 
 **Breakdown:**
 
-- `docs/features/{slug}/design/TDD*.md` exists with approved TDD_REVIEW.md
+- `docs/features/{slug}/design/TDD*.md` OR `docs/features/{slug}/design/IMPLEMENTATION_BRIEF.md` exists
 - `docs/features/{slug}/planning/PRD.md` exists
 - `config.yml` loaded
 

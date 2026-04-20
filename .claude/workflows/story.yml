@@ -16,7 +16,10 @@ planning:
     skill: design
     agent: tdd-author
     optional: true
-    gate: TDD exists or simple change documented
+    gate: TDD exists OR IMPLEMENTATION_BRIEF.md exists OR story has dev_notes with approach documented
+    notes: |
+      Story route defaults to lite tier. Produces IMPLEMENTATION_BRIEF.md (5 sections).
+      If story is trivial (1 SP, single file change), dev_notes in JIRA_BREAKDOWN.md suffice — skip entirely.
 
 execution:
   - id: S2

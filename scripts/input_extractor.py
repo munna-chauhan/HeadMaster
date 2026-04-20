@@ -16,10 +16,49 @@ import re
 import sys
 from pathlib import Path
 
+try:
+    from scripts.input_sanitizer import sanitize_and_report, fence_external_content
+except ImportError:
+    try:
+        from input_sanitizer import sanitize_and_report, fence_external_content
+    except ImportError:
+        def sanitize_and_report(text, source="unknown"):
+            class _R:
+                sanitized_text = text
+                detections = []
+                was_modified = False
+            return _R()
+        def fence_external_content(content, source, field_name="content"):
+            return (
+                f"<!-- EXTERNAL-DATA-START source=\"{source}\" field=\"{field_name}\" -->\n"
+                f"{content}\n"
+                f"<!-- EXTERNAL-DATA-END -->"
+            )
+
 
 # ---------------------------------------------------------------------------
 # Jira extraction
 # ---------------------------------------------------------------------------
+
+def _sanitize_field(text: str, source: str, field_name: str) -> str:
+    """Sanitize and fence a single external field value."""
+    if not text or not text.strip():
+        return text
+    result = sanitize_and_report(text, source=source)
+    if result.detections:
+        _log_detections(result.detections, source, field_name)
+    return fence_external_content(result.sanitized_text, source=source, field_name=field_name)
+
+
+def _log_detections(detections: list, source: str, field_name: str) -> None:
+    """Log sanitization detections to stderr for audit trail."""
+    for d in detections:
+        print(
+            f"[SANITIZER] {d['severity']} {d['category']} in {source}/{field_name} "
+            f"line {d['line']}: {d['snippet'][:80]}",
+            file=sys.stderr,
+        )
+
 
 def extract_jira_issue(data: dict) -> str:
     """Extract essential fields from a Jira issue API response."""
@@ -40,7 +79,8 @@ def extract_jira_issue(data: dict) -> str:
 
     # Description — Atlassian Document Format or plain string
     desc_raw = f.get("description", "")
-    description = _extract_adf_text(desc_raw) if isinstance(desc_raw, dict) else (desc_raw or "")
+    description_raw = _extract_adf_text(desc_raw) if isinstance(desc_raw, dict) else (desc_raw or "")
+    description = _sanitize_field(description_raw, source=f"jira:{key}", field_name="description")
 
     # Acceptance criteria — common custom field names
     ac_raw = (
@@ -48,16 +88,20 @@ def extract_jira_issue(data: dict) -> str:
             f.get("customfield_10035") or
             f.get("acceptance_criteria", "")
     )
-    ac_text = _extract_adf_text(ac_raw) if isinstance(ac_raw, dict) else (ac_raw or "")
+    ac_raw_text = _extract_adf_text(ac_raw) if isinstance(ac_raw, dict) else (ac_raw or "")
+    ac_text = _sanitize_field(ac_raw_text, source=f"jira:{key}", field_name="acceptance_criteria")
 
-    # Comments — last 5 only
+    # Comments — last 5 only (sanitized — comments are high-risk injection surface)
     comments_data = f.get("comment", {}).get("comments", [])[-5:]
     comments = []
     for c in comments_data:
         author = (c.get("author") or {}).get("displayName", "")
         date = c.get("created", "")[:10]
-        body = _extract_adf_text(c.get("body", "")) if isinstance(c.get("body"), dict) else c.get("body", "")
-        comments.append(f"- [{date}] {author}: {body[:300]}")
+        body_raw = _extract_adf_text(c.get("body", "")) if isinstance(c.get("body"), dict) else c.get("body", "")
+        body_result = sanitize_and_report(body_raw[:300], source=f"jira:{key}")
+        if body_result.detections:
+            _log_detections(body_result.detections, f"jira:{key}", "comment")
+        comments.append(f"- [{date}] {author}: {body_result.sanitized_text}")
 
     # Subtasks
     subtasks = [f"- {s.get('key')}: {s.get('fields', {}).get('summary', '')}" for s in f.get("subtasks", [])]
@@ -203,7 +247,8 @@ def extract_confluence_page(data: dict) -> str:
     author = data.get("version", {}).get("by", {}).get("displayName", "")
 
     storage_value = data.get("body", {}).get("storage", {}).get("value", "")
-    content = _confluence_storage_to_markdown(storage_value)
+    content_raw = _confluence_storage_to_markdown(storage_value)
+    content = _sanitize_field(content_raw, source=f"confluence:{page_id}", field_name="body")
 
     lines = [
         f"# {title}",

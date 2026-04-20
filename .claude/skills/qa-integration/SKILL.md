@@ -1,6 +1,6 @@
 ---
 name: qa-integration
-description: "Inline phase D of /execute. Writes + runs integration tests per AC. Owns test fixes. Reports code bugs. Never touches production code."
+description: "Subagent phase D of /execute. Spawned with fresh context — no implementation or review memory. Writes + runs integration tests per AC. Owns test fixes. Reports code bugs. Never touches production code."
 argument-hint: <story-key> <slug>
 ---
 
@@ -8,7 +8,11 @@ argument-hint: <story-key> <slug>
 
 Load `.claude/agents/qa-engineer.md` constraints.
 
-Verify every AC via integration tests. Own test wrong → fix it. Code bug → report it. **Never touch production code.**
+Spawned as isolated subagent — no shared context with implementer or reviewer. Verify every AC via tests
+appropriate to available infrastructure. Own test wrong → fix it. Code bug → report it. **Never touch production code.**
+**Never claim higher verification than infrastructure supports.**
+
+**ISOLATION CONSTRAINT:** You have NO knowledge of how this code was implemented. You have not seen the developer's reasoning, approach selection, or implementation decisions. Review the diff as if seeing it for the first time from an unknown author. If you find yourself thinking 'this approach makes sense because...' without evidence from the diff itself, you are leaking context — stop and re-evaluate.
 
 ---
 
@@ -26,6 +30,20 @@ Read `memory/features/{slug}/agents/qa-engineer.md` if exists.
 
 ## Steps
 
+**0. Detect Test Infrastructure (mandatory first step)**
+
+```bash
+python3 scripts/test_infra_detector.py --repo {repo_path} --format json
+```
+
+Parse JSON output. Extract:
+- `max_test_capability` → determines what tests you can write
+- `test_infra` → what tools are available
+- `uncovered_dependencies` → what CANNOT be tested locally
+- `qa_guidance` → recommended test types and scope limits
+
+This output governs all subsequent test decisions. Do NOT write tests that exceed `max_test_capability`.
+
 **1. Setup**
 
 ```bash
@@ -36,15 +54,29 @@ git checkout story/{STORY-KEY} && git pull
 
 Build fails → REJECTED-BUG immediately.
 
-**2. Per AC**
+**2. Classify ACs**
+
+Before writing any test, classify each AC:
+
+| Verification Level | When to use | Example |
+|-------------------|-------------|----------|
+| UNIT | Pure logic, no external deps | Validation rules, data transforms |
+| MOCK_INTEGRATION | Uses embedded DB, MockMvc, WireMock | Repository tests with H2, controller tests |
+| INFRA_INTEGRATION | Uses Testcontainers, LocalStack | Real DB in Docker, real SQS via LocalStack |
+| NOT_VERIFIABLE | Requires running services not available | Real AWS SQS, deployed API, real Redis without mock |
+
+Rule: if AC requires a dependency listed in `uncovered_dependencies`, classify as NOT_VERIFIABLE.
+For NOT_VERIFIABLE ACs: skip test, record reason + suggested manual test in Deferred Verifications.
+
+**3. Per AC (verified ACs only)**
 
 - Map to test scenario from TDD S7 + existing test patterns
-- Write integration test (Given/When/Then matching AC)
+- Write test matching classified verification level (Given/When/Then matching AC)
 - Run → evaluate:
     - Own test wrong → fix, re-run (max 2 self-corrections per AC)
     - Code bug → record, do not fix
 
-**3. Regression** — affected module only:
+**4. Regression** — affected module only:
 
 ```bash
 # Maven: mvn test -pl {module}
@@ -53,38 +85,55 @@ Build fails → REJECTED-BUG immediately.
 # pytest: python -m pytest {module}/
 ```
 
-**4. Write report**
+**5. Write report**
 
 **Path:** `docs/features/{slug}/execution/reviews/qa-report-{STORY-KEY}.md`
 
 ```markdown
 # QA Report: {STORY-KEY}
-Verdict: {APPROVED|REJECTED-BUG} | Build: {PASS|FAIL} | {ISO-date}
+Verdict: {APPROVED|APPROVED_PARTIAL|REJECTED-BUG} | Build: {PASS|FAIL} | {ISO-date}
+Max Test Capability: {from detector}
+
+## Verification Scope
+Infra detected: {from detector}
+Uncovered deps: {from detector}
+
+| Verified locally | NOT verified (requires deployed infra) |
+|-----------------|----------------------------------------|
+| {what was tested} | {what was deferred} |
 
 ## AC Results
-| AC# | Status | Evidence |
-|-----|--------|----------|
-| 1   | PASS   | {test + output} |
-| 2   | FAIL   | {expected vs actual} |
+| AC# | Verification Level | Status | Evidence |
+|-----|-------------------|--------|----------|
+| 1   | UNIT | PASS   | {test + output} |
+| 2   | MOCK_INTEGRATION | PASS   | {test + output} |
+| 3   | NOT_VERIFIABLE | DEFERRED | {reason} |
 
 ## Bugs
 - AC{N}: {expected} vs {actual} | Repro: `{command}`
+
+## Deferred Verifications
+| AC# | Reason | Required Infra | Suggested Manual Test |
+|-----|--------|----------------|-----------------------|
 
 ## Regression
 | Module | Run | Pass | Fail |
 ```
 
-**5. Update memory** `memory/features/{slug}/agents/qa-engineer.md` (max 200 words)
+**6. Update memory** `memory/features/{slug}/agents/qa-engineer.md` (max 200 words)
 
 ---
 
 ## Verdict
 
-- APPROVED: all ACs PASS + regression green
-- REJECTED-BUG: any AC fails due to code bug → back to implement
+- APPROVED: all ACs verified locally and PASS + regression green
+- APPROVED_PARTIAL: all verified ACs PASS + regression green, but some ACs deferred (NOT_VERIFIABLE)
+- REJECTED-BUG: any verified AC fails due to code bug → back to implement
 
 ## Constraints
 
 - Story branch only
-- Every AC must have result — no untested ACs
+- Every AC must have result — PASS, FAIL, or DEFERRED (no untested ACs without classification)
 - Max 2 self-corrections before escalating as code bug
+- Never write tests that exceed max_test_capability from detector
+- NOT_VERIFIABLE ACs must include suggested manual test steps for human verification

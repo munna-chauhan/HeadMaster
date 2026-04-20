@@ -1,0 +1,121 @@
+# Complexity Tiers — determines artifact depth per feature
+# Assessed by /navigate at classification. Stored in loop_state.json.
+# User can override at any time via /navigate <slug> --tier <lite|standard|full>
+
+tiers:
+  lite:
+    description: Simple feature — 1-2 stories, single repo, known patterns
+    signals:
+      - estimated_stories: 1-2
+      - estimated_sp: 1-5
+      - repos: 1
+      - design_complexity: low  # extends existing pattern, no new integrations
+    prd:
+      required_sections: 6
+      sections:
+        - Executive Summary
+        - Functional Requirements
+        - Non-Functional Requirements
+        - User Stories
+        - Out of Scope
+        - Acceptance Criteria
+      gate: "6 sections present, ACs testable"
+    tdd:
+      artifact_name: IMPLEMENTATION_BRIEF.md
+      required_sections: 5
+      sections:
+        - Scope & Approach  # what + how (1 paragraph each)
+        - Data Models & Contracts  # schema changes, API shapes
+        - Component Changes  # files to modify, method signatures
+        - Testing Strategy  # what to test, how
+        - Delivery Slice  # single slice, ACs mapped
+      gate: "5 sections present, interfaces typed"
+    review:
+      prd_checklist: lite  # subset of full checklist
+      tdd_checklist: lite
+
+  standard:
+    description: Medium feature — 3-5 stories, may span repos, some design needed
+    signals:
+      - estimated_stories: 3-5
+      - estimated_sp: 6-15
+      - repos: 1-2
+      - design_complexity: medium  # new integration or new pattern in existing service
+    prd:
+      required_sections: 10
+      sections:
+        - Executive Summary
+        - Background & Business Context
+        - Functional Requirements
+        - Non-Functional Requirements
+        - User Stories
+        - Assumptions & Constraints
+        - Dependencies
+        - Out of Scope
+        - Risks & Mitigations
+        - Acceptance Criteria
+      gate: "10 sections present, metrics quantified, ACs testable"
+    tdd:
+      artifact_name: TDD.md
+      required_sections: 8
+      sections:
+        - Architecture Overview
+        - Domain & Module Structure
+        - Data Models & Contracts
+        - Component Design & Command Lifecycle
+        - Error Handling & Resilience
+        - Testing Strategy
+        - Vertical Delivery Slices
+        - ADRs
+      gate: "8 sections present, slices defined, interfaces typed"
+    review:
+      prd_checklist: standard
+      tdd_checklist: standard
+
+  full:
+    description: Complex feature — 6+ stories, multi-repo, new architecture, migration
+    signals:
+      - estimated_stories: 6+
+      - estimated_sp: 16+
+      - repos: 2+
+      - design_complexity: high  # new service, migration, cross-cutting concern
+    prd:
+      required_sections: 14
+      sections:
+        - Executive Summary
+        - Background & Business Context
+        - Goals & Success Metrics
+        - Functional Requirements
+        - Non-Functional Requirements
+        - User Stories
+        - Assumptions & Constraints
+        - Dependencies
+        - Out of Scope
+        - Open Questions
+        - Risks & Mitigations
+        - Repos
+        - Acceptance Criteria
+        - Appendix
+      gate: "14 sections present, all metrics quantified"
+    tdd:
+      artifact_name: TDD.md  # or TDD_MASTER.md + TDD_{REPO}.md for multi-repo
+      required_sections: 11
+      sections:
+        - Architecture Overview
+        - Domain & Module Structure
+        - Data Models & Contracts
+        - Component Design & Command Lifecycle
+        - Error Handling & Resilience
+        - Observability & Configuration
+        - Testing Strategy
+        - Vertical Delivery Slices
+        - ADRs
+        - Resource Requirements
+        - Deployment Architecture
+      gate: "11 sections present, slices defined, errors enumerated"
+    review:
+      prd_checklist: full
+      tdd_checklist: full
+
+# Tier escalation: if during planning/design, complexity exceeds tier signals → suggest upgrade
+# Tier downgrade: user can always override to lower tier with justification logged

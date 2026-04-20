@@ -1,6 +1,6 @@
 ---
 name: review-system
-description: "Inline phase E of /execute. Pre-PR process audit — TDD design vs actual execution. Classifies divergences, root-cause analyzes, generates actionable findings + pipeline improvements. One-shot after all stories complete."
+description: "Subagent phase E of /execute. Spawned with fresh context after all stories complete. Pre-PR process audit — TDD design vs actual execution. Classifies divergences, root-cause analyzes, generates actionable findings + pipeline improvements. One-shot."
 argument-hint: <feature-slug>
 ---
 
@@ -19,8 +19,8 @@ not code bugs.
 ```
 slug,
 execution_log,    ← JIRA_BREAKDOWN.md Execution Log section
-tdd_ref,          ← path to TDD*.md files
-prd_repos,        ← PRD S12 repo specs (build tools, stacks)
+tdd_ref,          ← path to TDD*.md or IMPLEMENTATION_BRIEF.md
+prd_repos,        ← PRD Repos section (if exists) or repo info from JIRA_BREAKDOWN.md
 review_artifacts  ← paths to all execution/reviews/*.md files
 ```
 
@@ -31,8 +31,8 @@ review_artifacts  ← paths to all execution/reviews/*.md files
 Read once, extract, discard raw content:
 
 1. `docs/features/{slug}/breakdown/JIRA_BREAKDOWN.md` — Execution Log only
-2. `docs/features/{slug}/design/TDD*.md` — design blueprint
-3. `docs/features/{slug}/planning/PRD.md` S12 — repo specs for stack compliance
+2. `docs/features/{slug}/design/TDD*.md` or `IMPLEMENTATION_BRIEF.md` — design blueprint
+3. `docs/features/{slug}/planning/PRD.md` Repos section (if exists) — repo specs for stack compliance
 4. All `docs/features/{slug}/execution/reviews/*.md` — code-review, security-scan, qa-report artifacts
 
 **Do NOT re-read files.** Reference by section in later steps.
@@ -48,13 +48,13 @@ Per story in Execution Log:
 - Security-scan found issues TDD design should have prevented?
 - QA rejected for bugs TDD test strategy should have caught?
 - TDD deviations flagged in code-review artifacts?
-- Stack compliance: correct build tool + test runner per PRD S12?
+- Stack compliance: correct build tool + test runner per PRD Repos section (if present)?
 
 **Divergence examples:**
 
 - TDD: `PreparedStatement` → Actual: raw SQL concat → Problematic (security violation)
 - TDD: `OrderRepository` → Actual: `OrderDAO` → Problematic (arch drift)
-- TDD: yarn per PRD S12 → Actual: yarn → Justified (correct)
+- TDD: yarn per PRD Repos → Actual: yarn → Justified (correct)
 - Story needed 3 implement attempts → TDD section underspecified
 
 ---
@@ -64,7 +64,7 @@ Per story in Execution Log:
 **Justified (adaptive):**
 
 - TDD technically incomplete, agent adapted correctly
-- Agent used PRD S12 tools over TDD assumptions
+- Agent used PRD Repos tools over TDD assumptions
 - Agent followed codebase convention not in TDD
 
 **Problematic (violation):**
@@ -72,7 +72,7 @@ Per story in Execution Log:
 - Invented components not in TDD
 - Skipped required tests
 - Security constraint violated (hardcoded creds, raw SQL)
-- Ignored PRD S12 tool specs
+- Ignored PRD Repos tool specs
 
 ---
 
@@ -82,7 +82,7 @@ Per divergence:
 
 - **TDD incompleteness** — section didn't specify clearly enough
 - **Agent drift** — ignored constraints without justification
-- **Tool mismatch** — PRD S12 not updated, agent guessed wrong
+- **Tool mismatch** — PRD Repos not updated, agent guessed wrong
 - **Security blindness** — agent didn't recognize security pattern
 - **Underspecified test strategy** — TDD S7 didn't call out integration test requirements
 
@@ -229,7 +229,7 @@ N actionable findings:
 
 - JIRA_BREAKDOWN.md Execution Log populated
 - All stories ✅ COMPLETE or ⚪ DEFERRED
-- TDD*.md exists
+- TDD*.md or IMPLEMENTATION_BRIEF.md exists
 - At least some review artifacts exist
 
 ---
