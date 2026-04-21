@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "atlassian": {
-      "command": "npx",
+      "command": "cmd",
       "args": [
+        "/c",
+        "npx",
         "-y",
         "@xuandev/atlassian-mcp"
       ],

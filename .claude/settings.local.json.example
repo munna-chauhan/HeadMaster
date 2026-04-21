@@ -38,6 +38,15 @@
     "defaultMode": "default",
     "additionalDirectories": [
       "__HOME__"
+    ],
+    "modeValue": [
+      "acceptEdits",
+      "bypassPermissions",
+      "default",
+      "delegate",
+      "dontAsk",
+      "plan",
+      "auto"
     ]
   },
   "enableAllProjectMcpServers": true,
