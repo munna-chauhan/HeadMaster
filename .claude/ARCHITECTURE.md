@@ -47,10 +47,10 @@ Main agent context discipline before spawning any sub-agent:
 **Pipeline skills (5):** `/plan`, `/design`, `/breakdown`, `/execute`, `/navigate`
 **Execution phase skills (5):** `/implement`, `/security-scan`, `/review-code`, `/qa-integration`, `/review-system`
 **Utility skills (3):** `/jira-ops`, `/draw`, `/compress`
-**Commands (4):** `/commit`, `/create-branch`, `/create-pr`, `/handoff`
-**Scripts (7):** `compress.py`, `gate_transition.py`, `failure_ledger.py`, `convergence_check.py`, `secret_scanner.py`, `jira_ops.py`, `input_extractor.py`
+**Commands (5):** `/commit`, `/create-branch`, `/create-pr`, `/handoff`, `/ask-user` (question format)
+**Scripts (10):** `compress.py`, `gate_transition.py`, `failure_ledger.py`, `convergence_check.py`, `secret_scanner.py`, `jira_ops.py`, `input_extractor.py`, `diff_scanner.py` (security engine), `test_infra_detector.py`, `git_guard.py`
 **Hooks (8):** `activate.py`, `feature_context.py`, `session_reset.py`, `token_budget.py`, `read_compressor.py`, `post_tool.py`, `statusline.py`, `auto_braindump.py`
-**Stop Checks (4):** `plan_stop.py`, `design_stop.py`, `breakdown_stop.py`, `execute_stop.py`
+**Stop Checks (4):** `plan_stop.py`, `design_stop.py`, `breakdown_stop.py`, `execute_stop.py` (located in `.claude/hooks/stop_checks/`)
 
 ## Hook Consolidation (2026-04-21)
 

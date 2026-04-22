@@ -56,7 +56,6 @@ If session terminates unexpectedly, resume from last completed story.
 ## Resume Command
 
 ```bash
-cd {REPO_ROOT.name}
 /navigate {slug}  # Auto-detect phase and resume
 ```
 """
