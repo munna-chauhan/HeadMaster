@@ -14,3 +14,13 @@ session_budget:
   turn_warn_yellow: 15  # 🟡 warning threshold
   turn_warn_orange: 25  # 🟠 warning threshold + triggers auto-braindump (non-blocking)
   turn_warn_red: 35     # ⛔ auto-handoff threshold (terminates execution)
+
+# Passive Skill Monitoring (Phases 1-6 Complete)
+skill_monitoring:
+  enabled: true                 # Enable passive monitoring
+  alert_threshold: 1.5          # Alert if 50% slower than baseline
+  baseline_window: 10           # Last 10 features for baseline computation
+  metrics_to_track:
+    - phase_duration
+    - loop_iterations
+    - tool_calls
