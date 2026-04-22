@@ -88,7 +88,7 @@ graph LR
 
 ## 🔥 What Makes HeadMaster Different?
 
-### "Claude in a Loop"
+### Claude in a Loop
 
 | Capability | Naive Loop | HeadMaster |
 |-----------|-----------|-----------|
@@ -550,7 +550,7 @@ claude --name "my-feature"
 **Issues?** [Open an issue](https://github.com/munna-chauhan/HeadMaster/issues)  
 **Improvements?** Contributions welcome
 
-**License:** MIT  
+**License:** Apache License
 **Requirements:** Claude Code, Python 3.10+  
 **Optional:** Jira (for story push), Confluence (for input fetch)
 </div>
