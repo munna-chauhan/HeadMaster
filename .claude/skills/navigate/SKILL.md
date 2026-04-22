@@ -29,7 +29,7 @@ Scan `docs/features/*/` — for each feature found:
 
 1. Detect current phase:
    - **Primary:** Read `memory/features/{slug}/loop_state.json` → `pipeline.phase` if exists
-   - **Fallback:** Use artifact detection logic from Step 1 (line 90-104)
+   - **Fallback:** Use artifact-based phase detection (checks for PRD.md → planning, TDD*.md → design, JIRA_BREAKDOWN.md → breakdown, execution/reviews/ → execute)
 2. Read `memory/features/{slug}/loop_state.json` if exists — extract loop counts + last blocker
 3. Output one row per feature
 

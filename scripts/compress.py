@@ -14,6 +14,19 @@ Rules:
 
 import re
 
+# Files that should never be compressed
+NEVER_COMPRESS = {
+    "PRD.md", "SYSTEM_DESIGN_NOTES.md", "JIRA_BREAKDOWN.md",
+    "BRANCH_RECONCILIATION.md", "MIGRATION_PLAN.md",
+}
+
+# Filename patterns that should never be compressed
+NEVER_COMPRESS_PATTERNS = [
+    re.compile(r"^TDD.*\.md$"),
+    re.compile(r".*_REVIEW\.md$"),
+    re.compile(r"^(code-review|security-scan|qa-report|escalation|system-review).*\.md$"),
+]
+
 
 def compress_inline(text: str) -> str:
     lines = text.split("\n")

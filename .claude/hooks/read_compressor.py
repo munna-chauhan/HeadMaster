@@ -33,18 +33,10 @@ COMPRESS_PATH_PATTERNS = [
     re.compile(r"[/\\]input[/\\].*\.md$"),
 ]
 
-NEVER_COMPRESS = {
-    "PRD.md", "SYSTEM_DESIGN_NOTES.md", "JIRA_BREAKDOWN.md",
-    "BRANCH_RECONCILIATION.md", "MIGRATION_PLAN.md",
-}
-NEVER_COMPRESS_PATTERNS = [
-    re.compile(r"^TDD.*\.md$"),
-    re.compile(r".*_REVIEW\.md$"),
-    re.compile(r"^(code-review|security-scan|qa-report|escalation|system-review).*\.md$"),
-]
-
 
 def is_compressible(path: Path) -> bool:
+    from scripts.compress import NEVER_COMPRESS, NEVER_COMPRESS_PATTERNS
+
     if path.name in NEVER_COMPRESS:
         return False
     if any(p.match(path.name) for p in NEVER_COMPRESS_PATTERNS):

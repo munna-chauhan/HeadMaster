@@ -27,15 +27,6 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 COMPRESSIBLE_EXTENSIONS = {".md", ".txt", ".rst"}
-NEVER_COMPRESS = {
-    "PRD.md", "SYSTEM_DESIGN_NOTES.md", "JIRA_BREAKDOWN.md",
-    "BRANCH_RECONCILIATION.md", "MIGRATION_PLAN.md",
-}
-NEVER_COMPRESS_PATTERNS = [
-    re.compile(r"^TDD.*\.md$"),
-    re.compile(r".*_REVIEW\.md$"),
-    re.compile(r"^(code-review|security-scan|qa-report|escalation|system-review).*\.md$"),
-]
 
 
 def _atomic_update_session(updates: dict) -> None:
@@ -55,6 +46,8 @@ def _atomic_update_session(updates: dict) -> None:
 
 def _is_memory_md(path: Path) -> bool:
     """Only memory/**/*.md files get post-write compression."""
+    from scripts.compress import NEVER_COMPRESS, NEVER_COMPRESS_PATTERNS
+
     if path.suffix.lower() not in COMPRESSIBLE_EXTENSIONS:
         return False
     if path.name in NEVER_COMPRESS:
