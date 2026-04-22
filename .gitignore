@@ -43,14 +43,13 @@ console.log
 
 # Claude Code local settings (machine-specific, not shared)
 # Copy .claude/settings.local.json.example → .claude/settings.local.json and customize
-/memory/
 .claude/settings.json
 .claude/settings.local.json
 .claude/settings*.json
 !.claude/settings.local.json.example
 
 # Feature memory (project-specific work, never commit)
-memory/features/
+memory/*
 
 # Agent memory (cross-feature learnings, optional to commit)
 # memory/agents/
