@@ -12,13 +12,24 @@ SESSION_FILE = REPO_ROOT / "memory" / "session-budget.json"
 
 def main() -> None:
     SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    # Load existing data (don't reset turn_count across sessions)
+    existing_data = {}
+    if SESSION_FILE.exists():
+        try:
+            existing_data = json.loads(SESSION_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    # Keep turn_count, reset per-session metrics
     data = {
-        "turn_count": 0,
-        "prompt_chars": 0,
-        "bytes_read": 0,
-        "tool_calls": 0,
-        "total_tokens": 0,
+        "turn_count": existing_data.get("turn_count", 0),  # PRESERVE across sessions
+        "prompt_chars": 0,  # Reset per session
+        "bytes_read": 0,    # Reset per session
+        "tool_calls": 0,    # Reset per session
+        "total_tokens": existing_data.get("turn_count", 0),  # Same as turn_count
         "session_start": datetime.now(timezone.utc).isoformat(),
+        "last_reset": datetime.now(timezone.utc).isoformat(),
     }
     tmp = SESSION_FILE.with_suffix(".tmp")
     tmp.write_text(json.dumps(data), encoding="utf-8")
