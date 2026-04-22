@@ -457,6 +457,14 @@ def main():
             result = client.create_issue(summary, description, issue_type, points)
             print(json.dumps(result, indent=2))
 
+        elif args.action == "update":
+            if len(args.args) < 2:
+                print("Usage: jira_ops.py update <issue-key> <fields-json>")
+                sys.exit(1)
+            fields = json.loads(args.args[1])
+            result = client.update_issue(args.args[0], fields)
+            print("Issue updated successfully")
+
         elif args.action == "comment":
             if len(args.args) < 2:
                 print("Usage: jira_ops.py comment <issue-key> <comment-text>")
@@ -509,6 +517,7 @@ def main():
             print("\nAvailable actions:")
             print("  fetch <issue-key>")
             print("  create <summary> [description] [type] [points]")
+            print("  update <issue-key> <fields-json>")
             print("  comment <issue-key> <text>")
             print("  transition <issue-key> <status>")
             print("  search <jql> [max-results]")

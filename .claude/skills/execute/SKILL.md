@@ -5,9 +5,9 @@ argument-hint: <feature-slug>
 hooks:
   Stop:
     - hooks:
-      - type: command
-        command: "python .claude/hooks/stop_checks/execute_stop.py $ARGUMENTS"
-        timeout: 10
+        - type: command
+          command: "python .claude/hooks/stop_checks/execute_stop.py $ARGUMENTS"
+          timeout: 10
   PostToolUse:
     - matcher: "Bash"
       hooks:

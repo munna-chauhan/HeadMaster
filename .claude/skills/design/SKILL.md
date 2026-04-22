@@ -35,15 +35,14 @@ hooks:
         - type: command
           command: |
             python3 -c "
-  import json, sys
-  data = json.load(sys.stdin)
-  cmd = data.get('tool_input', {}).get('command', '')
-  err = data.get('error', 'unknown error')
+import json, sys
+data = json.load(sys.stdin)
+cmd = data.get('tool_input', {}).get('command', '')
+err = data.get('error', 'unknown error')
 if 'jira_ops' in cmd:
-  out = {'hookSpecificOutput': { 'hookEventName': 'PostToolUseFailure', 'additionalContext':
-                                                                          f'External data fetch failed: { err }. Continue with partial data. Mark affected SYSTEM_DESIGN_NOTES sections as [ UNVERIFIED ].' } }
-  print(json.dumps(out))
-  "
+    out = {'hookSpecificOutput': {'hookEventName': 'PostToolUseFailure', 'additionalContext': f'External data fetch failed: {err}. Continue with partial data. Mark affected SYSTEM_DESIGN_NOTES sections as [UNVERIFIED].'}}
+    print(json.dumps(out))
+"
         statusMessage: "Handling script failure..."
 ---
 

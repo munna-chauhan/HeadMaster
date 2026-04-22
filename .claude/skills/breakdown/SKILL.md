@@ -5,9 +5,9 @@ argument-hint: <feature-slug> [merge-gate]
 hooks:
   Stop:
     - hooks:
-      - type: command
-        command: "python .claude/hooks/stop_checks/breakdown_stop.py $ARGUMENTS"
-        timeout: 10
+        - type: command
+          command: "python .claude/hooks/stop_checks/breakdown_stop.py $ARGUMENTS"
+          timeout: 10
   PostToolUse:
     - matcher: "Bash"
       hooks:

@@ -11,23 +11,45 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BUDGET_FILE = REPO_ROOT / "memory" / "session-budget.json"
 
-WARN_YELLOW = 15
-WARN_ORANGE = 25
-WARN_RED = 35
+# Default thresholds (overridden by config.yml)
+DEFAULT_WARN_YELLOW = 15
+DEFAULT_WARN_ORANGE = 25
+DEFAULT_WARN_RED = 35
+
+
+def _load_thresholds():
+    """Load turn thresholds from config.yml, fall back to defaults."""
+    try:
+        import yaml
+        config_path = REPO_ROOT / "config.yml"
+        if config_path.exists():
+            with open(config_path, encoding="utf-8") as f:
+                config = yaml.safe_load(f) or {}
+                budget = config.get("session_budget", {})
+                return (
+                    budget.get("turn_warn_yellow", DEFAULT_WARN_YELLOW),
+                    budget.get("turn_warn_orange", DEFAULT_WARN_ORANGE),
+                    budget.get("turn_warn_red", DEFAULT_WARN_RED),
+                )
+    except Exception:
+        pass
+    return DEFAULT_WARN_YELLOW, DEFAULT_WARN_ORANGE, DEFAULT_WARN_RED
 
 
 def main() -> None:
     parts = ["HM"]
 
+    yellow, orange, red = _load_thresholds()
+
     if BUDGET_FILE.exists():
         try:
             budget = json.loads(BUDGET_FILE.read_text(encoding="utf-8"))
             turns = budget.get("turn_count", 0)
-            if turns >= WARN_RED:
+            if turns >= red:
                 parts.append(f"⛔T:{turns}")
-            elif turns >= WARN_ORANGE:
+            elif turns >= orange:
                 parts.append(f"🟠T:{turns}")
-            elif turns >= WARN_YELLOW:
+            elif turns >= yellow:
                 parts.append(f"🟡T:{turns}")
             elif turns > 0:
                 parts.append(f"T:{turns}")
