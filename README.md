@@ -109,6 +109,17 @@ flowchart LR
 
 ---
 
+## Developer Workflow
+
+**HeadMaster runs in autonomous mode** — you're involved at 3 gates only:
+1. **/breakdown approval** (review story list)
+2. **/execute escalations** (if story fails 3x)
+3. **PR merge** (final approval)
+
+Everything else auto-decides, logs rationale. See [DEVELOPER_WORKFLOW.md](.claude/DEVELOPER_WORKFLOW.md) for details.
+
+**Typical timeline:** 10-20 min developer time across 1-2 hour end-to-end delivery (3-5 stories).
+
 ## Quick Start
 
 ### Prerequisites

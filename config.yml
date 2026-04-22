@@ -3,10 +3,10 @@
 # Credentials stay in env vars: ATLASSIAN_DOMAIN, JIRA_USER_EMAIL, JIRA_API_TOKEN
 
 project_key: "PWRE"  # Jira project key (e.g. PWRE, PROJ). Leave empty if no Jira.
-jira_push: false     # true = push stories to Jira after human approval
+jira_push: true      # true = push stories to Jira after human approval. Requires env vars: JIRA_USER_EMAIL, JIRA_API_TOKEN, ATLASSIAN_DOMAIN
 max_loops: 3         # Max review iterations before human escalation
 parallel: false      # true = run independent stories simultaneously
-interactive: true    # true = ask user at decision points. false = auto-select, log rationale, never ask.
+interactive: false   # true = ask user at decision points. false = auto-select, log rationale, only ask for ambiguity/contradictions/destructive actions.
 default_tier: "full"  # Default complexity tier if /navigate can't determine. Options: lite, standard, full
 
 # Session budget thresholds (turn-based)
