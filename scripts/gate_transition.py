@@ -92,6 +92,19 @@ def main():
 
     print(f"[gate] {slug}: {phase}/{stage}", file=sys.stderr)
 
+    # Phase 3: Trigger gate analysis hook
+    try:
+        hook_script = REPO_ROOT / ".claude" / "hooks" / "gate_passed.py"
+        if hook_script.exists():
+            import subprocess
+            subprocess.run(
+                ["python", str(hook_script), slug, phase, stage],
+                timeout=10,
+                capture_output=True
+            )
+    except Exception:
+        pass  # Silent failure - never block gate transition
+
 
 if __name__ == "__main__":
     main()
