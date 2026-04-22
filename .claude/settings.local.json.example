@@ -38,15 +38,6 @@
     "defaultMode": "default",
     "additionalDirectories": [
       "__HOME__"
-    ],
-    "modeValue": [
-      "acceptEdits",
-      "bypassPermissions",
-      "default",
-      "delegate",
-      "dontAsk",
-      "plan",
-      "auto"
     ]
   },
   "enableAllProjectMcpServers": true,
@@ -87,26 +78,15 @@
             "statusMessage": "Compressing file read..."
           }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python scripts/git_guard.py",
-            "statusMessage": "Validating git operation..."
-          }
-        ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Write",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/write_compressor.py",
-            "statusMessage": "Compressing written file..."
+            "command": "python .claude/hooks/post_tool.py"
           }
         ]
       }
@@ -117,10 +97,6 @@
           {
             "type": "command",
             "command": "python .claude/hooks/token_budget.py"
-          },
-          {
-            "type": "command",
-            "command": "python .claude/hooks/mode_tracker.py \"$PROMPT\""
           }
         ]
       }

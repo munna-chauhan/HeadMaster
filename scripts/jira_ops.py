@@ -22,22 +22,6 @@ except ImportError:
     print("  pip install requests pyyaml")
     sys.exit(1)
 
-try:
-    from scripts.input_sanitizer import sanitize_external_input
-except ImportError:
-    def sanitize_external_input(text, **kwargs):
-        return text
-
-
-def _sanitize_response(data, source="jira"):
-    """Recursively sanitize string values in API response data."""
-    if isinstance(data, str):
-        return sanitize_external_input(data, source=source, log_to_db=False)
-    elif isinstance(data, dict):
-        return {k: _sanitize_response(v, source) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [_sanitize_response(item, source) for item in data]
-    return data
 
 
 class JiraClient:
@@ -190,7 +174,7 @@ class JiraClient:
                 # Handle response
                 if response.status_code in [200, 201, 204]:
                     if response.content:
-                        return _sanitize_response(response.json(), source="jira")
+                        return response.json()
                     return {}
 
                 # Handle errors

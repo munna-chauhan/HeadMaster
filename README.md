@@ -127,6 +127,9 @@ flowchart LR
 git clone <repository>
 cd HeadMaster
 pip install -r requirements.txt
+
+# Initialize memory directories
+mkdir -p memory/features memory/agents
 ```
 
 **Set up your local Claude Code settings:**
@@ -395,17 +398,16 @@ HeadMaster/
 │   ├── CLAUDE.md               # System prompt (~71 lines)
 │   └── ARCHITECTURE.md         # Model routing + context budget reference
 │
-├── scripts/                    # 11 Python utilities
+├── scripts/                    # 9 Python utilities
 │   ├── gate_transition.py      # Atomic pipeline state transitions
 │   ├── convergence_check.py    # Review loop oscillation detection
 │   ├── failure_ledger.py       # Append-only retry history per story
-│   ├── metrics.py              # Per-feature JSONL event collection
 │   ├── diff_scanner.py         # Security scan: secrets + SAST + deps
 │   ├── secret_scanner.py       # Pre-commit secret detection
 │   ├── git_guard.py            # Branch validation + destructive op blocking
 │   ├── input_extractor.py      # Strip Jira/Confluence API noise → lean .md
-│   ├── input_sanitizer.py      # Prompt injection detection in external data
 │   ├── jira_ops.py             # Jira API operations
+│   ├── compress.py             # Inline compression (shared by hooks)
 │   └── test_infra_detector.py  # Detect available test infrastructure per repo
 │
 ├── docs/
@@ -447,7 +449,7 @@ story/{STORY-KEY}  →  feature/{slug}  →  main
 | Build failing         | Check `execution/reviews/escalation-{STORY-KEY}.md`                                                              |
 | Session too long      | `/handoff` — saves state, clears context, session continues                                                      |
 | draw.io not found     | Falls back to Mermaid automatically. Install from [diagrams.net](https://www.diagrams.net/) for complex diagrams |
-| Hook errors           | Check `~/.claude/.HeadMaster-hook-errors.log` — statusline shows ⚠️ if errors in current session                |
+| Hook errors           | Check `~/memory/hook-errors.log` — statusline shows ⚠️ if errors in current session                              |
 | Crash mid-execute     | `/execute {slug}` — pre-flight checks branch integrity before resuming                                           |
 
 ---

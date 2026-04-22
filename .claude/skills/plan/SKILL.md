@@ -58,9 +58,9 @@ Nothing                                  → start Init
 
 ## Setup (every invocation)
 
-1. Read `config.yml` → `project_key`, `max_loops`, `interactive`
+1. Read `config.yml` → `project_key`, `max_loops`, `interactive`. If absent → HALT.
 2. Check `memory/features/{slug}/loop_state.json` → loop count + `complexity_tier` (managed by `convergence_check.py`, never write manually)
-3. Load tier from `.claude/workflows/complexity-tiers.yml` (default: `full` → 14 sections, standard → 10, lite → 6)
+3. Verify `.claude/workflows/complexity-tiers.yml` exists. If absent → HALT. Load tier (default: `full` → 14 sections, standard → 10, lite → 6)
 4. Detect state → load corresponding stage file
 
 ---

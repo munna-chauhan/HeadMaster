@@ -25,7 +25,7 @@ hooks:
 
 # Execute
 
-Load `.claude/agents/release-agent.md`. Read `config.yml`.
+Load `.claude/agents/release-agent.md`. Verify `config.yml` exists at repo root. If absent → HALT. Read values: `parallel`, `interactive`.
 
 Mission: drive all stories to completion. Phase A (implement) + Phase B (scan) run inline. Phase C (review), Phase D
 (QA), and Phase E (system review) spawn as isolated subagents for genuine cognitive isolation. `/handoff` between all

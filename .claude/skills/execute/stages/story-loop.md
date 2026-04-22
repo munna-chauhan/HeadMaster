@@ -16,10 +16,6 @@ JIRA_BREAKDOWN.md: Status → 🔄 IN PROGRESS
 TaskUpdate: [EXEC] {LOCAL-ID} → in_progress
 ```
 
-```bash
-python3 scripts/metrics.py emit {slug} story_start --phase execute --stage implement --story {STORY-KEY}
-```
-
 ---
 
 ## Phase A: Implement
@@ -91,10 +87,6 @@ JIRA_BREAKDOWN.md: Status → 🧪 IN QA
 JIRA_BREAKDOWN.md: Status → ✅ COMPLETE
 TaskUpdate: [EXEC] {LOCAL-ID} → completed
 Jira: transition → Done (if jira_push)
-```
-
-```bash
-python3 scripts/metrics.py emit {slug} story_complete --phase execute --stage complete --story {STORY-KEY} --verdict PASS
 ```
 
 **Auto-merge:**

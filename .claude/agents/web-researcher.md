@@ -1,7 +1,7 @@
 ---
 name: "web-researcher"
 description: "Research beyond training data — modern docs, recent APIs, current best practices. Searches strategically, fetches relevant content, synthesizes with citations. Use for broad research, comparisons, best practices."
-model: claude-haiku-4-5
+model: claude-haiku-4-5-20251001
 color: orange
 memory: project
 ---

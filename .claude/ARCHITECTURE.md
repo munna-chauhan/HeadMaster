@@ -7,11 +7,11 @@ always specify `Model:` explicitly in sub-agent prompts.
 
 | Task Type                               | Model               | Agents                                                                     | Reason                             |
 |-----------------------------------------|---------------------|----------------------------------------------------------------------------|------------------------------------| 
-| Creative design, architecture decisions | `claude-opus-4-7`   | solutions-architect                                                        | Needs deep reasoning               |
-| Code generation, implementation         | `claude-sonnet-4-6` | developer, tdd-author                                                      | Balanced cost/quality              |
-| Orchestration, Q&A, planning            | `claude-sonnet-4-6` | requirements-analyst, prd-author, release-agent, qa-engineer, review-agent | Conversational + structured output |
-| Mechanical checklist, search, scan      | `claude-haiku-4-5`  | prd-reviewer, tdd-reviewer, codebase-analyst, web-researcher               | No creativity needed               |
-| Hook validation (Stop/SubagentStop)     | `claude-haiku-4-5`  | inline hook agents                                                         | Lightweight gate check only        |
+| Creative design, architecture decisions | `claude-opus-4-7`          | solutions-architect                                                        | Needs deep reasoning               |
+| Code generation, implementation         | `claude-sonnet-4-6`        | developer, tdd-author                                                      | Balanced cost/quality              |
+| Orchestration, Q&A, planning            | `claude-sonnet-4-6`        | requirements-analyst, prd-author, release-agent, qa-engineer, review-agent | Conversational + structured output |
+| Mechanical checklist, search, scan      | `claude-haiku-4-5-20251001` | prd-reviewer, tdd-reviewer, codebase-analyst, web-researcher               | No creativity needed               |
+| Hook validation (Stop/SubagentStop)     | `claude-haiku-4-5-20251001` | inline hook agents                                                         | Lightweight gate check only        |
 | Main session (orchestrator)             | `claude-sonnet-4-6` | —                                                                          | Intent parsing, routing, user Q&A  |
 
 **Cost guard:** Never spawn opus for review, scan, or search tasks. Never spawn sonnet for checklist-only tasks.
@@ -48,6 +48,23 @@ Main agent context discipline before spawning any sub-agent:
 **Execution phase skills (5):** `/implement`, `/security-scan`, `/review-code`, `/qa-integration`, `/review-system`
 **Utility skills (3):** `/jira-ops`, `/draw`, `/compress`
 **Commands (4):** `/commit`, `/create-branch`, `/create-pr`, `/handoff`
-**Scripts (8):** `gate_transition.py`, `failure_ledger.py`, `metrics.py`, `secret_scanner.py`, `diff_scanner.py`, `git_guard.py`, `input_extractor.py`, `input_sanitizer.py`
+**Scripts (7):** `compress.py`, `gate_transition.py`, `failure_ledger.py`, `convergence_check.py`, `secret_scanner.py`, `jira_ops.py`, `input_extractor.py`
+**Hooks (7):** `activate.py`, `feature_context.py`, `session_reset.py`, `token_budget.py`, `read_compressor.py`, `post_tool.py`, `statusline.py`
+**Stop Checks (4):** `plan_stop.py`, `design_stop.py`, `breakdown_stop.py`, `execute_stop.py`
+
+## Hook Consolidation (2026-04-21)
+
+Merged 3 hooks (mode_tracker.py, tool_call_tracker.py, write_compressor.py) → `post_tool.py`.
+**Reason:** Saves ~200ms per tool call. Single PostToolUse handler now:
+  1. Increments tool_calls counter in session-budget.json
+  2. Compresses memory/*.md writes (opt-in, 4KB+ files, 5%+ savings)
+  3. Removed mode tracking (skill context from prompt now, not hook state)
+
+**Benefits:**
+- Faster hook execution (1 process vs 3)
+- Simpler maintenance (single file vs 3)
+- No shared state complexity
+
+See commit ae1a1c6 for migration details.
 
 Routes are recommended sequences, not prisons — any phase can be invoked standalone.

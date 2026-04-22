@@ -8,3 +8,9 @@ max_loops: 3         # Max review iterations before human escalation
 parallel: false      # true = run independent stories simultaneously
 interactive: true    # true = ask user at decision points. false = auto-select, log rationale, never ask.
 default_tier: "full"  # Default complexity tier if /navigate can't determine. Options: lite, standard, full
+
+# Session budget thresholds (turn-based)
+session_budget:
+  turn_warn_yellow: 15  # 🟡 warning threshold
+  turn_warn_orange: 25  # 🟠 warning threshold
+  turn_warn_red: 35     # ⛔ auto-handoff threshold

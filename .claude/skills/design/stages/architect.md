@@ -1,7 +1,6 @@
 # ARCHITECT
 
-**Pattern:** Skill orchestrates. Load `.claude/agents/solutions-architect.md` for behavioral constraints. Launches
-`codebase-analyst` subagents in parallel for code analysis. `solutions-architect` synthesizes findings into design.
+**Pattern:** Skill orchestrates. Load `.claude/agents/solutions-architect.md` + `.claude/commands/ask-user.md` for behavioral constraints and question format. Launches `codebase-analyst` subagents in parallel for code analysis. `solutions-architect` synthesizes findings into design.
 
 **Gate conditions:**
 

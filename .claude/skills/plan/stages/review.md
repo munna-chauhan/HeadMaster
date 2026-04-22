@@ -90,11 +90,9 @@ Verdict: APPROVED (0 blocker, 0 high) | CONDITIONAL (0 blocker, highs present) |
 
 **If REJECTED:**
 
-1. `python3 scripts/metrics.py emit {slug} gate_fail --phase planning --stage Review --verdict REJECTED`
-2. Run convergence check:
+1. Run convergence check:
    ```bash
    python3 scripts/convergence_check.py {slug} planning --blocker-type "PRD_ISSUE|DISCOVERY_GAP" --findings '[...]' --max-loops {max_loops}
    ```
    `escalate` → stop, report to human. `continue` → proceed below.
-3. `python .claude/hooks/write_compressor.py` — compress before loop-back. Skip if below threshold.
-4. `DISCOVERY_GAP` → Discover. `PRD_ISSUE` → Draft. Mixed → Discover first.
+3. `DISCOVERY_GAP` → Discover. `PRD_ISSUE` → Draft. Mixed → Discover first.

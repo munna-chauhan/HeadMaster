@@ -99,11 +99,7 @@ If APPROVED or CONDITIONAL:
 
 If REJECTED:
 
-1. Emit gate failure metric:
-   ```bash
-   python3 scripts/metrics.py emit {slug} gate_fail --phase design --stage Review --verdict REJECTED
-   ```
-2. **Run convergence check:**
+1. **Run convergence check:**
    ```bash
    python3 scripts/convergence_check.py {slug} design --blocker-type "TDD_ISSUE|DESIGN_GAP" --findings '[{"section": "S3", "issue": "..."}]' --max-loops {max_loops}
    ```

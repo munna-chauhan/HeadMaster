@@ -210,7 +210,7 @@ def main():
         try:
             from pathlib import Path as _P
             from datetime import datetime as _dt
-            _log = _P.home() / ".claude" / ".HeadMaster-hook-errors.log"
+            _log = _P.home() / "memory" / "hook-errors.log"
             with open(_log, "a") as _f:
                 _f.write(f"{_dt.now().isoformat()} feature_context.py: {type(e).__name__}: {e}\n")
         except Exception:

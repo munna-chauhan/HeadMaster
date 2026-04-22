@@ -44,41 +44,9 @@ Scan `docs/features/*/` — for each feature found:
 
 No features found → "No features in progress. Run `/navigate <description>` to start one."
 
-### Metrics Summary (after feature table)
+### Pipeline Health (after feature table)
 
-Run aggregation:
-
-```bash
-python3 scripts/metrics.py aggregate
-```
-
-Parse JSON output. If `totals.features > 0`, append metrics block:
-
-```markdown
-## Pipeline Health
-
-| Metric | Value |
-|--------|-------|
-| Features tracked | {totals.features} |
-| Stories completed | {totals.stories} |
-| First-pass rate | {totals.first_pass_rate}% |
-| Total retries | {totals.retries} |
-| Escalations | {totals.escalations} |
-| Gate failures | {totals.gate_failures} |
-```
-
-Per feature with metrics (from `features[]` array), show one-line summary:
-
-```markdown
-### Per-Feature
-
-| Slug | Stories | First-Pass | Retries | Escalations | Est. Tokens |
-|------|---------|------------|---------|-------------|-------------|
-| my-feature | 5/5 | 80% | 1 | 0 | ~45k |
-| auth-refactor | 2/3 | 100% | 0 | 0 | ~22k |
-```
-
-If no metrics data exists for any feature, show: `No metrics recorded yet. Metrics begin collecting on next gate transition.`
+Read `memory/features/*/loop_state.json` for each feature. Show loop counts + last blocker inline in the dashboard table above. No separate section needed.
 
 ---
 
@@ -102,7 +70,7 @@ block first, then continue to full execution plan.
 
 ---
 
-### Step 1: Artifact Detection
+### Step 1: Artifact Detection & Context Loading
 
 **PRIMARY:** Read `memory/features/{slug}/loop_state.json` → check `pipeline` key:
 
@@ -111,6 +79,13 @@ block first, then continue to full execution plan.
 ```
 
 If `pipeline` key exists → use it as authoritative state. Skip artifact scanning.
+
+**If resuming existing feature (not starting new):** Load phase-specific handoff context:
+```bash
+python .claude/hooks/feature_context.py
+```
+
+This loads the most recent `memory/features/{slug}/session-*.md` matching current phase. Only runs when resuming work, not on every session start (token efficiency: saves ~500-800 tokens per session when not working on features).
 
 **FALLBACK (no pipeline key):** Scan `docs/features/{slug}/`:
 
@@ -161,6 +136,8 @@ Resume from first missing gate. Never restart.
 Ambiguous → start `story`, escalate to `feature` if complexity emerges.
 
 ### Step 2b: Complexity Tier (feature/epic routes only)
+
+Verify `.claude/workflows/complexity-tiers.yml` exists. If absent → HALT with error.
 
 Read `.claude/workflows/complexity-tiers.yml`. Assess tier based on signals:
 

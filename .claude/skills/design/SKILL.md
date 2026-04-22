@@ -49,7 +49,7 @@ if 'jira_ops' in cmd:
 
 # Design
 
-Load agent per stage (see Stage table). Read `config.yml`.
+Load agent per stage (see Stage table). Verify `config.yml` exists at repo root. If absent → HALT.
 
 Mission: PRD → implementation-ready TDD(s). Single source of truth per stage. Working files kept.
 
@@ -108,9 +108,9 @@ Nothing                                                           → start Arch
 
 ## Setup (every invocation)
 
-1. Read `config.yml` → `project_key`, `max_loops` (default 3), `interactive`
+1. Read `config.yml` → `project_key`, `max_loops` (default 3), `interactive`. If absent → HALT.
 2. Check `memory/features/{slug}/loop_state.json` → loop count + last blocker type + `complexity_tier`
-3. Read `.claude/workflows/complexity-tiers.yml` → load tier definition for `complexity_tier` (default: `full`)
+3. Verify `.claude/workflows/complexity-tiers.yml` exists. If absent → HALT. Read tier definition for `complexity_tier` (default: `full`)
 4. Detect state
 5. If `<message>`: log as focus hint
 

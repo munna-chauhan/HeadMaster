@@ -5,6 +5,15 @@ import sys
 from pathlib import Path
 
 def main():
+    # Check if stop hook is already active (prevent infinite loops)
+    try:
+        payload = json.loads(sys.stdin.read()) if not sys.stdin.isatty() else {}
+        if payload.get("stop_hook_active"):
+            print(json.dumps({"ok": True}))
+            sys.exit(0)
+    except Exception:
+        payload = {}
+
     args = sys.argv[1] if len(sys.argv) > 1 else ""
     slug = args.strip()
     if not slug:
@@ -24,15 +33,14 @@ def main():
             print(json.dumps({"ok": True}))
             sys.exit(0)
 
-    # Check if waiting for user input
-    try:
-        payload = json.loads(sys.stdin.read()) if not sys.stdin.isatty() else {}
-        last_msg = payload.get("last_assistant_message", "")
-        if "AskUserQuestion" in last_msg:
-            print(json.dumps({"ok": True}))
-            sys.exit(0)
-    except Exception:
-        pass
+    # Check if waiting for user input (payload already loaded above)
+    last_msg = payload.get("last_assistant_message", "")
+    if ("AskUserQuestion" in last_msg or
+        "ToolSearch" in last_msg and "AskUserQuestion" in last_msg or
+        '"questions":' in last_msg or
+        "HALT" in last_msg):
+        print(json.dumps({"ok": True}))
+        sys.exit(0)
 
     print(json.dumps({"ok": False, "reason": "JIRA_BREAKDOWN.md missing or incomplete"}))
     sys.exit(0)
