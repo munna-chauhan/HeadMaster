@@ -21,7 +21,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-SESSION_FILE = Path.home() / ".claude" / ".HeadMaster-session-budget.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MEMORY_DIR = REPO_ROOT / "memory"
+SESSION_FILE = MEMORY_DIR / "session-budget.json"
 
 # Turn-based thresholds
 WARN_YELLOW = 15

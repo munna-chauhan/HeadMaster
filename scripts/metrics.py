@@ -32,7 +32,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MEMORY_DIR = REPO_ROOT / "memory" / "features"
-SESSION_FILE = Path.home() / ".claude" / ".HeadMaster-session-budget.json"
+SESSION_FILE = REPO_ROOT / "memory" / "session-budget.json"
 
 VALID_EVENTS = {
     "gate_pass", "gate_fail", "phase_start",

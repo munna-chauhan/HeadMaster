@@ -45,8 +45,34 @@ Don't read example files or skill files at init. Load them only when skill invok
 `config.yml` — single file at repo root. Missing keys use skill defaults.
 
 **interactive** (default: `true`):
-- `true` → ask user at ambiguous decision points via AskUserQuestion
-- `false` → auto-select best option, log rationale, never ask
+- `true` → MUST stop and wait for user response at every decision point. See enforcement rules below.
+- `false` → auto-select best option, log rationale, never ask — EXCEPT when confused (see Confusion Clause).
+
+## Interactive Mode Enforcement
+
+**Always load `.claude/commands/ask-user.md` before any skill that asks questions.** This is mandatory — not optional.
+
+When `interactive: true`:
+
+1. **STOP after every AskUserQuestion.** Do not continue, do not auto-answer, do not assume a default. Wait for the human to respond.
+2. **Never self-answer.** If you generated a question, you MUST yield control. Proceeding without user input is a bug.
+3. **One question at a time.** Present one AskUserQuestion, stop. Acknowledge the answer, then (if needed) present the next.
+4. **Skills that MUST use AskUserQuestion format:** `/plan` (Discover stage), `/design` (Architect stage), `/breakdown` (Steps 3 + 7), `/execute` (escalation points).
+
+### Confusion Clause (applies regardless of `interactive` setting)
+
+Even when `interactive: false`, if any of these are true — STOP and ask using AskUserQuestion format:
+
+- **Ambiguity:** two valid interpretations exist and picking wrong one derails downstream work.
+- **Contradiction:** two sources (code, Jira, Confluence, PRD) disagree on a fact.
+- **Missing critical input:** a required piece of information is absent and cannot be inferred from codebase or context.
+- **Destructive action:** about to delete, overwrite, or restructure something irreversible.
+
+Tag these questions `[CLARIFICATION]` in the header. Auto-mode resumes after the answer.
+
+### Unconditional Human Gates (never skipped, any mode)
+
+`/breakdown` Step 7 and `/execute` escalation always stop — regardless of `interactive` setting.
 
 ## Security
 

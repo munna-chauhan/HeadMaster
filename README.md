@@ -357,7 +357,8 @@ docs/features/{slug}/
 └── retrospective/
     └── system-review.md       ← Post-execution design-vs-actual audit
 
-memory/features/{slug}/        ← Loop state, failure ledgers, session handoffs
+memory/session-budget.json         ← Live session tracking (turns, reads, tool calls)
+memory/features/{slug}/        ← Loop state, metrics, failure ledgers, session handoffs
 memory/agents/{name}/          ← Cross-feature agent learnings
 ```
 
@@ -411,8 +412,9 @@ HeadMaster/
 │   ├── features/{slug}/        # Feature workspaces (generated)
 │   └── examples/               # 4 artifact samples
 │
-├── memory/                     # Persistent state (generated)
-│   ├── features/{slug}/        # Per-feature: loop_state, failure ledgers, handoffs
+├── memory/                     # Persistent state (generated) — see [memory/README.md](memory/README.md)
+│   ├── session-budget.json     # Live session tracking (turns, reads, tool calls)
+│   ├── features/{slug}/        # Per-feature: loop_state, metrics, failure ledgers, handoffs
 │   └── agents/{name}/          # Cross-feature agent learnings
 │
 ├── config.yml                  # Project configuration

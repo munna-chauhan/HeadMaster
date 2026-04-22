@@ -485,7 +485,7 @@ class TestSensitivePathDetection:
         assert is_sensitive_path(Path("private.key")) is True
 
     def test_normal_markdown(self):
-        assert is_sensitive_path(Path("README.md")) is False
+        assert is_sensitive_path(Path("HELP.md")) is False
 
     def test_normal_text(self):
         assert is_sensitive_path(Path("notes.txt")) is False
@@ -578,7 +578,7 @@ class TestSensitiveRegex:
         assert SENSITIVE_BASENAME_REGEX.match("key.asc") is not None
 
     def test_regular_md(self):
-        assert SENSITIVE_BASENAME_REGEX.match("README.md") is None
+        assert SENSITIVE_BASENAME_REGEX.match("HELP.md") is None
 
     def test_regular_py(self):
         assert SENSITIVE_BASENAME_REGEX.match("main.py") is None

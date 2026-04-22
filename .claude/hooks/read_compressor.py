@@ -38,7 +38,8 @@ import re
 import sys
 from pathlib import Path
 
-SESSION_FILE = Path.home() / ".claude" / ".HeadMaster-session-budget.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SESSION_FILE = REPO_ROOT / "memory" / "session-budget.json"
 
 MIN_SIZE_BYTES = 4_000  # ~1k tokens — lower threshold to catch more files
 

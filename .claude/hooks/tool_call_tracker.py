@@ -11,7 +11,8 @@ import os
 import sys
 from pathlib import Path
 
-SESSION_FILE = Path.home() / ".claude" / ".HeadMaster-session-budget.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SESSION_FILE = REPO_ROOT / "memory" / "session-budget.json"
 
 
 def main() -> None:

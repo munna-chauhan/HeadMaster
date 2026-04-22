@@ -5,7 +5,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 FLAG_FILE = Path.home() / ".claude" / ".HeadMaster-active"
-BUDGET_FILE = Path.home() / ".claude" / ".HeadMaster-session-budget.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+BUDGET_FILE = REPO_ROOT / "memory" / "session-budget.json"
 STALE_SECONDS = 3600
 
 WARN_YELLOW = 15

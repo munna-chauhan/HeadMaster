@@ -20,7 +20,7 @@ from scripts.metrics import (
 
 @pytest.fixture
 def tmp_memory(tmp_path, monkeypatch):
-    """Redirect MEMORY_DIR to a temp directory."""
+    """Redirect MEMORY_DIR and SESSION_FILE to a temp directory."""
     import scripts.metrics as m
     monkeypatch.setattr(m, "MEMORY_DIR", tmp_path)
     monkeypatch.setattr(m, "SESSION_FILE", tmp_path / "session-budget.json")
@@ -72,7 +72,7 @@ class TestEmit:
 
     def test_emit_captures_session_tokens(self, tmp_memory, slug):
         # Write a fake session budget
-        budget = {"estimated_cost": 42000, "turn_count": 10}
+        budget = {"total_tokens": 42000, "turn_count": 10}
         session_file = tmp_memory / "session-budget.json"
         session_file.write_text(json.dumps(budget), encoding="utf-8")
         cmd_emit(slug, "gate_pass", phase="planning", stage="Draft")
@@ -202,20 +202,30 @@ class TestAggregate:
         assert output["features"] == []
 
 
+CLI_TEST_SLUG = "_cli_test_"
+CLI_TEST_DIR = REPO_ROOT / "memory" / "features" / CLI_TEST_SLUG
+
+
 class TestCLI:
-    def test_cli_emit(self, tmp_memory):
+    @pytest.fixture(autouse=True)
+    def _cleanup(self):
+        yield
+        import shutil
+        if CLI_TEST_DIR.exists():
+            shutil.rmtree(CLI_TEST_DIR)
+
+    def test_cli_emit(self):
         result = subprocess.run(
-            [sys.executable, str(METRICS_SCRIPT), "emit", "cli-test", "gate_pass",
+            [sys.executable, str(METRICS_SCRIPT), "emit", CLI_TEST_SLUG, "gate_pass",
              "--phase", "planning", "--stage", "Draft"],
             capture_output=True, text=True,
             env={**os.environ, "PYTHONPATH": str(REPO_ROOT)},
         )
         assert result.returncode == 0
-        # File created in real MEMORY_DIR (not tmp), but command ran successfully
 
     def test_cli_invalid_event(self):
         result = subprocess.run(
-            [sys.executable, str(METRICS_SCRIPT), "emit", "cli-test", "bogus"],
+            [sys.executable, str(METRICS_SCRIPT), "emit", CLI_TEST_SLUG, "bogus"],
             capture_output=True, text=True,
         )
         assert result.returncode != 0

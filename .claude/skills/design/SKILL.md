@@ -135,7 +135,8 @@ Based on detected state, load and execute the corresponding stage file:
 
 ## AskUserQuestion Format
 
-See `.claude/commands/ask-user.md` for full format, decision rules, and navigation commands.
+Load `.claude/commands/ask-user.md` before any stage that asks questions. Mandatory when `interactive: true`.
+After every AskUserQuestion: STOP. Wait for user response. Do not continue.
 
 ---
 

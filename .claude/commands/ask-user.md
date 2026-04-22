@@ -16,7 +16,9 @@ Never ask:
 - Generic questions ("how should we handle errors?", "what format?")
 - Questions where one option is clearly better given context
 
-Autonomous mode (`interactive: false`): auto-select best option, log rationale, never ask.
+Autonomous mode (`interactive: false`): auto-select best option, log rationale — EXCEPT when confused.
+Confusion = ambiguity, contradiction, missing critical input, or destructive action.
+If confused: ask using this same format. Tag header `[CLARIFICATION]`. Resume auto-mode after answer.
 
 ## Question Format
 
