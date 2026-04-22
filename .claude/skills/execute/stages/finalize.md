@@ -17,10 +17,6 @@ JIRA_BREAKDOWN.md: Status → ❌ FAILED
 Write: docs/features/{slug}/execution/reviews/escalation-{STORY-KEY}.md
 ```
 
-```bash
-python3 scripts/metrics.py emit {slug} escalation --phase execute --stage escalation --story {STORY-KEY}
-```
-
 Escalation report MUST include:
 - All attempted approaches (from ledger)
 - Error for each attempt
@@ -44,10 +40,7 @@ AskUserQuestion({
 
 **Pattern:** Launch `review-agent` as isolated subagent for system-level audit. Fresh context — no per-story memory.
 
-**Before spawning — mandatory context reset:**
-```
-/handoff
-```
+**Isolation:** Do NOT load execution history into parent context. Subagent reads TDD + git diff fresh.
 
 **Spawn subagent:**
 
@@ -76,7 +69,6 @@ Return:
 0 actionable findings → update pipeline state + proceed to PR:
 ```bash
 python3 scripts/gate_transition.py {slug} execute complete --artifact docs/features/{slug}/retrospective/system-review.md
-python3 scripts/metrics.py emit {slug} feature_complete --phase execute --stage complete
 ```
 N actionable → re-dispatch affected stories through full phase cycle.
 

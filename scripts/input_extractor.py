@@ -16,24 +16,13 @@ import re
 import sys
 from pathlib import Path
 
-try:
-    from scripts.input_sanitizer import sanitize_and_report, fence_external_content
-except ImportError:
-    try:
-        from input_sanitizer import sanitize_and_report, fence_external_content
-    except ImportError:
-        def sanitize_and_report(text, source="unknown"):
-            class _R:
-                sanitized_text = text
-                detections = []
-                was_modified = False
-            return _R()
-        def fence_external_content(content, source, field_name="content"):
-            return (
-                f"<!-- EXTERNAL-DATA-START source=\"{source}\" field=\"{field_name}\" -->\n"
-                f"{content}\n"
-                f"<!-- EXTERNAL-DATA-END -->"
-            )
+def fence_external_content(content, source, field_name="content"):
+    """Wrap external content in data-fence markers for trust boundary."""
+    return (
+        f"<!-- EXTERNAL-DATA-START source=\"{source}\" field=\"{field_name}\" -->\n"
+        f"{content}\n"
+        f"<!-- EXTERNAL-DATA-END -->"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -41,23 +30,10 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 def _sanitize_field(text: str, source: str, field_name: str) -> str:
-    """Sanitize and fence a single external field value."""
+    """Fence an external field value with trust boundary markers."""
     if not text or not text.strip():
         return text
-    result = sanitize_and_report(text, source=source)
-    if result.detections:
-        _log_detections(result.detections, source, field_name)
-    return fence_external_content(result.sanitized_text, source=source, field_name=field_name)
-
-
-def _log_detections(detections: list, source: str, field_name: str) -> None:
-    """Log sanitization detections to stderr for audit trail."""
-    for d in detections:
-        print(
-            f"[SANITIZER] {d['severity']} {d['category']} in {source}/{field_name} "
-            f"line {d['line']}: {d['snippet'][:80]}",
-            file=sys.stderr,
-        )
+    return fence_external_content(text, source=source, field_name=field_name)
 
 
 def extract_jira_issue(data: dict) -> str:
@@ -98,10 +74,7 @@ def extract_jira_issue(data: dict) -> str:
         author = (c.get("author") or {}).get("displayName", "")
         date = c.get("created", "")[:10]
         body_raw = _extract_adf_text(c.get("body", "")) if isinstance(c.get("body"), dict) else c.get("body", "")
-        body_result = sanitize_and_report(body_raw[:300], source=f"jira:{key}")
-        if body_result.detections:
-            _log_detections(body_result.detections, f"jira:{key}", "comment")
-        comments.append(f"- [{date}] {author}: {body_result.sanitized_text}")
+        comments.append(f"- [{date}] {author}: {body_raw[:300]}")
 
     # Subtasks
     subtasks = [f"- {s.get('key')}: {s.get('fields', {}).get('summary', '')}" for s in f.get("subtasks", [])]

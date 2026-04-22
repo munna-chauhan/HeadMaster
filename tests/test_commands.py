@@ -168,13 +168,14 @@ Iterations: 1
     def test_state_detection_execute_ready(self):
         """Test execute/ready state — JIRA_BREAKDOWN exists"""
         (self.breakdown_dir / "JIRA_BREAKDOWN.md").write_text(
-            "# Breakdown\nPush Status: LOCAL ONLY\n\n| STORY-01 | — | repo | title | 3 | P1 | ⏳ NEW |"
+            "# Breakdown\nPush Status: LOCAL ONLY\n\n| STORY-01 | — | repo | title | 3 | P1 | ⏳ NEW |",
+            encoding="utf-8"
         )
 
         has_breakdown = (self.breakdown_dir / "JIRA_BREAKDOWN.md").exists()
         self.assertTrue(has_breakdown)
 
-        content = (self.breakdown_dir / "JIRA_BREAKDOWN.md").read_text()
+        content = (self.breakdown_dir / "JIRA_BREAKDOWN.md").read_text(encoding="utf-8")
         has_new_stories = "⏳ NEW" in content
         self.assertTrue(has_new_stories)
 

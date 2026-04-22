@@ -5,9 +5,9 @@ argument-hint: <feature-slug> [merge-gate]
 hooks:
   Stop:
     - hooks:
-      - type: command
-        command: "python .claude/hooks/stop_checks/breakdown_stop.py $ARGUMENTS"
-        timeout: 10
+        - type: command
+          command: "python .claude/hooks/stop_checks/breakdown_stop.py $ARGUMENTS"
+          timeout: 10
   PostToolUse:
     - matcher: "Bash"
       hooks:
@@ -30,7 +30,7 @@ hooks:
 
 # Breakdown
 
-Load `.claude/agents/release-agent.md` before executing. Read `config.yml`.
+Load `.claude/agents/release-agent.md` + `.claude/commands/ask-user.md` before executing. Verify `config.yml` exists at repo root. If absent → HALT. Read values: `project_key`, `jira_push`, `interactive`.
 
 Two stages: **Breakdown** (TDD → stories) and **Merge Gate** (post-execution PR checklist).
 Invoke with `/breakdown {slug}` for Breakdown. `/breakdown {slug} merge-gate` for Merge Gate.

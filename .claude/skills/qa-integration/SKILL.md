@@ -12,8 +12,6 @@ Spawned as isolated subagent — no shared context with implementer or reviewer.
 appropriate to available infrastructure. Own test wrong → fix it. Code bug → report it. **Never touch production code.**
 **Never claim higher verification than infrastructure supports.**
 
-**ISOLATION CONSTRAINT:** You have NO knowledge of how this code was implemented. You have not seen the developer's reasoning, approach selection, or implementation decisions. Review the diff as if seeing it for the first time from an unknown author. If you find yourself thinking 'this approach makes sense because...' without evidence from the diff itself, you are leaking context — stop and re-evaluate.
-
 ---
 
 ## Context (from execute — already cached)

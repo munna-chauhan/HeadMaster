@@ -16,10 +16,6 @@ JIRA_BREAKDOWN.md: Status → 🔄 IN PROGRESS
 TaskUpdate: [EXEC] {LOCAL-ID} → in_progress
 ```
 
-```bash
-python3 scripts/metrics.py emit {slug} story_start --phase execute --stage implement --story {STORY-KEY}
-```
-
 ---
 
 ## Phase A: Implement
@@ -28,8 +24,6 @@ Run per `.claude/skills/implement/SKILL.md`.
 
 - PASS → proceed to Phase B
 - FAIL → attempt += 1. If attempt >= max_loops → ESCALATE
-
-**After phase A:** `/handoff`
 
 ---
 
@@ -44,15 +38,13 @@ JIRA_BREAKDOWN.md: Status → 🔍 SCANNING
 - PASS / WARNING → proceed to Phase C
 - BLOCKED → back to Phase A
 
-**After phase B:** `/handoff`
-
 ---
 
 ## Phase C: Review Code
 
 Run per `.claude/skills/review-code/SKILL.md`. Spawn `review-agent` as isolated subagent (fresh context).
 
-**Before spawning:** `/handoff` (clears parent context)
+**Isolation:** Do NOT load code into parent context before spawning. Subagent reads git diff fresh.
 
 ```
 JIRA_BREAKDOWN.md: Status → 👁️ IN REVIEW
@@ -62,15 +54,13 @@ JIRA_BREAKDOWN.md: Status → 👁️ IN REVIEW
 - FINDINGS (critical/high) → back to Phase A
 - attempt >= max_loops → ESCALATE
 
-**After phase C:** `/handoff`
-
 ---
 
 ## Phase D: QA Integration
 
 Run per `.claude/skills/qa-integration/SKILL.md`. Spawn `qa-engineer` as isolated subagent (fresh context).
 
-**Before spawning:** `/handoff` (clears parent context)
+**Isolation:** Do NOT load implementation code into parent context. Subagent reads story ACs + TDD fresh.
 
 ```
 JIRA_BREAKDOWN.md: Status → 🧪 IN QA
@@ -81,8 +71,6 @@ JIRA_BREAKDOWN.md: Status → 🧪 IN QA
 - REJECTED-BUG → back to Phase A
 - attempt >= max_loops → ESCALATE
 
-**After phase D:** `/handoff`
-
 ---
 
 ## Story Complete
@@ -91,10 +79,6 @@ JIRA_BREAKDOWN.md: Status → 🧪 IN QA
 JIRA_BREAKDOWN.md: Status → ✅ COMPLETE
 TaskUpdate: [EXEC] {LOCAL-ID} → completed
 Jira: transition → Done (if jira_push)
-```
-
-```bash
-python3 scripts/metrics.py emit {slug} story_complete --phase execute --stage complete --story {STORY-KEY} --verdict PASS
 ```
 
 **Auto-merge:**

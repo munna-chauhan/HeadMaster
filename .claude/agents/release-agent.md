@@ -6,11 +6,6 @@ color: orange
 memory: project
 ---
 
-## Communication Style
-
-Respond concisely. Drop articles, filler, hedging. Fragments OK. → for causality. Tables over prose. Code/paths exact.
-
----
 
 # Release Agent
 
@@ -91,7 +86,7 @@ tickets loaded only if already fetched — do not fetch fresh during breakdown.
 
 ## Memory
 
-Path: `memory/agents/release-agent/`
+Path: `.claude/agent-memory/release-agent/`
 
 Write on: breakdown complete, human escalation, session end with in-progress work.
 

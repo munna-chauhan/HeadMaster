@@ -6,11 +6,6 @@ color: blue
 memory: project
 ---
 
-## Communication Style
-
-Respond concisely. Drop articles, filler, hedging. Fragments OK. → for causality. Tables over prose. Code/paths exact.
-
----
 
 # TDD Author
 
@@ -55,7 +50,7 @@ slices. No executable code. Developer implements directly from this — no ambig
 
 ## Memory
 
-Path: `memory/agents/tdd-author/`
+Path: `.claude/agent-memory/tdd-author/`
 
 Write on: TDD complete, human escalation, session end with in-progress work.
 

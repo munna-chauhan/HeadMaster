@@ -1,7 +1,7 @@
 ---
 name: "tdd-reviewer"
 description: "TDD stress-tester for /design Review stage. Launched as isolated subagent with fresh context. Reads TDD cold as engineer implementing alone. Mechanical A-E checklist. No authorship memory."
-model: claude-haiku-4-5
+model: claude-haiku-4-5-20251001
 color: red
 memory: project
 ---
@@ -67,7 +67,7 @@ Fix MEDIUM/LOW inline in TDD files directly. BLOCKER/HIGH → record in findings
 
 ## Memory
 
-Path: `memory/agents/tdd-reviewer/`
+Path: `.claude/agent-memory/tdd-reviewer/`
 
 Write on: review complete, session end.
 

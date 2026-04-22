@@ -35,21 +35,20 @@ hooks:
         - type: command
           command: |
             python3 -c "
-  import json, sys
-  data = json.load(sys.stdin)
-  cmd = data.get('tool_input', {}).get('command', '')
-  err = data.get('error', 'unknown error')
+import json, sys
+data = json.load(sys.stdin)
+cmd = data.get('tool_input', {}).get('command', '')
+err = data.get('error', 'unknown error')
 if 'jira_ops' in cmd:
-  out = {'hookSpecificOutput': { 'hookEventName': 'PostToolUseFailure', 'additionalContext':
-                                                                          f'External data fetch failed: { err }. Continue with partial data. Mark affected SYSTEM_DESIGN_NOTES sections as [ UNVERIFIED ].' } }
-  print(json.dumps(out))
-  "
+    out = {'hookSpecificOutput': {'hookEventName': 'PostToolUseFailure', 'additionalContext': f'External data fetch failed: {err}. Continue with partial data. Mark affected SYSTEM_DESIGN_NOTES sections as [UNVERIFIED].'}}
+    print(json.dumps(out))
+"
         statusMessage: "Handling script failure..."
 ---
 
 # Design
 
-Load agent per stage (see Stage table). Read `config.yml`.
+Load agent per stage (see Stage table). Verify `config.yml` exists at repo root. If absent → HALT.
 
 Mission: PRD → implementation-ready TDD(s). Single source of truth per stage. Working files kept.
 
@@ -108,9 +107,9 @@ Nothing                                                           → start Arch
 
 ## Setup (every invocation)
 
-1. Read `config.yml` → `project_key`, `max_loops` (default 3), `interactive`
+1. Read `config.yml` → `project_key`, `max_loops` (default 3), `interactive`. If absent → HALT.
 2. Check `memory/features/{slug}/loop_state.json` → loop count + last blocker type + `complexity_tier`
-3. Read `.claude/workflows/complexity-tiers.yml` → load tier definition for `complexity_tier` (default: `full`)
+3. Verify `.claude/workflows/complexity-tiers.yml` exists. If absent → HALT. Read tier definition for `complexity_tier` (default: `full`)
 4. Detect state
 5. If `<message>`: log as focus hint
 
@@ -135,7 +134,8 @@ Based on detected state, load and execute the corresponding stage file:
 
 ## AskUserQuestion Format
 
-See `.claude/commands/ask-user.md` for full format, decision rules, and navigation commands.
+Load `.claude/commands/ask-user.md` before any stage that asks questions. Mandatory when `interactive: true`.
+After every AskUserQuestion: STOP. Wait for user response. Do not continue.
 
 ---
 

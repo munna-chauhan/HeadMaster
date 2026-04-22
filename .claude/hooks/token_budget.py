@@ -21,15 +21,38 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-SESSION_FILE = Path.home() / ".claude" / ".HeadMaster-session-budget.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MEMORY_DIR = REPO_ROOT / "memory"
+SESSION_FILE = MEMORY_DIR / "session-budget.json"
 
-# Turn-based thresholds
-WARN_YELLOW = 15
-WARN_ORANGE = 25
-WARN_RED = 35
+# Default turn-based thresholds (overridable in config.yml)
+DEFAULT_WARN_YELLOW = 15
+DEFAULT_WARN_ORANGE = 25
+DEFAULT_WARN_RED = 35
 
 # Heavy-read downgrade: if bytes_read > this, subtract 5 from each threshold
 HEAVY_READ_THRESHOLD = 512_000  # 500KB
+
+
+def _load_thresholds():
+    """Load turn thresholds from config.yml, fall back to defaults."""
+    try:
+        import yaml
+        config_path = REPO_ROOT / "config.yml"
+        if config_path.exists():
+            with open(config_path, encoding="utf-8") as f:
+                config = yaml.safe_load(f) or {}
+                budget = config.get("session_budget", {})
+                return (
+                    budget.get("turn_warn_yellow", DEFAULT_WARN_YELLOW),
+                    budget.get("turn_warn_orange", DEFAULT_WARN_ORANGE),
+                    budget.get("turn_warn_red", DEFAULT_WARN_RED),
+                )
+    except Exception:
+        pass
+    return DEFAULT_WARN_YELLOW, DEFAULT_WARN_ORANGE, DEFAULT_WARN_RED
+
+
 
 
 def load_session() -> dict:
@@ -39,7 +62,7 @@ def load_session() -> dict:
         except Exception as e:
             try:
                 from datetime import datetime as _dt
-                _log = Path.home() / ".claude" / ".HeadMaster-hook-errors.log"
+                _log = Path.home() / "memory" / "hook-errors.log"
                 with open(_log, "a") as _f:
                     _f.write(f"{_dt.now().isoformat()} {Path(__file__).name}: {type(e).__name__}: {e}\n")
             except Exception:
@@ -72,7 +95,7 @@ def write_auto_handoff(turns: int) -> None:
             except Exception:
                 pass
 
-        memory_dir = Path("memory") / "features" / slug
+        memory_dir = REPO_ROOT / "memory" / "features" / slug
         memory_dir.mkdir(parents=True, exist_ok=True)
         ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
         handoff_path = memory_dir / f"session-{ts}-auto.md"
@@ -118,10 +141,10 @@ def main() -> None:
     session["total_tokens"] = turns
     save_session(session)
 
+    # Load thresholds from config
+    yellow, orange, red = _load_thresholds()
+
     # Adjust thresholds if heavy reads
-    yellow = WARN_YELLOW
-    orange = WARN_ORANGE
-    red = WARN_RED
     if session["bytes_read"] > HEAVY_READ_THRESHOLD:
         yellow -= 5
         orange -= 5
@@ -135,6 +158,22 @@ def main() -> None:
     bar = "█" * bar_filled + "░" * (20 - bar_filled)
 
     breakdown = f"reads:{reads_kb}KB tools:{session['tool_calls']}"
+
+    # Auto-braindump at orange threshold (non-blocking)
+    if turns == orange:
+        try:
+            flag_file = Path.home() / ".claude" / ".HeadMaster-active"
+            if flag_file.exists():
+                flag = json.loads(flag_file.read_text(encoding="utf-8"))
+                slug = flag.get("slug", "unknown")
+                import subprocess
+                subprocess.run(
+                    ["python", str(REPO_ROOT / ".claude" / "hooks" / "auto_braindump.py"), slug, str(turns)],
+                    capture_output=True,
+                    timeout=5
+                )
+        except Exception:
+            pass
 
     if turns >= red:
         write_auto_handoff(turns)

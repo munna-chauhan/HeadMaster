@@ -240,4 +240,4 @@ N actionable findings:
 - Actionable findings = Problematic + CRITICAL/HIGH only
 - Justified divergences = informational, never block
 - Pipeline improvements must be specific and actionable — not vague
-- Apply improvements to actual files — not just document them
+- Never auto-apply changes to skill/agent files — present proposed changes to human (see Step 7)

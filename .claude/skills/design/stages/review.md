@@ -2,11 +2,8 @@
 
 **Pattern:** Launch `tdd-reviewer` as isolated subagent. Fresh context — no authorship memory.
 
-**Before spawning — mandatory context reset:**
-```
-/handoff
-```
-Clears parent context accumulated during Engineer stage. Reviewer spawns clean.
+**Before spawning — isolation via Agent tool:**
+Do NOT load TDD into parent context before spawning. Subagent reads TDD fresh from disk. Isolation achieved via minimal parent prompt, not /handoff.
 
 **Note:** This review stage runs for standard and full tiers only. Lite tier skips review entirely.
 For standard tier (8 sections): items referencing S9-S11 should be marked N/A.
@@ -99,11 +96,7 @@ If APPROVED or CONDITIONAL:
 
 If REJECTED:
 
-1. Emit gate failure metric:
-   ```bash
-   python3 scripts/metrics.py emit {slug} gate_fail --phase design --stage Review --verdict REJECTED
-   ```
-2. **Run convergence check:**
+1. **Run convergence check:**
    ```bash
    python3 scripts/convergence_check.py {slug} design --blocker-type "TDD_ISSUE|DESIGN_GAP" --findings '[{"section": "S3", "issue": "..."}]' --max-loops {max_loops}
    ```

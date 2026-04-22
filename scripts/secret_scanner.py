@@ -80,13 +80,17 @@ def _is_allowlisted(line: str) -> bool:
     return any(re.search(r'\b' + re.escape(v) + r'\b', lower) for v in _ALLOWLIST_VALUES)
 
 
-_compiled: Optional[List] = None
+_compiled = None
+_compiled_config_mtime = None
 
 
 def _get_patterns():
-    """Get compiled patterns including custom ones from config."""
-    global _compiled
-    if _compiled is not None:
+    """Get compiled patterns including custom ones from config. Recomputes if config changes."""
+    global _compiled, _compiled_config_mtime
+    config_path = Path(__file__).parent.parent / "config.yml"
+    current_mtime = config_path.stat().st_mtime if config_path.exists() else None
+
+    if _compiled is not None and _compiled_config_mtime == current_mtime:
         return _compiled
 
     patterns = list(_DEFAULT_PATTERNS)
@@ -100,6 +104,7 @@ def _get_patterns():
             patterns.append(("Custom", p, "Custom pattern"))
 
     _compiled = [(name, re.compile(regex), desc) for name, regex, desc in patterns]
+    _compiled_config_mtime = current_mtime
     return _compiled
 
 

@@ -1,7 +1,7 @@
 ---
 name: "prd-reviewer"
 description: "PRD stress-tester for /plan Review stage. Launched as isolated subagent with fresh context. Reads PRD cold as engineer implementing alone. Mechanical A-E checklist. No authorship memory."
-model: claude-haiku-4-5
+model: claude-haiku-4-5-20251001
 color: red
 memory: project
 ---
@@ -65,7 +65,7 @@ Fix MEDIUM/LOW inline in PRD.md directly. BLOCKER/HIGH → record in findings ta
 
 ## Memory
 
-Path: `memory/agents/prd-reviewer/`
+Path: `.claude/agent-memory/prd-reviewer/`
 
 Write on: review complete, session end.
 

@@ -1,7 +1,6 @@
 # ARCHITECT
 
-**Pattern:** Skill orchestrates. Load `.claude/agents/solutions-architect.md` for behavioral constraints. Launches
-`codebase-analyst` subagents in parallel for code analysis. `solutions-architect` synthesizes findings into design.
+**Pattern:** Skill orchestrates. Load `.claude/agents/solutions-architect.md` + `.claude/commands/ask-user.md` for behavioral constraints and question format. Launches `codebase-analyst` subagents in parallel for code analysis. `solutions-architect` synthesizes findings into design.
 
 **Gate conditions:**
 
@@ -37,7 +36,11 @@ Extract and cache:
 
 **Step 2: Launch codebase-analyst subagents** (parallel, max 3, grouped by stack similarity)
 
-Group repos from PRD (Repos section or Dependencies section) into max 3 agents. Each agent:
+Group repos from PRD (Repos section or Dependencies section) into max 3 agents.
+
+**IMPORTANT:** Spawn all agents in a single message with multiple Agent tool calls for true parallelism. Do NOT spawn sequentially.
+
+Each agent:
 
 ```
 Agent: codebase-analyst

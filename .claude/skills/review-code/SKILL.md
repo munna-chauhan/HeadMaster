@@ -11,8 +11,6 @@ Load `.claude/agents/review-agent.md` constraints.
 Spawned as isolated subagent — no shared context with implementer. Review git diff only. **80+ confidence before
 flagging. Never fix.**
 
-**ISOLATION CONSTRAINT:** You have NO knowledge of how this code was implemented. You have not seen the developer's reasoning, approach selection, or implementation decisions. Review the diff as if seeing it for the first time from an unknown author. If you find yourself thinking 'this approach makes sense because...' without evidence from the diff itself, you are leaking context — stop and re-evaluate.
-
 ---
 
 ## Step 1: Get diff
@@ -36,12 +34,7 @@ Read `memory/features/{slug}/agents/review-agent.md` if exists.
 - No invented components
 - No gold-plating
 
-**Security — OWASP gaps not covered by scanner:**
-
-- A01: missing RBAC, insecure direct object refs
-- A04: missing input validation, no rate limiting
-- A05: verbose errors exposing internals, CORS misconfiguration
-- A08: insecure deserialization, unsigned JWTs
+**Security — OWASP Top 10 coverage (full list in review-agent.md)**
 
 **Logic + quality:**
 
@@ -67,7 +60,7 @@ Diff: +{N}/-{N} lines
 ## TDD Compliance
 {PASS | deviations with section ref}
 
-## Security (OWASP A01/A04/A05/A08)
+## Security (OWASP Top 10)
 {PASS | file:line + issue + fix}
 
 ## Logic + Quality

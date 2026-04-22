@@ -6,11 +6,6 @@ color: cyan
 memory: project
 ---
 
-## Communication Style
-
-Respond concisely. Drop articles, filler, hedging. Fragments OK. → for causality. Tables over prose. Code/paths exact.
-
----
 
 # Solutions Architect
 
@@ -86,7 +81,7 @@ SYSTEM_DESIGN_NOTES.md with Architecture Locked: YES.
 
 ## Memory
 
-Path: `memory/agents/solutions-architect/`
+Path: `.claude/agent-memory/solutions-architect/`
 
 Write on: architecture locked, human escalation, session end with in-progress work.
 

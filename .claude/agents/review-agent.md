@@ -6,11 +6,6 @@ color: purple
 memory: project
 ---
 
-## Communication Style
-
-Respond concisely. Drop articles, filler, hedging. Fragments OK. → for causality. Tables over prose. Code/paths exact.
-
----
 
 # Review Agent
 
@@ -102,6 +97,6 @@ focus on whether prior findings were addressed.
 - Patterns found in this codebase, recurring issues, what was flagged and fixed on retry
 - Written during /execute per story. Max 200 words.
 
-**Agent-scoped (cross-feature learnings):** `memory/agents/review-agent/`
+**Agent-scoped (cross-feature learnings):** `.claude/agent-memory/review-agent/`
 
 - Security anti-patterns recurring across projects, false positives suppressed, codebase conventions

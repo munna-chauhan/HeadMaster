@@ -22,22 +22,6 @@ except ImportError:
     print("  pip install requests pyyaml")
     sys.exit(1)
 
-try:
-    from scripts.input_sanitizer import sanitize_external_input
-except ImportError:
-    def sanitize_external_input(text, **kwargs):
-        return text
-
-
-def _sanitize_response(data, source="jira"):
-    """Recursively sanitize string values in API response data."""
-    if isinstance(data, str):
-        return sanitize_external_input(data, source=source, log_to_db=False)
-    elif isinstance(data, dict):
-        return {k: _sanitize_response(v, source) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [_sanitize_response(item, source) for item in data]
-    return data
 
 
 class JiraClient:
@@ -190,7 +174,7 @@ class JiraClient:
                 # Handle response
                 if response.status_code in [200, 201, 204]:
                     if response.content:
-                        return _sanitize_response(response.json(), source="jira")
+                        return response.json()
                     return {}
 
                 # Handle errors
@@ -367,39 +351,7 @@ class JiraClient:
         self._log("SUCCESS", f"Linked issues: {blocking_key} blocks {blocked_key}")
         return data
 
-    # ============================================================================
-    # AUTO-TRANSITION (WORKFLOW AUTOMATION)
-    # ============================================================================
-
-    def auto_transition(self, issue_key: str, trigger: str) -> Dict:
-        """Auto-transition based on trigger event"""
-        self._check_permission("transition")
-        self._log("INFO", f"Auto-transition {issue_key} based on trigger: {trigger}")
-
-        # Check if auto-transition is enabled
-        if not self.workflow.get("auto_transition", False):
-            self._log("WARN", "Auto-transition is disabled in config")
-            return {}
-
-        # Map trigger to target status
-        transitions_map = self.workflow.get("transitions", {})
-        trigger_mapping = {
-            "build_passed": "code_complete",
-            "code_complete": "code_complete",
-            "review_approved": "review_approved",
-            "qa_passed": "qa_passed",
-            "blocked": "blocked",
-        }
-
-        config_key = trigger_mapping.get(trigger)
-        if not config_key:
-            raise ValueError(f"Unknown trigger: {trigger}")
-
-        target_status = transitions_map.get(config_key)
-        if not target_status:
-            raise ValueError(f"No transition configured for trigger: {trigger}")
-
-        return self.transition_issue(issue_key, target_status)
+    # Auto-transition removed — was dead code (workflow config never populated in _validate_config)
 
     # ============================================================================
     # UTILITY OPERATIONS
@@ -473,6 +425,14 @@ def main():
             result = client.create_issue(summary, description, issue_type, points)
             print(json.dumps(result, indent=2))
 
+        elif args.action == "update":
+            if len(args.args) < 2:
+                print("Usage: jira_ops.py update <issue-key> <fields-json>")
+                sys.exit(1)
+            fields = json.loads(args.args[1])
+            result = client.update_issue(args.args[0], fields)
+            print("Issue updated successfully")
+
         elif args.action == "comment":
             if len(args.args) < 2:
                 print("Usage: jira_ops.py comment <issue-key> <comment-text>")
@@ -503,13 +463,6 @@ def main():
             result = client.link_issues(args.args[0], args.args[1])
             print("Issues linked successfully")
 
-        elif args.action == "auto-transition":
-            if len(args.args) < 2:
-                print("Usage: jira_ops.py auto-transition <issue-key> <trigger>")
-                sys.exit(1)
-            result = client.auto_transition(args.args[0], args.args[1])
-            print("Auto-transition successful")
-
         elif args.action == "health":
             client.health_check()
 
@@ -525,11 +478,11 @@ def main():
             print("\nAvailable actions:")
             print("  fetch <issue-key>")
             print("  create <summary> [description] [type] [points]")
+            print("  update <issue-key> <fields-json>")
             print("  comment <issue-key> <text>")
             print("  transition <issue-key> <status>")
             print("  search <jql> [max-results]")
             print("  link <blocking-key> <blocked-key>")
-            print("  auto-transition <issue-key> <trigger>")
             print("  health")
             print("  summary <issue-key>")
             sys.exit(1)

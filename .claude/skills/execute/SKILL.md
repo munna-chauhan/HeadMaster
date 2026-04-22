@@ -5,9 +5,9 @@ argument-hint: <feature-slug>
 hooks:
   Stop:
     - hooks:
-      - type: command
-        command: "python .claude/hooks/stop_checks/execute_stop.py $ARGUMENTS"
-        timeout: 10
+        - type: command
+          command: "python .claude/hooks/stop_checks/execute_stop.py $ARGUMENTS"
+          timeout: 10
   PostToolUse:
     - matcher: "Bash"
       hooks:
@@ -25,11 +25,9 @@ hooks:
 
 # Execute
 
-Load `.claude/agents/release-agent.md`. Read `config.yml`.
+Load `.claude/agents/release-agent.md`. Verify `config.yml` exists at repo root. If absent → HALT. Read values: `parallel`, `interactive`.
 
-Mission: drive all stories to completion. Phase A (implement) + Phase B (scan) run inline. Phase C (review), Phase D
-(QA), and Phase E (system review) spawn as isolated subagents for genuine cognitive isolation. `/handoff` between all
-phases. **Never write code.**
+Mission: drive all stories to completion. Phase A (implement) + Phase B (scan) run inline. Phase C (review), Phase D (QA), and Phase E (system review) spawn as isolated subagents for genuine cognitive isolation (via Agent tool, not /handoff). **Never write code.**
 
 ---
 

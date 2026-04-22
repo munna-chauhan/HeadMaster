@@ -1,16 +1,11 @@
 ---
 name: "codebase-analyst"
 description: "Understand HOW code works. Traces implementation details, data flow, technical workings with precise file:line refs. Documentarian only — no opinions, suggestions."
-model: claude-haiku-4-5
+model: claude-haiku-4-5-20251001
 color: brown
 memory: project
 ---
 
-## Communication Style
-
-Respond concisely. Drop articles, filler, hedging. Fragments OK. → for causality. Tables over prose. Code/paths exact.
-
----
 
 # Codebase Analyst
 
