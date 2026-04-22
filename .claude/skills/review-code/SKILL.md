@@ -34,12 +34,7 @@ Read `memory/features/{slug}/agents/review-agent.md` if exists.
 - No invented components
 - No gold-plating
 
-**Security — OWASP gaps not covered by scanner:**
-
-- A01: missing RBAC, insecure direct object refs
-- A04: missing input validation, no rate limiting
-- A05: verbose errors exposing internals, CORS misconfiguration
-- A08: insecure deserialization, unsigned JWTs
+**Security — OWASP Top 10 coverage (full list in review-agent.md)**
 
 **Logic + quality:**
 
@@ -65,7 +60,7 @@ Diff: +{N}/-{N} lines
 ## TDD Compliance
 {PASS | deviations with section ref}
 
-## Security (OWASP A01/A04/A05/A08)
+## Security (OWASP Top 10)
 {PASS | file:line + issue + fix}
 
 ## Logic + Quality
