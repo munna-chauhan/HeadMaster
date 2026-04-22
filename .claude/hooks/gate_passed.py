@@ -54,6 +54,15 @@ def analyze_phase(slug: str, phase: str, stage: str):
             "status": phase_data.get("status", "UNKNOWN")
         }
 
+        # Phase 5: Check for regressions
+        baseline = load_baseline(phase)
+        regression = None
+
+        if baseline:
+            regression = check_regression(summary, baseline)
+            if regression:
+                flag_regression(slug, phase, regression)
+
         # Write to phase_performance.json
         perf_file = REPO_ROOT / "memory" / "features" / slug / "phase_performance.json"
         if perf_file.exists():
@@ -78,6 +87,78 @@ def analyze_phase(slug: str, phase: str, stage: str):
                 f.write(f"{datetime.now(timezone.utc).isoformat()} gate_passed error: {e}\n")
         except Exception:
             pass
+
+def load_baseline(phase: str) -> dict:
+    """Load baseline for phase."""
+    baseline_file = REPO_ROOT / "memory" / "baselines" / f"{phase}_baseline.json"
+    if baseline_file.exists():
+        try:
+            return json.loads(baseline_file.read_text())
+        except Exception:
+            pass
+    return {}
+
+def check_regression(current: dict, baseline: dict) -> dict:
+    """Check if current performance regressed vs baseline."""
+
+    regression = {}
+    metrics = baseline.get("metrics", {})
+
+    # Duration check
+    if "duration_seconds" in metrics:
+        curr_dur = current["duration_seconds"]
+        base_dur = metrics["duration_seconds"]["mean"]
+
+        if curr_dur > base_dur * 1.5:  # 50% slower
+            regression["duration"] = {
+                "current": curr_dur,
+                "baseline": base_dur,
+                "delta_pct": ((curr_dur / base_dur) - 1) * 100
+            }
+
+    # Iteration check
+    if "iterations" in metrics:
+        curr_iter = current["iterations"]
+        base_iter = metrics["iterations"]["mean"]
+
+        if curr_iter > base_iter * 1.5:  # 50% more loops
+            regression["iterations"] = {
+                "current": curr_iter,
+                "baseline": base_iter,
+                "delta_pct": ((curr_iter / base_iter) - 1) * 100
+            }
+
+    return regression if regression else None
+
+def flag_regression(slug: str, phase: str, regression: dict):
+    """Write regression alert."""
+
+    alert_file = REPO_ROOT / "memory" / "features" / slug / "performance_alerts.json"
+
+    if alert_file.exists():
+        alerts = json.loads(alert_file.read_text())
+    else:
+        alerts = {"alerts": []}
+
+    alert = {
+        "phase": phase,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "regression": regression
+    }
+
+    alerts["alerts"].append(alert)
+
+    tmp = alert_file.with_suffix(".tmp")
+    tmp.write_text(json.dumps(alerts, indent=2))
+    tmp.replace(alert_file)
+
+    # Log to stderr (visible to user)
+    print(f"\nWARNING: Performance regression in {phase}:", file=sys.stderr)
+    if "duration" in regression:
+        print(f"   Duration: {regression['duration']['delta_pct']:.0f}% slower than baseline", file=sys.stderr)
+    if "iterations" in regression:
+        print(f"   Iterations: {regression['iterations']['delta_pct']:.0f}% more loops than baseline", file=sys.stderr)
+    print(f"   View: memory/features/{slug}/performance_alerts.json\n", file=sys.stderr)
 
 if __name__ == "__main__":
     if len(sys.argv) >= 4:
