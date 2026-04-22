@@ -197,9 +197,9 @@ Result: 60-80% cost savings vs "Opus everywhere"
 ```
 Turn-based thresholds (configurable):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🟡 25 turns  → Notice (session getting long)
-🟠 40 turns  → Auto-checkpoint saved to memory/
-⛔ 60 turns  → Auto-handoff + clear context
+🟡 15 turns  → Notice (session getting long)
+🟠 25 turns  → Auto-checkpoint saved to memory/
+⛔ 35 turns  → Auto-handoff + clear context
 ```
 
 Heavy file reads (>500KB) trigger earlier thresholds. Auto-braindump at 🟠 provides recovery point without terminating execution.
@@ -486,9 +486,9 @@ default_tier: "full" # Fallback if /navigate can't determine
 
 ```yaml
 session_budget:
-  turn_warn_yellow: 25   # First warning
-  turn_warn_orange: 40   # Auto-checkpoint (non-blocking)
-  turn_warn_red: 60      # Auto-handoff (terminates session)
+  turn_warn_yellow: 15   # First warning
+  turn_warn_orange: 25   # Auto-checkpoint (non-blocking)
+  turn_warn_red: 35      # Auto-handoff (terminates session)
 ```
 
 Adjust based on your workflow. Heavy research features may need higher limits.
@@ -505,6 +505,70 @@ Adjust based on your workflow. Heavy research features may need higher limits.
 ```
 
 Get token: https://id.atlassian.com/manage-profile/security/api-tokens
+
+---
+
+## 🤖 Autonomous Mode
+
+### What Runs Automatically (`interactive: false`)
+
+| Stage | Auto-Decides |
+|-------|-------------|
+| **/plan** | Discovery Q&A from codebase/docs, ambiguity resolution, PRD drafting, review loops (max 3) |
+| **/design** | Architecture patterns, tech stack (follows PRD Repos), TDD generation, review loops |
+| **/breakdown** | Story classification (STORY/MERGE/SPLIT), SP estimation, epic creation, Jira push |
+| **/execute** | Implementation, security scan, code review, QA tests, system review, PR creation |
+
+### When HeadMaster Stops to Ask (Confusion Clause)
+
+Even with `interactive: false`, HeadMaster stops if:
+- **Ambiguity** — two valid interpretations, wrong choice derails downstream work
+- **Contradiction** — code vs docs vs Jira disagree on a fact
+- **Missing input** — required info absent, can't infer from context
+- **Destructive action** — about to delete/overwrite something irreversible
+
+These questions are tagged `[CLARIFICATION]` — autonomous mode resumes after your answer.
+
+### Unconditional Human Gates (never skipped)
+
+1. **/breakdown Step 7** — review story list before execution starts
+2. **/execute escalation** — story failed 3x, needs human intervention
+3. **PR merge** — final approval before merging to main
+
+### Override Any Decision
+
+At any gate you can edit the artifact directly and re-run the skill:
+
+```bash
+# Edit PRD, then re-run planning
+/plan {slug}
+
+# Edit TDD, then re-run design
+/design {slug}
+
+# Edit JIRA_BREAKDOWN.md, then re-run execution
+/execute {slug}
+```
+
+HeadMaster detects the change and adapts downstream work.
+
+### Where to Find AI's Reasoning
+
+| Decision type | Location |
+|--------------|----------|
+| Discovery resolutions | `docs/features/{slug}/planning/DISCOVERY_NOTES.md` |
+| Architecture decisions (ADRs) | `docs/features/{slug}/design/SYSTEM_DESIGN_NOTES.md` |
+| Story classification rationale | `docs/features/{slug}/breakdown/JIRA_BREAKDOWN.md` |
+
+### Rollback a Gate
+
+If HeadMaster approved a gate prematurely:
+
+```bash
+python scripts/gate_transition.py {slug} rollback  # restores previous loop_state.json
+```
+
+Then re-run the skill to fix the issue.
 
 ---
 
@@ -526,7 +590,7 @@ Get token: https://id.atlassian.com/manage-profile/security/api-tokens
 ## 📚 Documentation
 
 - **`.claude/CLAUDE.md`** — System prompt + project instructions (what AI reads)
-- **`.claude/ARCHITECTURE.md`** — Model routing, memory systems, hook lifecycle
+- **`.claude/ARCHITECTURE.md`** — Model routing, memory systems, hook lifecycle (AI reference)
 - **`docs/examples/`** — Sample artifacts (PRD, reviews, reports)
 
 ---
@@ -567,9 +631,9 @@ Stop hooks use Python. Only spawn agents when judgment required.
 
 ### 4. **Progressive Checkpointing**
 ```
-🟡 25 turns → Notice (keep working)
-🟠 40 turns → Auto-checkpoint written (keep working)
-⛔ 60 turns → Auto-handoff + terminate
+🟡 15 turns → Notice (keep working)
+🟠 25 turns → Auto-checkpoint written (keep working)
+⛔ 35 turns → Auto-handoff + terminate
 ```
 
 Long-running `/execute` can complete even if session age exceeds normal threshold.
