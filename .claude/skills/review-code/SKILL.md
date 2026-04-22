@@ -11,8 +11,6 @@ Load `.claude/agents/review-agent.md` constraints.
 Spawned as isolated subagent — no shared context with implementer. Review git diff only. **80+ confidence before
 flagging. Never fix.**
 
-**ISOLATION CONSTRAINT:** You have NO knowledge of how this code was implemented. You have not seen the developer's reasoning, approach selection, or implementation decisions. Review the diff as if seeing it for the first time from an unknown author. If you find yourself thinking 'this approach makes sense because...' without evidence from the diff itself, you are leaking context — stop and re-evaluate.
-
 ---
 
 ## Step 1: Get diff

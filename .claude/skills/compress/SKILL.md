@@ -68,45 +68,20 @@ If file is in the "never compress" list → HALT, tell user why.
 ## Process
 
 ```
-1. Detect    → detect.py classifies file. Only natural_language proceeds.
-2. Scope     → check against safe scope list. Formal artifacts → HALT.
-3. Backup    → save original as <filename>.original.md
+1. Scope     → check against safe scope list. Formal artifacts → HALT.
+2. Backup    → save original as <filename>.original.md
                If backup already exists → HALT (prevent data loss)
-4. Compress  → compress.py sends content to Claude with compression rules above.
-               Model: HEAD_MASTER_COMPRESS_MODEL env var (default: claude-haiku-4-5)
-               Use haiku — compression is mechanical, not creative.
-5. Validate  → validate.py checks:
+3. Compress  → python3 scripts/compress.py (inline regex compression)
+               No API calls — preserves code/URLs/paths, drops filler/articles
+4. Validate  → Manual verification:
                - Heading count + order preserved
                - Code blocks exact
-               - URL set equal
-               - File paths preserved
-               - Bullet count drift < 20%
-6. Retry     → If validation fails: targeted fix prompt only — patch broken parts,
-               do NOT recompress full file. Up to 2 retry attempts.
-               If all retries fail → restore original, remove backup.
-7. Write     → compressed output overwrites original file path
+               - URLs preserved
+               - File paths intact
+5. Write     → compressed output overwrites original file path
 ```
 
----
-
-## Retry Strategy (token-efficient)
-
-On validation failure, send only the broken parts to Claude with targeted fix prompt — not the full file. This costs a
-fraction of a full recompress.
-
-```
-Fix prompt: "Fix only these validation errors in the compressed output:
-{specific errors}
-Do not change anything else."
-```
-
----
-
-## Requirements
-
-- Python 3.10+
-- `ANTHROPIC_API_KEY` env var (uses `anthropic` SDK) or `claude` CLI on PATH
-- Model: `HEAD_MASTER_COMPRESS_MODEL` env var (default: `claude-haiku-4-5`)
+**Note:** This uses regex-based inline compression (no LLM calls). For files needing deeper compression, manually review and edit.
 
 ---
 

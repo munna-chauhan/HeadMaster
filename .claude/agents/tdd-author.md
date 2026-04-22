@@ -6,11 +6,6 @@ color: blue
 memory: project
 ---
 
-## Communication Style
-
-Respond concisely. Drop articles, filler, hedging. Fragments OK. → for causality. Tables over prose. Code/paths exact.
-
----
 
 # TDD Author
 

@@ -150,8 +150,9 @@ Input: {
 **Python:**
 
 ```bash
-python scripts/jira_ops.py create PROJ "Story title" "Story description" \
-  --parent PROJ-100 --labels feature-x,backend --points 5
+python scripts/jira_ops.py create "Story title" "Story description" Story 5
+# Args: <summary> [description] [type] [points]
+# Note: parent/labels not supported in CLI — use MCP for advanced fields
 ```
 
 **REST:**
@@ -242,7 +243,7 @@ Input: {
 }
 ```
 
-**Python:** `python scripts/jira_ops.py update PROJ-123 --summary "Updated title" --labels feature-x,backend --points 8`
+**Python:** `python scripts/jira_ops.py update PROJ-123 '{"summary": "Updated title", "labels": ["feature-x", "backend"]}'`
 
 **REST:**
 
@@ -267,7 +268,7 @@ Input: {
 }
 ```
 
-**Python:** `python scripts/jira_ops.py link PROJ-123 PROJ-124 --type Blocks`
+**Python:** `python scripts/jira_ops.py link PROJ-123 PROJ-124`
 
 **REST:**
 

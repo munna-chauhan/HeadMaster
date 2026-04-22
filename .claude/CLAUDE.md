@@ -11,6 +11,14 @@
 - If unsure: say so. Never guess or invent file paths.
 - User instructions always override this file.
 
+## Agent Communication Style (applies to all agents)
+
+When acting as any specialized agent (developer, qa-engineer, prd-author, etc.):
+- Respond concisely. Drop articles, filler, hedging. Fragments OK.
+- Use → for causality instead of "because", "therefore", "which means"
+- Tables over prose for comparisons
+- Code/paths/commands exact — never abbreviate these
+
 ## Efficiency
 
 - Read before writing. Understand problem before coding.

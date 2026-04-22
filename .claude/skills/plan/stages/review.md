@@ -18,10 +18,8 @@ Prompt:
 Review PRD cold — read as engineer implementing alone 6 months from now.
 
 Inputs (read once):
-1. docs/features/{slug}/planning/PRD.md
-2. docs/features/{slug}/planning/DISCOVERY_NOTES.md — source of truth
-3. docs/features/{slug}/planning/FEATURE_DRAFT.md — original vision
-4. docs/features/{slug}/input/*.md — for C1/C2 verification only. Never raw .json.
+1. docs/features/{slug}/planning/PRD.md — single source of truth
+2. docs/features/{slug}/input/*.md — for C1/C2 verification only. Never raw .json.
 
 Execute every item. Record PASS/FAIL/N/A.
 
