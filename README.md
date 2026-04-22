@@ -472,6 +472,24 @@ memory/features/{slug}/
 
 ---
 
+## 📊 Performance Monitoring
+
+HeadMaster includes passive performance monitoring:
+- Tracks phase durations, loop iterations, tool usage
+- Compares to baselines, alerts on regressions  
+- Zero user friction (runs in background)
+
+**View dashboard:**
+```bash
+claude -p "/skill-monitor dashboard"
+```
+
+**Configuration:** See `config.yml` → `skill_monitoring` section.  
+**Disable:** Run `bash scripts/disable_monitoring.sh`  
+**Details:** See `docs/MONITORING_QUICK_START.md`
+
+---
+
 ## 🐛 Troubleshooting
 
 | Problem | Solution |
