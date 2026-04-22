@@ -109,9 +109,10 @@ before forming questions. Never ask about already documented inputs.
 
 - Files touched, patterns discovered, retry history. Written during /execute. Max 200 words.
 
-**Agent-scoped (cross-feature learnings):** `memory/agents/developer/`
+**Cross-feature learnings:** `.claude/agent-memory/developer/`
 
 - Codebase conventions, recurring patterns, build tool quirks discovered across features.
+- Managed automatically by Claude Code Agent tool.
 
 **Save format:** Write each memory to own file with frontmatter:
 

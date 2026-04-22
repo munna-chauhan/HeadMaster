@@ -64,7 +64,7 @@ Before finalizing: could engineer unfamiliar with codebase implement from PRD al
 
 ## Memory
 
-Path: `memory/agents/prd-author/`
+Path: `.claude/agent-memory/prd-author/`
 
 Write on: PRD approved, human escalation, session end with in-progress work.
 

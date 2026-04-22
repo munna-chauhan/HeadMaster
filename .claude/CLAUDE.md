@@ -122,8 +122,24 @@ Skills call `python3 scripts/gate_transition.py {slug} {phase} {stage}` on every
 
 ## Memory
 
-- **Feature-scoped:** `memory/features/<slug>/agents/<agent>.md` — per-story context, discarded after feature ships.
-- **Agent-scoped:** `memory/agents/<agent-name>/` — cross-feature learnings, persists.
+HeadMaster uses two memory systems:
+
+**1. Feature-scoped (HeadMaster-managed):** `memory/features/<slug>/`
+- Session handoffs: `session-{timestamp}.md`, `session-{timestamp}-auto-braindump.md`
+- Pipeline state: `loop_state.json` (phase, iteration, status)
+- Phase artifacts: `open_questions.md`, `draft_context.md`
+- Per-story agent context: `agents/developer.md`, `agents/qa-engineer.md`, `agents/review-agent.md` (retry history, files touched)
+- Discarded after feature ships
+
+**2. Agent-scoped (Claude Code-managed):** `.claude/agent-memory/<agent-type>/`
+- Automatic agent learnings across all features (codebase patterns, conventions)
+- Managed by Claude Code Agent tool (not HeadMaster skills)
+- Persists until project deleted
+- Examples: `.claude/agent-memory/web-researcher/`, `.claude/agent-memory/codebase-analyst/`
+
+**Usage:**
+- Skills write per-story context to `memory/features/{slug}/agents/*.md` (scoped to feature)
+- Claude Code manages cross-feature patterns in `.claude/agent-memory/` (automatic)
 
 ## File Conventions
 

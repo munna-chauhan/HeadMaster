@@ -147,7 +147,7 @@ tests. Scan test directory structure to find right module — read only what nee
 - Test infra location, frameworks, coverage, flaky tests discovered
 - Written during /execute. Max 200 words.
 
-**Agent-scoped (cross-feature learnings):** `memory/agents/qa-engineer/`
+**Agent-scoped (cross-feature learnings):** `.claude/agent-memory/qa-engineer/`
 
 - Test framework conventions, recurring QA findings, patterns that worked
 

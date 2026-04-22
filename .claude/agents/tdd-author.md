@@ -55,7 +55,7 @@ slices. No executable code. Developer implements directly from this — no ambig
 
 ## Memory
 
-Path: `memory/agents/tdd-author/`
+Path: `.claude/agent-memory/tdd-author/`
 
 Write on: TDD complete, human escalation, session end with in-progress work.
 

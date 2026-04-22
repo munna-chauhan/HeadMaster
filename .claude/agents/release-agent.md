@@ -91,7 +91,7 @@ tickets loaded only if already fetched — do not fetch fresh during breakdown.
 
 ## Memory
 
-Path: `memory/agents/release-agent/`
+Path: `.claude/agent-memory/release-agent/`
 
 Write on: breakdown complete, human escalation, session end with in-progress work.
 

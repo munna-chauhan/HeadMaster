@@ -88,3 +88,29 @@ See commit ae1a1c6 for migration details.
 **Trigger:** Automatic at `turn_warn_orange` (configurable in `config.yml`).
 
 Routes are recommended sequences, not prisons — any phase can be invoked standalone.
+
+---
+
+## Memory Architecture
+
+HeadMaster uses two distinct memory systems:
+
+**1. Feature-scoped (HeadMaster):** `memory/features/<slug>/`
+- **Purpose:** Session state, pipeline progress, handoffs
+- **Lifecycle:** Created during feature work, discarded after feature ships
+- **Contents:**
+  - `loop_state.json` — pipeline phase, iteration counts, complexity tier
+  - `session-{timestamp}.md` — manual handoffs via /handoff command
+  - `session-{timestamp}-auto-braindump.md` — automatic checkpoints at orange threshold
+  - `open_questions.md`, `draft_context.md` — phase-specific artifacts
+  - `agents/*.md` — per-story agent context (developer, qa-engineer, review-agent retry history)
+- **Management:** Written by HeadMaster skills, read by SessionStart hooks
+
+**2. Agent-scoped (Claude Code):** `.claude/agent-memory/<agent-type>/`
+- **Purpose:** Cross-feature learnings, codebase patterns, conventions
+- **Lifecycle:** Persists until project deleted
+- **Contents:** Automatic agent memories (codebase patterns, build quirks, conventions)
+- **Management:** Handled by Claude Code Agent tool (not HeadMaster skills)
+- **Examples:** `web-researcher/`, `codebase-analyst/`, `developer/`
+
+**Key distinction:** Feature memory is ephemeral (per-feature), agent memory is permanent (per-project).

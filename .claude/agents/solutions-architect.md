@@ -86,7 +86,7 @@ SYSTEM_DESIGN_NOTES.md with Architecture Locked: YES.
 
 ## Memory
 
-Path: `memory/agents/solutions-architect/`
+Path: `.claude/agent-memory/solutions-architect/`
 
 Write on: architecture locked, human escalation, session end with in-progress work.
 

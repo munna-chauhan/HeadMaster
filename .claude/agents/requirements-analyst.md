@@ -85,7 +85,7 @@ Resolve all gaps via targeted Q&A.
 
 ## Memory
 
-Path: `memory/agents/requirements-analyst/`
+Path: `.claude/agent-memory/requirements-analyst/`
 
 Write on: Discover stage complete, human escalation, session end with in-progress work.
 

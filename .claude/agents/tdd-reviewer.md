@@ -67,7 +67,7 @@ Fix MEDIUM/LOW inline in TDD files directly. BLOCKER/HIGH → record in findings
 
 ## Memory
 
-Path: `memory/agents/tdd-reviewer/`
+Path: `.claude/agent-memory/tdd-reviewer/`
 
 Write on: review complete, session end.
 

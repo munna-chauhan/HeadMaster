@@ -65,7 +65,7 @@ Fix MEDIUM/LOW inline in PRD.md directly. BLOCKER/HIGH → record in findings ta
 
 ## Memory
 
-Path: `memory/agents/prd-reviewer/`
+Path: `.claude/agent-memory/prd-reviewer/`
 
 Write on: review complete, session end.
 
