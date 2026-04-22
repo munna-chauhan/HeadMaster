@@ -40,10 +40,7 @@ AskUserQuestion({
 
 **Pattern:** Launch `review-agent` as isolated subagent for system-level audit. Fresh context — no per-story memory.
 
-**Before spawning — mandatory context reset:**
-```
-/handoff
-```
+**Isolation:** Do NOT load execution history into parent context. Subagent reads TDD + git diff fresh.
 
 **Spawn subagent:**
 

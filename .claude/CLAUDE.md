@@ -84,6 +84,15 @@ Tag these questions `[CLARIFICATION]` in the header. Auto-mode resumes after the
   `scripts/git_guard.py` available for `/commit` command validation.
 - Primary shell: PowerShell. Use `cmd /c "..."` only when necessary.
 
+## Permission Modes (Recommended)
+
+**For solo developer use:**
+- **Mode:** `default` (auto-approve read-only, prompt for writes)
+- **Allow list:** All `python3 scripts/*` (HeadMaster automation)
+- **Deny list:** Destructive git commands (force push, hard reset, clean)
+
+See `.claude/settings.local.json.example` for configuration template.
+
 ## Hooks & Compression
 
 Hooks fire automatically — never disable or bypass them:

@@ -12,5 +12,5 @@ default_tier: "full"  # Default complexity tier if /navigate can't determine. Op
 # Session budget thresholds (turn-based)
 session_budget:
   turn_warn_yellow: 15  # 🟡 warning threshold
-  turn_warn_orange: 25  # 🟠 warning threshold
-  turn_warn_red: 35     # ⛔ auto-handoff threshold
+  turn_warn_orange: 25  # 🟠 warning threshold + triggers auto-braindump (non-blocking)
+  turn_warn_red: 35     # ⛔ auto-handoff threshold (terminates execution)

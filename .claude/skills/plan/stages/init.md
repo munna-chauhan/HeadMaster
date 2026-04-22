@@ -67,11 +67,13 @@ Greenfield if no matches. Return: | Question | Finding | File Refs |"
 {
   "feature_slug": "{slug}",
   "complexity_tier": "{default_tier from config.yml}",
-  "current_phase": "planning",
-  "current_stage": "Init",
-  "iteration": 0,
   "blocker_history": []
 }
+```
+
+Then call gate_transition to set pipeline state:
+```bash
+python3 scripts/gate_transition.py {slug} planning Init --artifact docs/features/{slug}/planning/FEATURE_DRAFT.md
 ```
 
 **8. Move** `FEATURE_INPUT.md` → `docs/features/{slug}/input/FEATURE_INPUT.md`

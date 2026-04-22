@@ -49,7 +49,7 @@ Main agent context discipline before spawning any sub-agent:
 **Utility skills (3):** `/jira-ops`, `/draw`, `/compress`
 **Commands (4):** `/commit`, `/create-branch`, `/create-pr`, `/handoff`
 **Scripts (7):** `compress.py`, `gate_transition.py`, `failure_ledger.py`, `convergence_check.py`, `secret_scanner.py`, `jira_ops.py`, `input_extractor.py`
-**Hooks (7):** `activate.py`, `feature_context.py`, `session_reset.py`, `token_budget.py`, `read_compressor.py`, `post_tool.py`, `statusline.py`
+**Hooks (8):** `activate.py`, `feature_context.py`, `session_reset.py`, `token_budget.py`, `read_compressor.py`, `post_tool.py`, `statusline.py`, `auto_braindump.py`
 **Stop Checks (4):** `plan_stop.py`, `design_stop.py`, `breakdown_stop.py`, `execute_stop.py`
 
 ## Hook Consolidation (2026-04-21)
@@ -66,5 +66,25 @@ Merged 3 hooks (mode_tracker.py, tool_call_tracker.py, write_compressor.py) → 
 - No shared state complexity
 
 See commit ae1a1c6 for migration details.
+
+---
+
+## Auto-Braindump (2026-04-21)
+
+**Problem:** Long-running skills (`/execute` with many stories) hit ⛔ threshold mid-execution, terminating before completion.
+
+**Solution:** Progressive checkpoint at 🟠 threshold (default 25 turns):
+- `token_budget.py` triggers `auto_braindump.py` at orange
+- Writes compressed state: `memory/features/{slug}/session-{ts}-auto-braindump.md`
+- **Does NOT terminate** — execution continues
+- Provides recovery point if session crashes before completion
+
+**Benefits:**
+- Long-running features can complete even if session age exceeds normal threshold
+- Automatic recovery points every 25 turns
+- No manual `/handoff` needed during execution
+- If ⛔ hits, user has checkpoint to resume from
+
+**Trigger:** Automatic at `turn_warn_orange` (configurable in `config.yml`).
 
 Routes are recommended sequences, not prisons — any phase can be invoked standalone.

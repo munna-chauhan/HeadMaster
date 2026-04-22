@@ -2,11 +2,8 @@
 
 **Pattern:** Launch `tdd-reviewer` as isolated subagent. Fresh context — no authorship memory.
 
-**Before spawning — mandatory context reset:**
-```
-/handoff
-```
-Clears parent context accumulated during Engineer stage. Reviewer spawns clean.
+**Before spawning — isolation via Agent tool:**
+Do NOT load TDD into parent context before spawning. Subagent reads TDD fresh from disk. Isolation achieved via minimal parent prompt, not /handoff.
 
 **Note:** This review stage runs for standard and full tiers only. Lite tier skips review entirely.
 For standard tier (8 sections): items referencing S9-S11 should be marked N/A.

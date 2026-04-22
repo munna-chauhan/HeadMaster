@@ -53,6 +53,10 @@ Write `docs/features/{slug}/design/IMPLEMENTATION_BRIEF.md` directly:
 
 Gate: 5 sections present, interfaces typed. No TDD review subagent — proceed directly to breakdown.
 
+```bash
+python3 scripts/gate_transition.py {slug} design APPROVED --artifact docs/features/{slug}/design/IMPLEMENTATION_BRIEF.md
+```
+
 ### Tier: Standard (8 sections → TDD.md)
 
 1. **Architecture Overview** — pattern, tech stack per repo
@@ -64,7 +68,7 @@ Gate: 5 sections present, interfaces typed. No TDD review subagent — proceed d
 7. **Vertical Delivery Slices** — 3-5 end-to-end shippable slices
 8. **ADRs** — from SYSTEM_DESIGN_NOTES verbatim + implementation details
 
-Gate: 8 sections present, slices defined, interfaces typed.
+Gate: 8 sections present, slices defined, interfaces typed. Proceed to Review.
 
 ### Tier: Full (11 sections → TDD.md)
 
@@ -93,6 +97,6 @@ Check SYSTEM_DESIGN_NOTES S11:
 - Actual migration strategy → write `docs/features/{slug}/design/MIGRATION_PLAN.md`
 
 **Gate (per tier):**
-- Lite: 5 sections in IMPLEMENTATION_BRIEF.md → COMPLETE (skip Review, proceed to breakdown)
-- Standard: 8 sections in TDD.md → proceed to Review
-- Full: 11 sections in TDD.md → proceed to Review
+- Lite: 5 sections in IMPLEMENTATION_BRIEF.md → gate_transition to APPROVED (skip Review, proceed to breakdown)
+- Standard: 8 sections in TDD.md → proceed to Review (no gate_transition here)
+- Full: 11 sections in TDD.md → proceed to Review (no gate_transition here)

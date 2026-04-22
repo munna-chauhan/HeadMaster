@@ -5,7 +5,7 @@
 **Before spawning:**
 
 1. Write `memory/features/{slug}/draft_context.md`: tier, sections written, key decisions, open items, iteration N.
-2. `/handoff` — clear parent context.
+2. Do NOT load PRD.md into parent context before spawning (isolation via minimal parent state, not /handoff)
 
 **Output:** `docs/features/{slug}/planning/PRD_REVIEW.md`
 
@@ -35,20 +35,19 @@ A — STRUCTURE
   A6 Header uses standard PRD header table (Technical Owner, Status, Date, Approver required)
 
 B — COMPLETENESS
-  B1 Every discovery decision reflected in FRs/NFRs/constraints
-  B2 Every FEATURE_DRAFT gap addressed or deferred in Open Questions
-  B3 Every FR has ≥1 AC
-  B4 Concurrency/ordering/dedup edge case in ≥1 user story
-  B5 Failure/dependency-down scenario in NFRs or Risks
-  B6 All repos have defined role
-  B7 No open infra questions blocking implementation
+  B1 Every FR has ≥1 AC
+  B2 Concurrency/ordering/dedup edge case in ≥1 user story
+  B3 Failure/dependency-down scenario in NFRs or Risks
+  B4 All repos have defined role
+  B5 No open infra questions blocking implementation
+  B6 All external dependencies identified (APIs, services, teams)
 
-C — ACCURACY
-  C1 Version numbers match FEATURE_DRAFT + extracted input .md files
-  C2 Field names/API shapes match extracted input .md files
-  C3 Counts/limits/thresholds consistent across sections
-  C4 All [Assumption] items justified
-  C5 No internal contradictions
+C — ACCURACY (Self-Contained Validation)
+  C1 Counts/limits/thresholds consistent across sections
+  C2 All [Assumption] items justified
+  C3 No internal contradictions (between FRs, NFRs, ACs)
+  C4 Version numbers/API shapes internally consistent (no cross-file validation)
+  C5 All technical terms defined in Glossary or inline
 
 D — SELF-CONTAINEDNESS
   D1 Every FR implementable without other docs

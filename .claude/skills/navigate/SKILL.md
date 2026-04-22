@@ -27,7 +27,9 @@ Description   → New mode: classify route, generate plan, confirm with user
 
 Scan `docs/features/*/` — for each feature found:
 
-1. Detect current phase (artifact detection logic below)
+1. Detect current phase:
+   - **Primary:** Read `memory/features/{slug}/loop_state.json` → `pipeline.phase` if exists
+   - **Fallback:** Use artifact detection logic from Step 1 (line 90-104)
 2. Read `memory/features/{slug}/loop_state.json` if exists — extract loop counts + last blocker
 3. Output one row per feature
 
@@ -80,12 +82,7 @@ block first, then continue to full execution plan.
 
 If `pipeline` key exists → use it as authoritative state. Skip artifact scanning.
 
-**If resuming existing feature (not starting new):** Load phase-specific handoff context:
-```bash
-python .claude/hooks/feature_context.py
-```
-
-This loads the most recent `memory/features/{slug}/session-*.md` matching current phase. Only runs when resuming work, not on every session start (token efficiency: saves ~500-800 tokens per session when not working on features).
+**Handoff context loading (automatic):** The SessionStart hook `feature_context.py` automatically injects the most recent `memory/features/{slug}/session-*.md` matching current phase when active feature detected. Token efficiency: saves ~500-800 tokens per session when not working on features (hook exits early if no active feature).
 
 **FALLBACK (no pipeline key):** Scan `docs/features/{slug}/`:
 

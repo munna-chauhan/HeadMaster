@@ -53,6 +53,8 @@ def _load_thresholds():
     return DEFAULT_WARN_YELLOW, DEFAULT_WARN_ORANGE, DEFAULT_WARN_RED
 
 
+
+
 def load_session() -> dict:
     if SESSION_FILE.exists():
         try:
@@ -156,6 +158,22 @@ def main() -> None:
     bar = "█" * bar_filled + "░" * (20 - bar_filled)
 
     breakdown = f"reads:{reads_kb}KB tools:{session['tool_calls']}"
+
+    # Auto-braindump at orange threshold (non-blocking)
+    if turns == orange:
+        try:
+            flag_file = Path.home() / ".claude" / ".HeadMaster-active"
+            if flag_file.exists():
+                flag = json.loads(flag_file.read_text(encoding="utf-8"))
+                slug = flag.get("slug", "unknown")
+                import subprocess
+                subprocess.run(
+                    ["python", str(REPO_ROOT / ".claude" / "hooks" / "auto_braindump.py"), slug, str(turns)],
+                    capture_output=True,
+                    timeout=5
+                )
+        except Exception:
+            pass
 
     if turns >= red:
         write_auto_handoff(turns)

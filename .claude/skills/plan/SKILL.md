@@ -59,7 +59,7 @@ Nothing                                  → start Init
 ## Setup (every invocation)
 
 1. Read `config.yml` → `project_key`, `max_loops`, `interactive`. If absent → HALT.
-2. Check `memory/features/{slug}/loop_state.json` → loop count + `complexity_tier` (managed by `convergence_check.py`, never write manually)
+2. Check `memory/features/{slug}/loop_state.json` → loop count + `complexity_tier` (set by `/navigate` during classification, read-only here)
 3. Verify `.claude/workflows/complexity-tiers.yml` exists. If absent → HALT. Load tier (default: `full` → 14 sections, standard → 10, lite → 6)
 4. Detect state → load corresponding stage file
 
@@ -69,9 +69,22 @@ Nothing                                  → start Init
 
 `/plan <slug> <message>` on APPROVED PRD:
 
+**PRD = Single Source of Truth.** Edit PRD directly. Do NOT update FEATURE_DRAFT or DISCOVERY_NOTES.
+
 1. Parse intent from `<message>`
-2. Minor → edit sections directly. New requirement → add to sections. Major → re-run Discover for new questions only.
-3. Remove gate string → run Review → re-add on pass.
+2. Edit affected sections in PRD.md
+3. Add entry to "Appendix" section:
+   ```
+   ## Appendix
+   
+   ### Change Log
+   | Date | Iteration | Changes | Rationale |
+   |------|-----------|---------|-----------|
+   | {ISO-date} | {N} | {affected sections} | {why reopened} |
+   ```
+4. Remove "PRD Status: APPROVED" gate string
+5. Run Review (validates PRD self-containedness only, no cross-file checks)
+6. On pass → re-add gate string with new iteration count
 
 ---
 

@@ -36,8 +36,10 @@ Header: standard PRD header table from SKILL.md (Status: Draft).
 ### Lite (6) — sections: 1, 4, 5, 6, 9, 13
 
 **Rules:**
+- **Single source of truth:** PRD must be self-contained. No cross-references to FEATURE_DRAFT, DISCOVERY_NOTES, or input files in body.
 - No omissions (N/A + reason if empty)
-- No source annotations, no references to FEATURE_DRAFT/DISCOVERY_NOTES in PRD body
+- No source annotations ('per Jira', 'as discussed in Confluence', 'see FEATURE_DRAFT')
+- All technical terms defined in Glossary or inline
 - Diagrams only when clearer than prose:
 
 | Type           | When                       | Tool                                    |
