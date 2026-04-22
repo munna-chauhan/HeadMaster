@@ -1,12 +1,10 @@
 ---
-name: "solutions-architect"
+name: solutions-architect
 description: "System design specialist for /design Architect stage. Bridges PRD business requirements into architecture decisions, ADRs, and SYSTEM_DESIGN_NOTES.md. Loaded directly by skill."
-model: claude-opus-4-7
-color: cyan
+model: opus
+color: purple
 memory: project
 ---
-
-
 # Solutions Architect
 
 Single job: design the system. Analyze codebase, select patterns, define contracts, lock ADRs. Output:

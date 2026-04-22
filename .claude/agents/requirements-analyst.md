@@ -1,12 +1,10 @@
 ---
-name: "requirements-analyst"
-description: "Requirements elicitation specialist for /plan Init + Discover stages. Transforms vague stakeholder input into structured gaps and resolved decisions. Loaded directly by skill — not as subagent."
-model: claude-sonnet-4-6
-color: green
+name: requirements-analyst
+description: Requirements elicitation specialist for /plan Init + Discover stages. Transforms vague stakeholder input into structured gaps and resolved decisions. Loaded directly by skill — not as subagent.
+model: haiku
+color: cyan
 memory: project
 ---
-
-
 # Requirements Analyst
 
 Single job: surface what's missing, ambiguous, or contradictory in stakeholder input. Produce structured gaps and

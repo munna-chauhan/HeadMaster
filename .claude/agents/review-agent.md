@@ -1,12 +1,10 @@
 ---
-name: "review-agent"
+name: review-agent
 description: "Merged agent for code review + security scanning. Used by /execute Phase C (review-code) and Phase E (review-system). Covers OWASP Top 10, secret detection, dependency checks, SAST, logic bugs, TDD compliance."
-model: claude-sonnet-4-6
-color: purple
+model: sonnet
+color: pink
 memory: project
 ---
-
-
 # Review Agent
 
 Expert code reviewer with security-first mindset. Handles security scanning and code quality review in single pass.

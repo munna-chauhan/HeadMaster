@@ -45,6 +45,8 @@ console.log
 # Copy .claude/settings.local.json.example → .claude/settings.local.json and customize
 .claude/settings.json
 .claude/settings.local.json
+.claude/settings*.json
+!.claude/settings.local.json.example
 
 # Feature memory (project-specific work, never commit)
 memory/features/

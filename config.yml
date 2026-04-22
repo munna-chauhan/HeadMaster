@@ -3,7 +3,7 @@
 # Credentials stay in env vars: ATLASSIAN_DOMAIN, JIRA_USER_EMAIL, JIRA_API_TOKEN
 
 project_key: "PWRE"  # Jira project key (e.g. PWRE, PROJ). Leave empty if no Jira.
-jira_push: flase      # true = push stories to Jira after human approval. Requires env vars: JIRA_USER_EMAIL, JIRA_API_TOKEN, ATLASSIAN_DOMAIN
+jira_push: false      # true = push stories to Jira after human approval. Requires env vars: JIRA_USER_EMAIL, JIRA_API_TOKEN, ATLASSIAN_DOMAIN
 max_loops: 3         # Max review iterations before human escalation
 parallel: false      # true = run independent stories simultaneously
 interactive: true   # true = ask user at decision points. false = auto-select, log rationale, only ask for ambiguity/contradictions/destructive actions.
@@ -11,6 +11,6 @@ default_tier: "full"  # Default complexity tier if /navigate can't determine. Op
 
 # Session budget thresholds (turn-based)
 session_budget:
-  turn_warn_yellow: 10  # 🟡 warning threshold
-  turn_warn_orange: 20  # 🟠 warning threshold + triggers auto-braindump (non-blocking)
-  turn_warn_red: 30     # ⛔ auto-handoff threshold (terminates execution)
+  turn_warn_yellow: 15  # 🟡 warning threshold
+  turn_warn_orange: 25  # 🟠 warning threshold + triggers auto-braindump (non-blocking)
+  turn_warn_red: 35     # ⛔ auto-handoff threshold (terminates execution)

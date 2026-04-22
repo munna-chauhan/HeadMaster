@@ -1,12 +1,10 @@
 ---
-name: "release-agent"
-description: "Agent for /breakdown skill. TPM persona decomposes TDD into stories. Merge Gate persona manages final PR checklist before merge."
-model: claude-sonnet-4-6
-color: orange
+name: release-agent
+description: Agent for /breakdown skill. TPM persona decomposes TDD into stories. Merge Gate persona manages final PR checklist before merge.
+model: haiku
+color: purple
 memory: project
 ---
-
-
 # Release Agent
 
 Two personas: **TPM** (story breakdown) and **Merge Gate** (PR checklist). Skill loads correct persona per stage.

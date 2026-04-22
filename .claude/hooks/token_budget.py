@@ -114,6 +114,22 @@ def write_auto_handoff(turns: int) -> None:
         pass
 
 
+def _check_hook_failures() -> str:
+    """Check if hook errors logged this session. Return warning string or empty."""
+    try:
+        log_file = Path.home() / "memory" / "hook-errors.log"
+        if not log_file.exists():
+            return ""
+
+        # Check last 10 lines for recent errors (rough heuristic)
+        lines = log_file.read_text(encoding="utf-8").strip().split("\n")
+        if len(lines) > 0 and lines[-1]:  # Has recent content
+            return "\n⚠️ Hook failures logged. Check ~/memory/hook-errors.log"
+        return ""
+    except Exception:
+        return ""
+
+
 def main() -> None:
     payload = {}
     try:
@@ -158,6 +174,7 @@ def main() -> None:
     bar = "█" * bar_filled + "░" * (20 - bar_filled)
 
     breakdown = f"reads:{reads_kb}KB tools:{session['tool_calls']}"
+    hook_warning = _check_hook_failures()
 
     # Auto-braindump at orange threshold (non-blocking)
     if turns == orange:
@@ -167,13 +184,19 @@ def main() -> None:
                 flag = json.loads(flag_file.read_text(encoding="utf-8"))
                 slug = flag.get("slug", "unknown")
                 import subprocess
-                subprocess.run(
+                result = subprocess.run(
                     ["python", str(REPO_ROOT / ".claude" / "hooks" / "auto_braindump.py"), slug, str(turns)],
                     capture_output=True,
                     timeout=5
                 )
-        except Exception:
-            pass
+                if result.returncode != 0:
+                    _log = Path.home() / "memory" / "hook-errors.log"
+                    with open(_log, "a") as _f:
+                        _f.write(f"{datetime.now(timezone.utc).isoformat()} auto_braindump: exit_code={result.returncode} stderr={result.stderr.decode('utf-8', errors='ignore')[:200]}\n")
+        except Exception as e:
+            _log = Path.home() / "memory" / "hook-errors.log"
+            with open(_log, "a") as _f:
+                _f.write(f"{datetime.now(timezone.utc).isoformat()} auto_braindump: {type(e).__name__}: {e}\n")
 
     if turns >= red:
         write_auto_handoff(turns)
@@ -184,7 +207,7 @@ def main() -> None:
 ⛔ SESSION AGE EXCEEDED — {turns} turns ({breakdown})
 [{bar}] {turns} / {red} turns
 
-Auto-handoff written to memory/. Run /handoff then start new session.
+Auto-handoff written to memory/. Run /handoff then start new session.{hook_warning}
 """
             }
         }
@@ -196,7 +219,7 @@ Auto-handoff written to memory/. Run /handoff then start new session.
 🟠 SESSION AGE WARNING — {turns} turns ({breakdown})
 [{bar}] {turns} / {red} turns
 
-Approaching limit. Run /handoff soon.
+Approaching limit. Run /handoff soon.{hook_warning}
 """
             }
         }
@@ -206,7 +229,7 @@ Approaching limit. Run /handoff soon.
                 "hookEventName": "UserPromptSubmit",
                 "additionalContext": f"""
 🟡 SESSION AGE NOTICE — {turns} turns ({breakdown})
-[{bar}] {turns} / {red} turns
+[{bar}] {turns} / {red} turns{hook_warning}
 """
             }
         }

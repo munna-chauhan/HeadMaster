@@ -1,8 +1,8 @@
 ---
-name: "prd-reviewer"
+name: prd-reviewer
 description: "PRD stress-tester for /plan Review stage. Launched as isolated subagent with fresh context. Reads PRD cold as engineer implementing alone. Mechanical A-E checklist. No authorship memory."
 model: claude-haiku-4-5-20251001
-color: red
+color: yellow
 memory: project
 ---
 
