@@ -1,0 +1,157 @@
+{
+  "cleanupPeriodDays": 60,
+  "attribution": {
+    "commit": "Co-Authored-By: HeadMaster ADLC <noreply@headmaster.dev>"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(git fetch *)",
+      "Bash(git stash *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git merge *)",
+      "Bash(git push *)",
+      "Bash(git remote *)",
+      "Bash(git rev-parse *)",
+      "Bash(git show-ref *)",
+      "Bash(git ls-files *)",
+      "Bash(git config *)",
+      "Bash(git pull *)",
+      "Bash(git check-ignore *)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(python scripts/*)",
+      "Bash(python .claude/hooks/*)",
+      "Bash(grep *)",
+      "Bash(awk *)",
+      "Bash(start *)",
+      "Bash(mvn *)",
+      "Bash(./mvnw *)",
+      "Bash(./gradlew *)",
+      "Bash(gradle *)",
+      "Bash(java *)",
+      "Bash(javac *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(yarn *)",
+      "Bash(chmod *)",
+      "Bash(mkdir *)",
+      "Bash(find *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(touch *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(sed *)",
+      "Bash(curl https://api.atlassian.net *)",
+      "Bash(which *)",
+      "Bash(echo *)",
+      "Write(../<project-repo>/**)",
+      "mcp__atlassian__confluence_search",
+      "mcp__atlassian__confluence_get_page",
+      "mcp__atlassian__jira_get_issue",
+      "mcp__atlassian__jira_create_issue",
+      "mcp__atlassian__jira_update_issue",
+      "mcp__atlassian__jira_add_comment",
+      "mcp__atlassian__jira_transition_issue",
+      "mcp__atlassian__jira_search_issues",
+      "mcp__atlassian__jira_create_issue_link",
+      "mcp__atlassian__jira_get_transitions",
+      "mcp__atlassian__jira_search_fields",
+      "Write(docs/features/**)",
+      "Write(memory/features/**)",
+      "Skill(*)"
+    ],
+    "deny": [
+      "Bash(git push * --force *)",
+      "Bash(git push * -f *)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean *)",
+      "Write(.claude/settings.json)",
+      "Write(.claude/settings.local.json)",
+      "Write(../<project-repo>/**/.env*)",
+      "Write(../<project-repo>/**/secrets.*)",
+      "Write(../<project-repo>/**/application-prod.*)"
+    ],
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "../<project-repo>"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/activate.py",
+            "statusMessage": "Loading project status..."
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/feature_context.py",
+            "statusMessage": "Loading active feature context..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/write_guard.py",
+            "statusMessage": "Checking for secrets..."
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/pre_spawn_validation.py",
+            "statusMessage": "Validating subagent isolation..."
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/subagent_stop.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/session_end.py",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": []
+  },
+  "effortLevel": "medium",
+  "fastModePerSessionOptIn": true,
+  "autoMemoryEnabled": false
+}

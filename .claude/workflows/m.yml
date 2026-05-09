@@ -1,0 +1,115 @@
+# Tier: M — Medium
+# Multi-story feature, moderate design complexity.
+# Load: agents/skills read this file when loop_state.json tier = "m"
+
+description: Medium — multi-story feature, moderate design complexity
+signals:
+  estimated_stories: 5-8
+  estimated_sp: 13-21
+  repos: 1-2
+  design_complexity: medium-high
+  examples:
+    - new cross-service integration
+    - moderate refactoring with new patterns
+    - feature spanning 2 repos
+
+stages:
+  feature_draft:
+    status: required
+    agent: requirements-analyst
+    artifact: FEATURE_DRAFT.md
+    gate: "≥3 gaps, ≥2 open questions"
+
+  discovery:
+    status: required
+    agent: requirements-analyst
+    artifact: DISCOVERY_NOTES.md
+    gate: "All Questions Resolved: YES"
+
+  prd:
+    status: required
+    agent: prd-author
+    artifact: PRD.md
+    typical_sections: 12  # Guidance, not enforcement
+    sections:
+      - Executive Summary
+      - Background & Business Context
+      - Goals & Success Metrics
+      - Functional Requirements
+      - Non-Functional Requirements
+      - User Stories
+      - Assumptions & Constraints
+      - Dependencies
+      - Out of Scope
+      - Risks & Mitigations
+      - Repos
+      - Acceptance Criteria
+    gate: "All necessary sections present, metrics quantified"
+
+  prd_review:
+    status: optional
+    agent: prd-reviewer
+    artifact: PRD_REVIEW.md
+    gate: "0 BLOCKERs"
+
+  system_design:
+    status: optional
+    agent: solutions-architect
+    artifact: SYSTEM_DESIGN_NOTES.md
+    gate: "Architecture Locked: YES"
+
+  tdd:
+    status: required
+    agent: tdd-author
+    artifact: TDD.md
+    sections:
+      - Architecture Overview
+      - Domain & Module Structure
+      - Data Models & Contracts
+      - Component Design & Command Lifecycle
+      - Error Handling & Resilience
+      - Observability & Configuration
+      - Testing Strategy
+      - Vertical Delivery Slices
+      - ADRs
+      - Resource Requirements
+    gate: "10 sections present, slices defined, errors enumerated"
+
+  tdd_review:
+    status: required
+    agent: tdd-reviewer
+    artifact: TDD_REVIEW.md
+    gate: "0 BLOCKERs"
+
+  breakdown:
+    status: required
+    agent: release-agent
+    artifact: JIRA_BREAKDOWN.md
+    gate: human approval (unconditional)
+
+  execute:
+    status: required
+    agents: [developer, review-agent, qa-engineer]
+    phases: [implement, security-scan, review-code, qa-integration, review-system]
+    gate: all stories COMPLETE + system review PASS
+
+  system_review:
+    status: required
+    agent: review-agent
+    artifact: system-review.md
+    gate: 0 critical/high findings
+
+  merge_gate:
+    status: required
+    agent: release-agent
+    gate: human approval (unconditional)
+
+branches:
+  base: main or epic/{EPIC-KEY}
+  feature: feature/{slug}
+  stories: story/{STORY-KEY}
+  merge: story → feature (direct), feature → main (PR)
+
+escalation_thresholds:
+  story_count: 10
+  story_points: 21

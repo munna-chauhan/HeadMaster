@@ -1,0 +1,72 @@
+# Tier Classification
+# How to determine tier from input. Two paths: user declares or AI classifies.
+# Load: skill reads this when tier not yet set in loop_state.json.
+
+# Path 1: User declares
+user_declared:
+  behavior: Use declared tier directly. Log to run-log.md.
+  override: User can change tier at any time via /navigate {slug} --tier {new}
+  note: User-declared tier is still subject to re-classification checks.
+
+# Path 2: AI classifies from input
+ai_classification:
+
+  # Deterministic signals (fast, rule-based)
+  deterministic_signals:
+    - signal: jira_story_count
+      rules:
+        - "1-2 → xs"
+        - "3-5 → s"
+        - "5-8 → m"
+        - "9+ → l"
+
+    - signal: repo_count
+      rules:
+        - "1 → xs or s"
+        - "2 → m"
+        - "3+ → l"
+
+    - signal: story_points_total
+      rules:
+        - "1-5 → xs"
+        - "6-15 → s"
+        - "13-21 → m"
+        - "22+ → l"
+
+  # AI judgment signals (contextual, from feature description)
+  ai_judgment_signals:
+    - signal: design_complexity
+      rules:
+        - "extends existing pattern, no new integrations → xs/s"
+        - "new integration or new pattern in existing service → s/m"
+        - "new cross-service integration or moderate refactoring → m"
+        - "new service, migration, cross-cutting concern → l"
+
+    - signal: breaking_changes
+      rules:
+        - "no breaking changes → no escalation"
+        - "breaking changes present → escalate one tier minimum"
+
+    - signal: input_completeness
+      rules:
+        - "Jira ticket with ACs + dev notes → may skip discovery/PRD"
+        - "2-3 sentence description → needs full discovery"
+        - "Detailed feature spec → may skip discovery"
+
+  # Algorithm
+  algorithm: |
+    1. Check deterministic signals first (story count, repo count, SP)
+    2. Take the HIGHEST tier suggested by any deterministic signal
+    3. Apply AI judgment to adjust:
+       - design_complexity suggests higher → escalate
+       - breaking_changes present → escalate one tier minimum
+       - input_completeness high → may allow stage skips within tier
+    4. Propose tier with reasoning
+    5. Supervised mode: wait for user confirmation
+    6. Autonomous mode: use proposed tier, log reasoning to run-log.md
+
+  # Confidence
+  confidence:
+    high: All signals agree → auto-assign (autonomous) or propose (supervised)
+    medium: Signals disagree by 1 tier → propose higher with explanation
+    low: Signals disagree by 2+ tiers → always ask user regardless of mode

@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "atlassian": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@xuandev/atlassian-mcp"
+      ],
+      "env": {
+        "ATLASSIAN_DOMAIN": "${ATLASSIAN_DOMAIN}",
+        "ATLASSIAN_EMAIL": "${JIRA_USER_EMAIL}",
+        "ATLASSIAN_API_TOKEN": "${JIRA_API_TOKEN}"
+      }
+    },
+    "drawio": {
+      "command": "npx",
+      "args": [
+        "@drawio/mcp"
+      ]
+    }
+  }
+}

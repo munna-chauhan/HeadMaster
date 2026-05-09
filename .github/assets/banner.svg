@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-label="HeadMaster - AI-Driven Software Delivery Pipeline">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0c29"/>
+      <stop offset="50%" stop-color="#302b63"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#06B6D4" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="300" rx="12" fill="url(#bg)"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.035" stroke="#fff" stroke-width="0.5">
+    <line x1="0" y1="50" x2="1200" y2="50"/>
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="150" x2="1200" y2="150"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="250" x2="1200" y2="250"/>
+    <line x1="100" y1="0" x2="100" y2="300"/>
+    <line x1="200" y1="0" x2="200" y2="300"/>
+    <line x1="300" y1="0" x2="300" y2="300"/>
+    <line x1="400" y1="0" x2="400" y2="300"/>
+    <line x1="500" y1="0" x2="500" y2="300"/>
+    <line x1="600" y1="0" x2="600" y2="300"/>
+    <line x1="700" y1="0" x2="700" y2="300"/>
+    <line x1="800" y1="0" x2="800" y2="300"/>
+    <line x1="900" y1="0" x2="900" y2="300"/>
+    <line x1="1000" y1="0" x2="1000" y2="300"/>
+    <line x1="1100" y1="0" x2="1100" y2="300"/>
+  </g>
+
+  <!-- Top accent bar -->
+  <rect x="0" y="0" width="1200" height="4" rx="2" fill="url(#accent)"/>
+
+  <!-- Bottom glow line -->
+  <rect x="150" y="282" width="900" height="1" fill="url(#glow)" rx="1"/>
+
+  <!-- Decorative orbs -->
+  <circle cx="120" cy="80" r="50" fill="#7C3AED" opacity="0.04"/>
+  <circle cx="1080" cy="200" r="65" fill="#06B6D4" opacity="0.035"/>
+  <circle cx="200" cy="230" r="30" fill="#818cf8" opacity="0.035"/>
+  <circle cx="980" cy="60" r="35" fill="#a78bfa" opacity="0.035"/>
+  <circle cx="600" cy="150" r="120" fill="#7C3AED" opacity="0.015"/>
+
+  <!-- Graduation cap icon -->
+  <g transform="translate(510, 30)">
+    <!-- Cap top diamond -->
+    <polygon points="90,12 18,48 90,84 162,48" fill="url(#accent)" opacity="0.85"/>
+    <!-- Cap body -->
+    <polygon points="90,84 42,60 42,88 90,114 138,88 138,60" fill="url(#accent)" opacity="0.55"/>
+    <!-- Tassel pole -->
+    <rect x="148" y="48" width="4" height="50" rx="2" fill="#06B6D4" opacity="0.7"/>
+    <!-- Tassel ball -->
+    <circle cx="150" cy="100" r="6" fill="#06B6D4" opacity="0.7"/>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="190" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="58" font-weight="700" fill="#ffffff" letter-spacing="5">HeadMaster</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="225" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="16" fill="#a5b4fc" letter-spacing="8" opacity="0.85">AI-DRIVEN SOFTWARE DELIVERY PIPELINE</text>
+
+  <!-- Pipeline flow boxes -->
+  <g transform="translate(168, 248)">
+    <!-- init -->
+    <rect x="0" y="0" width="72" height="28" rx="6" fill="#06B6D4" opacity="0.12" stroke="#06B6D4" stroke-width="0.8" stroke-opacity="0.35"/>
+    <text x="36" y="19" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12" fill="#06B6D4" opacity="0.8">init</text>
+
+    <!-- arrow -->
+    <line x1="80" y1="14" x2="102" y2="14" stroke="#4b5563" stroke-width="1" opacity="0.35"/>
+    <polygon points="100,10 106,14 100,18" fill="#4b5563" opacity="0.4"/>
+
+    <!-- plan -->
+    <rect x="110" y="0" width="68" height="28" rx="6" fill="#818cf8" opacity="0.12" stroke="#818cf8" stroke-width="0.8" stroke-opacity="0.35"/>
+    <text x="144" y="19" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12" fill="#818cf8" opacity="0.8">plan</text>
+
+    <!-- arrow -->
+    <line x1="186" y1="14" x2="208" y2="14" stroke="#4b5563" stroke-width="1" opacity="0.35"/>
+    <polygon points="206,10 212,14 206,18" fill="#4b5563" opacity="0.4"/>
+
+    <!-- design -->
+    <rect x="216" y="0" width="88" height="28" rx="6" fill="#a78bfa" opacity="0.12" stroke="#a78bfa" stroke-width="0.8" stroke-opacity="0.35"/>
+    <text x="260" y="19" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12" fill="#a78bfa" opacity="0.8">design</text>
+
+    <!-- arrow -->
+    <line x1="312" y1="14" x2="334" y2="14" stroke="#4b5563" stroke-width="1" opacity="0.35"/>
+    <polygon points="332,10 338,14 332,18" fill="#4b5563" opacity="0.4"/>
+
+    <!-- breakdown -->
+    <rect x="342" y="0" width="112" height="28" rx="6" fill="#c084fc" opacity="0.12" stroke="#c084fc" stroke-width="0.8" stroke-opacity="0.35"/>
+    <text x="398" y="19" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12" fill="#c084fc" opacity="0.8">breakdown</text>
+
+    <!-- arrow -->
+    <line x1="462" y1="14" x2="484" y2="14" stroke="#4b5563" stroke-width="1" opacity="0.35"/>
+    <polygon points="482,10 488,14 482,18" fill="#4b5563" opacity="0.4"/>
+
+    <!-- execute -->
+    <rect x="492" y="0" width="92" height="28" rx="6" fill="#e879f9" opacity="0.12" stroke="#e879f9" stroke-width="0.8" stroke-opacity="0.35"/>
+    <text x="538" y="19" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12" fill="#e879f9" opacity="0.8">execute</text>
+
+    <!-- arrow -->
+    <line x1="592" y1="14" x2="614" y2="14" stroke="#4b5563" stroke-width="1" opacity="0.35"/>
+    <polygon points="612,10 618,14 612,18" fill="#4b5563" opacity="0.4"/>
+
+    <!-- review -->
+    <rect x="622" y="0" width="82" height="28" rx="6" fill="#22d3ee" opacity="0.12" stroke="#22d3ee" stroke-width="0.8" stroke-opacity="0.35"/>
+    <text x="663" y="19" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="12" fill="#22d3ee" opacity="0.8">review</text>
+
+    <!-- arrow -->
+    <line x1="712" y1="14" x2="734" y2="14" stroke="#4b5563" stroke-width="1" opacity="0.35"/>
+    <polygon points="732,10 738,14 732,18" fill="#4b5563" opacity="0.4"/>
+
+    <!-- PR (highlighted) -->
+    <rect x="742" y="0" width="55" height="28" rx="6" fill="#22d3ee" opacity="0.2" stroke="#22d3ee" stroke-width="1.2" stroke-opacity="0.6"/>
+    <text x="769" y="19" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="13" fill="#22d3ee" font-weight="700">PR</text>
+  </g>
+</svg>

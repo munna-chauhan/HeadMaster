@@ -1,0 +1,70 @@
+{
+  "$schema": "loop_state",
+  "$location": "memory/features/{project}/{slug}/loop_state.json",
+  "$created_by": "init-feature",
+  "$updated_by": "gate_transition.py (file-locked, atomic)",
+  "$validated_by": "validate_loop_state.py (on SessionStart)",
+
+  "feature_slug": "string",
+  "route": "spike | hotfix | feature | epic",
+  "complexity_tier": "xs | s | m | l | null",
+  "workflow": "research | xs | s | m | l",
+  "pipeline_mode": "full | skip-plan | skip-to-execute | plan-only",
+  "technical_owner": "string",
+  "approver": "string",
+
+  "tier_classification": {
+    "$comment": "null for spikes. Populated by init-feature Step 4.",
+    "method": "user_declared | ai_classification",
+    "confidence": "HIGH | MEDIUM | LOW",
+    "signals": {},
+    "reasoning": "string",
+    "timestamp": "ISO-date"
+  },
+
+  "research_questions": ["spike only"],
+  "blocker_history": [],
+
+  "pipeline": {
+    "$comment": "Absent until first gate transition.",
+    "phase": "planning | design | breakdown | execute",
+    "stage": "string",
+    "gate_passed": "ISO-date",
+    "artifact": "path",
+    "parallel": false
+  },
+
+  "released_sections": {
+    "$comment": "Absent until first partial breakdown. Authoritative record alongside TDD_MASTER.md.",
+    "TDD_{NAME}": {
+      "breakdown_file": "breakdown/JIRA_BREAKDOWN_{NAME}.md",
+      "released_date": "ISO-date",
+      "stories": "N (int)",
+      "sp": "N (int)"
+    }
+  },
+
+  "stories": {
+    "$comment": "Absent until breakdown. Updated by execute.",
+    "STORY-KEY": {
+      "status": "NEW | IN_PROGRESS | IN_REVIEW | IN_QA | COMPLETE | FAILED | BLOCKED | DEFERRED",
+      "phases_completed": ["A", "B", "C", "D", "E"],
+      "design_section": "string | null"
+    }
+  },
+
+  "last_updated": "ISO-date",
+
+  "$rules": {
+    "immutable_after_init": ["route", "workflow"],
+    "null_for_spikes": ["complexity_tier", "tier_classification"],
+    "released_sections_tracking": "loop_state.json released_sections key (written by gate_transition.py released-section). Authoritative alongside TDD_MASTER.md.",
+    "parallel_story_execution": "Enabled by config.yml pipeline.parallel: true. Controlled by human — never fires autonomously.",
+    "route_workflow_map": {
+      "spike": { "workflow": "research", "tier": null, "pipeline_mode": "plan-only" },
+      "hotfix": { "workflow": "{tier}", "tier": "required", "pipeline_mode": "full | skip-plan | skip-to-execute" },
+      "feature": { "workflow": "{tier}", "tier": "required", "pipeline_mode": "full | skip-plan | skip-to-execute" },
+      "epic": { "workflow": "{tier}", "tier": "required", "pipeline_mode": "full | skip-plan" }
+    }
+  }
+}

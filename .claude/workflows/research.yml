@@ -1,0 +1,68 @@
+# Workflow: Research / Spike
+# Analysis-only. Deliverable = knowledge, not code.
+# Load: agents/skills read this file when loop_state.json route = "spike"
+# Tier: not assigned at init. May be recommended at end as future effort estimate.
+
+description: Research / Spike — investigate, analyze, produce findings. No code delivery.
+signals:
+  # No tier signals — type alone drives this workflow.
+  # Tier may be recommended in RESEARCH_REPORT.md as estimated effort for follow-up work.
+  examples:
+    - investigate feasibility of migration
+    - analyze codebase for refactoring scope
+    - spike on new integration approach
+    - research library/framework options
+    - map dependencies across services
+    - understand existing data flow before designing change
+
+stages:
+  feature_draft:
+    status: required
+    agent: requirements-analyst
+    artifact: FEATURE_DRAFT.md
+    codebase_scan: deep
+    gate: "≥3 gaps, ≥2 open questions"
+
+  discovery:
+    status: required
+    agent: requirements-analyst
+    artifact: DISCOVERY_NOTES.md
+    gate: "All Questions Resolved: YES"
+
+  research_report:
+    status: required
+    agent: prd-author
+    artifact: RESEARCH_REPORT.md
+    sections:
+      - Executive Summary
+      - Research Questions
+      - Methodology (what was analyzed, how)
+      - Findings
+      - Codebase Analysis (deep scan results)
+      - Risks & Concerns
+      - Recommendations
+      - Estimated Effort (proposed tier + reasoning)
+      - Next Steps
+    gate: "All research questions answered, effort estimated"
+
+  # Everything below is skipped — research produces knowledge, not code.
+  prd:
+    status: skip
+  prd_review:
+    status: skip
+  system_design:
+    status: skip
+  tdd:
+    status: skip
+  tdd_review:
+    status: skip
+  breakdown:
+    status: skip
+  execute:
+    status: skip
+  system_review:
+    status: skip
+  merge_gate:
+    status: skip
+
+branches: null  # No code branches — analysis only.

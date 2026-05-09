@@ -1,0 +1,75 @@
+# Environment configuration
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.iml
+
+# Logs
+.claude/logs/
+console.log
+
+# Claude Code settings: settings.json is committed (shared), settings.local.json is machine-specific
+.claude/settings.local.json
+
+# HeadMaster config (user-specific, not shared)
+# Copy config.yml.sample → config.yml and customize
+config.yml
+
+# Feature memory (project-specific work, never commit)
+memory/
+
+# Project-specific features (project-specific work, never commit)
+docs/
+
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Binary artifacts
+*.pdf
+.security-test/
+.security/
+.remember/logs/

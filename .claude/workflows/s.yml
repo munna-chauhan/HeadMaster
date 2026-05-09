@@ -1,0 +1,106 @@
+# Tier: S — Standard
+# Small feature, known patterns, some design needed.
+# Load: agents/skills read this file when loop_state.json tier = "s"
+
+description: Standard — small feature, known patterns, some design needed
+signals:
+  estimated_stories: 3-5
+  estimated_sp: 6-15
+  repos: 1-2
+  design_complexity: medium
+  examples:
+    - new API endpoint following existing patterns
+    - add feature to existing service
+    - integration with known external system
+
+stages:
+  feature_draft:
+    status: required
+    agent: requirements-analyst
+    artifact: FEATURE_DRAFT.md
+    gate: "≥3 gaps, ≥2 open questions"
+
+  discovery:
+    status: optional
+    agent: requirements-analyst
+    artifact: DISCOVERY_NOTES.md
+    gate: "All Questions Resolved: YES"
+
+  prd:
+    status: required
+    agent: prd-author
+    artifact: PRD.md
+    typical_sections: 10  # Guidance, not enforcement
+    sections:
+      - Executive Summary
+      - Background & Business Context
+      - Functional Requirements
+      - Non-Functional Requirements
+      - User Stories
+      - Assumptions & Constraints
+      - Dependencies
+      - Out of Scope
+      - Risks & Mitigations
+      - Acceptance Criteria
+    gate: "All necessary sections present, metrics quantified, ACs testable"
+
+  prd_review:
+    status: skip
+
+  system_design:
+    status: skip
+
+  tdd:
+    status: required
+    agent: tdd-author
+    artifact: TDD.md
+    sections:
+      - Architecture Overview
+      - Domain & Module Structure
+      - Data Models & Contracts
+      - Component Design & Command Lifecycle
+      - Error Handling & Resilience
+      - Testing Strategy
+      - Vertical Delivery Slices
+      - ADRs
+    gate: "8 sections present, slices defined, interfaces typed"
+
+  tdd_review:
+    status: optional
+    agent: tdd-reviewer
+    artifact: TDD_REVIEW.md
+    gate: "0 BLOCKERs"
+
+  breakdown:
+    status: required
+    agent: release-agent
+    artifact: JIRA_BREAKDOWN.md
+    gate: human approval (unconditional)
+
+  execute:
+    status: required
+    agents: [developer, review-agent, qa-engineer]
+    phases: [implement, security-scan, review-code, qa-integration]
+    gate: all stories COMPLETE
+
+  system_review:
+    status: optional
+    agent: review-agent
+    artifact: system-review.md
+    gate: 0 critical/high findings
+
+  merge_gate:
+    status: required
+    agent: release-agent
+    gate: human approval (unconditional)
+
+branches:
+  base: main or epic/{EPIC-KEY}
+  feature: feature/{slug}
+  stories: story/{STORY-KEY}
+  merge: story → feature (direct), feature → main (PR)
+
+escalation_thresholds:
+  story_count: 5
+  story_points: 13
+  breaking_changes: true

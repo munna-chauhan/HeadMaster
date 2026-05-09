@@ -1,0 +1,80 @@
+# Tier: XS — Extra-small
+# Trivial change, bug fix, config, single file.
+# Load: agents/skills read this file when loop_state.json tier = "xs"
+
+description: Extra-small — trivial change, bug fix, config, single file
+signals:
+  estimated_stories: 1-2
+  estimated_sp: 1-5
+  repos: 1
+  design_complexity: low
+  examples:
+    - typo fix
+    - config change
+    - small bug fix with Jira ticket
+    - single-file feature in known pattern
+
+# Legend: required | optional | skip
+stages:
+  feature_draft:
+    status: optional
+    agent: requirements-analyst
+    artifact: FEATURE_DRAFT.md
+    gate: null
+
+  discovery:
+    status: skip
+
+  prd:
+    status: skip
+
+  prd_review:
+    status: skip
+
+  system_design:
+    status: skip
+
+  tdd:
+    status: optional
+    agent: tdd-author
+    artifact: IMPLEMENTATION_BRIEF.md
+    sections:
+      - Scope & Approach
+      - Data Models & Contracts
+      - Component Changes
+      - Testing Strategy
+      - Delivery Slice
+    gate: "5 sections present, interfaces typed"
+
+  tdd_review:
+    status: skip
+
+  breakdown:
+    status: optional
+    agent: release-agent
+    artifact: JIRA_BREAKDOWN.md
+    gate: human approval (unconditional if produced)
+
+  execute:
+    status: required
+    agents: [developer, review-agent, qa-engineer]
+    phases: [implement, security-scan, review-code, qa-integration]
+    gate: all ACs pass, build green
+
+  system_review:
+    status: skip
+
+  merge_gate:
+    status: optional
+    agent: release-agent
+    gate: human approval
+
+branches:
+  base: feature/{slug} or main
+  story: story/{STORY-KEY}
+  merge: story → feature (direct) or story → main (PR if protected)
+
+escalation_thresholds:
+  story_count: 2
+  story_points: 5
+  breaking_changes: true

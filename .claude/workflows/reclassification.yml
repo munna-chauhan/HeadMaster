@@ -1,0 +1,145 @@
+# Tier Re-classification
+# When and how tier changes mid-pipeline. Escalation (up) and downgrade (down).
+# Load: skill reads this at re-classification checkpoints (after plan, after design, after breakdown).
+
+checkpoints:
+  - after: plan
+    trigger: PRD reveals complexity not visible in initial input
+    evidence:
+      escalate:
+        - "PRD has >N user stories for current tier"
+        - "PRD identifies breaking changes not in original input"
+        - "PRD identifies new repo/service not in original scope"
+        - "Discovery found >3 P0 gaps requiring architectural decisions"
+      downgrade:
+        - "PRD is simpler than expected — fewer stories, single repo"
+        - "All gaps resolved trivially — no architectural decisions needed"
+
+  - after: design
+    trigger: TDD reveals complexity not visible in PRD
+    evidence:
+      escalate:
+        - "TDD slices exceed tier threshold"
+        - "SYSTEM_DESIGN_NOTES identifies new integration points"
+        - "TDD requires multi-repo split not anticipated"
+      downgrade:
+        - "TDD is simpler than PRD suggested — fewer slices, simpler contracts"
+
+  - after: breakdown
+    trigger: Story count/SP exceeds tier thresholds
+    evidence:
+      escalate:
+        - "Story count > tier escalation_threshold"
+        - "Total SP > tier escalation_threshold"
+        - "Breaking changes detected in stories"
+      # No downgrade at breakdown — too late, stories already scoped
+
+on_escalate:
+  behavior: |
+    1. Log re-classification to run-log.md with evidence
+    2. Supervised mode: ask user — ESCALATE / KEEP (with justification) / ABORT
+    3. Autonomous mode: auto-escalate, log reasoning
+    4. Update loop_state.json tier
+    5. Apply re-work rules below
+
+on_downgrade:
+  behavior: |
+    1. Log downgrade proposal to run-log.md with evidence
+    2. ALWAYS ask user (even in autonomous mode — downgrade is unusual)
+    3. Update loop_state.json tier
+    4. Existing artifacts kept as-is. Future stages follow new tier.
+
+# Re-work rules: what gets re-done on escalation
+rework:
+  xs_to_s:
+    - "PRD: run with 10 sections (was skipped)"
+    - "TDD: re-run with 8 sections (was 5-section BRIEF)"
+    - "Breakdown: re-run"
+
+  xs_to_m:
+    - "Discovery: run (was skipped)"
+    - "PRD: run with 12 sections"
+    - "System Design: run (was skipped)"
+    - "TDD: re-run with 10 sections"
+    - "TDD Review: run (was skipped)"
+    - "Breakdown: re-run"
+
+  s_to_m:
+    - "PRD: append 2 sections (Goals & Success Metrics, Repos)"
+    - "System Design: run (was skipped)"
+    - "TDD: append 2 sections (Observability, Resource Requirements)"
+    - "TDD Review: run (was optional)"
+
+  s_to_l:
+    - "PRD: re-run with 14 sections"
+    - "PRD Review: run (was skipped)"
+    - "System Design: run (was skipped)"
+    - "TDD: re-run with 11 sections"
+    - "TDD Review: run"
+    - "Breakdown: re-run"
+
+  m_to_l:
+    - "PRD: append 2 sections (Open Questions, Appendix)"
+    - "PRD Review: run if was skipped"
+    - "TDD: append 1 section (Deployment Architecture)"
+    - "Breakdown: re-run"
+
+  downgrade:
+    - "No re-work. Existing artifacts kept. Future stages follow new tier."
+
+---
+
+# Route Re-classification
+# Route is checked at the same checkpoints as tier. Spike route is never reclassified.
+
+route_checkpoints:
+  - after: plan
+    checks:
+      hotfix_to_feature:
+        evidence: ["PRD has new contracts (endpoints, models, events)", "story count > 2"]
+        action: reclassify route hotfix → feature; re-classify tier; run full design stage
+      feature_to_epic:
+        evidence: ["PRD identifies 3+ service owners", "multi-phase delivery", "2+ quarter dependencies"]
+        action: add multi-phase PRD section; split TDD into TDD_MASTER; set pipeline_mode=epic
+      feature_to_hotfix:
+        evidence: ["PRD has no new contracts", "story count = 1", "targeted fix only"]
+        action: replace TDD with IMPLEMENTATION_BRIEF; re-scope to 1-2 stories; set tier=xs or s
+
+  - after: design
+    checks:
+      feature_to_epic:
+        evidence: ["TDD requires multi-repo split", "phased rollout not visible in PRD"]
+        action: run full epic reclassification (same as plan → feature_to_epic)
+      hotfix_to_feature:
+        evidence: ["SYSTEM_DESIGN_NOTES introduces new integration points"]
+        action: run PRD if skipped; re-run design with new integration context
+
+  # No route reclassification after breakdown — stories are already scoped
+
+route_behavior:
+  supervised: |
+    Log evidence to run-log.md → AskUserQuestion: CHANGE / KEEP / ABORT
+    On CHANGE: python scripts/gate_transition.py {project} {slug} reclassify --route {new} --from {old} --checkpoint {checkpoint} --evidence "{evidence}"
+  autonomous: |
+    Escalations auto-apply (logged to run-log.md)
+    Downgrades always ask (even in autonomous mode)
+
+route_rework:
+  hotfix_to_feature:
+    - "Re-classify tier per classification.yml"
+    - "Re-run planning if tier is m or l"
+    - "Run full design stage"
+
+  feature_to_epic:
+    - "Add multi-phase PRD section"
+    - "Split TDD into TDD_MASTER + TDD_{REPO} per service"
+    - "Set pipeline_mode=epic in loop_state.json"
+
+  feature_to_hotfix:
+    - "Replace TDD with IMPLEMENTATION_BRIEF"
+    - "Re-scope to 1-2 stories"
+    - "Set tier=xs or s"
+
+  hotfix_to_feature_via_design:
+    - "Run PRD if skipped"
+    - "Re-run design stage with new integration context"

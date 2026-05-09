@@ -1,0 +1,78 @@
+"""
+Test samples for security_prescan.py validation.
+These contain intentionally vulnerable patterns for testing detection.
+"""
+
+# SQL Injection patterns
+def sql_injection_fstring():
+    user_id = request.GET.get('id')
+    query = f"SELECT * FROM users WHERE id = {user_id}"  # VULNERABLE: SQL injection via f-string
+    cursor.execute(query)
+
+def sql_injection_concat():
+    name = request.GET.get('name')
+    query = "SELECT * FROM users WHERE name = '" + name + "'"  # VULNERABLE: SQL injection via concatenation
+    cursor.execute(query)
+
+def sql_injection_template():
+    email = request.GET.get('email')
+    query = f"SELECT * FROM users WHERE email = '{email}'"  # VULNERABLE: F-string SQL injection
+    db.query(query)
+
+# XSS patterns
+def xss_innerhtml():
+    user_input = request.GET.get('comment')
+    element.innerHTML = user_input  # VULNERABLE: XSS via innerHTML
+
+def xss_dangerous_react():
+    html_content = get_user_content()
+    return <div dangerouslySetInnerHTML={{__html: html_content}} />  # VULNERABLE: React XSS
+
+def xss_template_literal():
+    name = get_user_name()
+    html = `<div class="user">${name}</div>`  # VULNERABLE: XSS in template literal
+
+# Auth bypass patterns
+@app.route('/admin/delete_user', methods=['POST'])  # VULNERABLE: No @login_required decorator
+def delete_user():
+    user_id = request.form.get('user_id')
+    db.delete_user(user_id)
+
+export async function POST(request) {  # VULNERABLE: Next.js API route without auth
+    const data = await request.json()
+    await db.updateUser(data)
+}
+
+# Hardcoded secrets
+def hardcoded_secrets():
+    API_KEY = "sk_live_1234567890abcdef1234567890abcdef"  # VULNERABLE: Hardcoded API key
+    password = "SuperSecret123!"  # VULNERABLE: Hardcoded password
+    AWS_ACCESS_KEY = "AKIAIOSFODNN7EXAMPLE"  # VULNERABLE: Hardcoded AWS key
+
+# Weak crypto
+def weak_crypto():
+    import md5  # VULNERABLE: MD5 is deprecated
+    password_hash = md5(password).hexdigest()
+
+    import sha1  # VULNERABLE: SHA1 is deprecated
+    checksum = sha1(data).hexdigest()
+
+# SAFE examples (should NOT trigger)
+def safe_parameterized_query():
+    user_id = request.GET.get('id')
+    query = "SELECT * FROM users WHERE id = ?"
+    cursor.execute(query, (user_id,))  # SAFE: Parameterized query
+
+def safe_text_content():
+    user_input = request.GET.get('comment')
+    element.textContent = user_input  # SAFE: textContent escapes HTML
+
+def safe_auth_route():
+    @app.route('/admin/users', methods=['GET'])
+    @login_required  # SAFE: Has auth decorator
+    def list_users():
+        return db.get_all_users()
+
+def safe_test_password():
+    test_password = "password123"  # SAFE: Test placeholder (allowlisted)
+    dummy_secret = "changeit"  # SAFE: Example placeholder (allowlisted)

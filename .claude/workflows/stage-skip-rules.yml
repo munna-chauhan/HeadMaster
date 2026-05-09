@@ -1,0 +1,44 @@
+# Stage Skip Rules
+# Within a tier, stages marked "optional" can be skipped based on input quality.
+# Load: skill reads this when deciding whether to run an optional stage.
+
+rules:
+  feature_draft:
+    skip_if:
+      - "Jira ticket has description + ACs + dev notes"
+      - "User provides detailed spec (>500 words with ACs)"
+    skip_action: "Extract content from input into FEATURE_DRAFT.md format, mark as extracted"
+
+  discovery:
+    skip_if:
+      - "FEATURE_DRAFT has 0 P0 gaps and ≤1 P1 gap"
+      - "All questions answerable from codebase/Jira without human input"
+    skip_action: "Log 'discovery skipped — no unresolved gaps' to run-log.md"
+
+  prd_review:
+    skip_if:
+      - "PRD has 0 assumptions and 0 conflicts"
+      - "Tier is s and design_complexity is low"
+    skip_action: "Log 'PRD review skipped — no assumptions or conflicts' to run-log.md"
+
+  system_design:
+    skip_if:
+      - "Feature extends existing pattern with no new integrations"
+      - "No new external dependencies"
+      - "Single repo, no cross-service communication"
+    skip_action: "Log 'system design skipped — extends existing pattern' to run-log.md"
+
+  tdd_review:
+    skip_if:
+      - "TDD has ≤5 slices and no DESIGN_GAP flags"
+      - "Tier is s and all interfaces trace to PRD"
+    skip_action: "Log 'TDD review skipped — clean TDD' to run-log.md"
+
+  system_review:
+    skip_if:
+      - "≤2 stories, all PASS in review-code and qa-integration"
+    skip_action: "Log 'system review skipped — all stories clean' to run-log.md"
+
+  merge_gate:
+    skip_if: never
+    skip_action: null

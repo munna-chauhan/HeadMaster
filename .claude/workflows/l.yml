@@ -1,0 +1,117 @@
+# Tier: L — Large
+# Complex feature, new architecture, migration, multi-repo.
+# Load: agents/skills read this file when loop_state.json tier = "l"
+
+description: Large — complex feature, new architecture, migration, multi-repo
+signals:
+  estimated_stories: 9+
+  estimated_sp: 22+
+  repos: 2+
+  design_complexity: high
+  examples:
+    - new service or microservice
+    - database migration
+    - cross-cutting architectural change
+    - multi-repo feature with shared contracts
+
+stages:
+  feature_draft:
+    status: required
+    agent: requirements-analyst
+    artifact: FEATURE_DRAFT.md
+    gate: "≥3 gaps, ≥2 open questions"
+
+  discovery:
+    status: required
+    agent: requirements-analyst
+    artifact: DISCOVERY_NOTES.md
+    gate: "All Questions Resolved: YES"
+
+  prd:
+    status: required
+    agent: prd-author
+    artifact: PRD.md
+    typical_sections: 14  # Guidance, not enforcement
+    sections:
+      - Executive Summary
+      - Background & Business Context
+      - Goals & Success Metrics
+      - Functional Requirements
+      - Non-Functional Requirements
+      - User Stories
+      - Assumptions & Constraints
+      - Dependencies
+      - Out of Scope
+      - Open Questions
+      - Risks & Mitigations
+      - Repos
+      - Acceptance Criteria
+      - Appendix
+    gate: "All necessary sections present, all metrics quantified"
+
+  prd_review:
+    status: required
+    agent: prd-reviewer
+    artifact: PRD_REVIEW.md
+    gate: "0 BLOCKERs"
+
+  system_design:
+    status: required
+    agent: solutions-architect
+    artifact: SYSTEM_DESIGN_NOTES.md
+    gate: "Architecture Locked: YES"
+
+  tdd:
+    status: required
+    agent: tdd-author
+    artifact: TDD.md  # or TDD_MASTER.md + TDD_{REPO}.md for multi-repo
+    sections:
+      - Architecture Overview
+      - Domain & Module Structure
+      - Data Models & Contracts
+      - Component Design & Command Lifecycle
+      - Error Handling & Resilience
+      - Observability & Configuration
+      - Testing Strategy
+      - Vertical Delivery Slices
+      - ADRs
+      - Resource Requirements
+      - Deployment Architecture
+    gate: "11 sections present, slices defined, errors enumerated"
+
+  tdd_review:
+    status: required
+    agent: tdd-reviewer
+    artifact: TDD_REVIEW.md
+    gate: "0 BLOCKERs"
+
+  breakdown:
+    status: required
+    agent: release-agent
+    artifact: JIRA_BREAKDOWN.md
+    gate: human approval (unconditional)
+
+  execute:
+    status: required
+    agents: [developer, review-agent, qa-engineer]
+    phases: [implement, security-scan, review-code, qa-integration, review-system]
+    gate: all stories COMPLETE + system review PASS
+
+  system_review:
+    status: required
+    agent: review-agent
+    artifact: system-review.md
+    gate: 0 critical/high findings
+
+  merge_gate:
+    status: required
+    agent: release-agent
+    gate: human approval (unconditional)
+
+branches:
+  base: main or epic/{EPIC-KEY}
+  feature: feature/{slug}
+  stories: story/{STORY-KEY}
+  merge: story → feature (direct), feature → main (PR)
+
+# No escalation thresholds — l is the highest tier
