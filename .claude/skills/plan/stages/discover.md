@@ -46,6 +46,18 @@ python scripts/workflow_config.py {tier} stages discovery status
 
 One question at a time. Never ask what inputs already answer.
 
+**Minimum category coverage** — before ending discovery, verify at least one question from each applicable category was asked or explicitly ruled out:
+
+| Category | Applicable when | Minimum question if not in inputs |
+|---|---|---|
+| Biz Rules | Always | "What are the exact conditions that trigger / complete this feature?" |
+| Edge Cases | Always | "What happens if a dependency is unavailable? What's the data limit and what happens at limit+1?" |
+| Integration | Any external system mentioned | "What is the API contract / auth mechanism for {system}? Are there downstream consumers?" |
+| Performance | SLA or load mentioned | "What is the expected request volume and acceptable response time?" |
+| UX | User-facing flow | "What does the user see on success and on failure?" |
+
+If a category has no applicable gaps → mark `[N/A: {reason}]`, do not ask.
+
 ---
 
 ## s tier — inline resolution

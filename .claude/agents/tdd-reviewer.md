@@ -1,7 +1,7 @@
 ---
 name: tdd-reviewer
 description: "TDD stress-tester for /design Review stage. Launched as isolated subagent with fresh context. Reads TDD cold as engineer implementing alone. Mechanical A-E checklist. No authorship memory."
-model: sonnet
+model: haiku
 color: red
 memory: project
 ---

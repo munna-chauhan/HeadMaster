@@ -30,7 +30,7 @@ Then resolve input:
 
 ## Step 2: Route Detection
 
-Detect from input before Q&A:
+Auto-detect from input keywords:
 
 | Keywords | Route |
 |----------|-------|
@@ -39,7 +39,17 @@ Detect from input before Q&A:
 | build, add, create, implement, feature, endpoint, service | feature |
 | epic, initiative, multi-phase, program | epic |
 
-Clear → confirm with user. Ambiguous → ask.
+**Always confirm via AskUserQuestion** — even when auto-detection is clear. Show all options; mark detected route as ⭐ Recommended:
+
+```
+header: Route
+question: "[P0] What type of work is this? Why: determines pipeline shape and which stages run."
+options:
+  - Feature       — new functionality, full pipeline (plan → design → build → PR)
+  - Hotfix        — targeted bug fix, compressed pipeline
+  - Epic          — multi-phase initiative, plan-heavy
+  - Spike         — research only, no implementation
+```
 
 ## Step 3: Q&A (missing fields only)
 
@@ -79,8 +89,34 @@ If modules found → `AskUserQuestion` with list, `multiSelect: true`. If none �
 - build_cmd: {command}
 ```
 
-### Q3: Effort + Design Complexity
-Skip if spike.
+### Q3: Effort + Initial Tier Estimate
+Skip if spike (tier = null, workflow = research).
+
+**Step A — Effort signals** (three questions, one at a time):
+
+| Question | Header | Options |
+|---|---|---|
+| Estimated story count | `Effort` | 1-2 · 3-5 · 5-8 · 9+ |
+| Repos / services affected | `Scope` | 1 · 2 · 3+ |
+| Design complexity | `Design` | Config-only change · Extending existing pattern · New pattern or service |
+| Breaking changes (API / contract / schema) | `Risk` | Yes · No · Unknown |
+
+**Step B — Tier proposal** (always confirm, show all options):
+
+Read `.claude/workflows/classification.yml` → compute proposed tier from Step A answers.
+
+```
+header: Tier
+question: "[P1] Initial tier estimate: {tier} ({confidence}). Why: {one-line signal summary}.
+          This is a starting point — /plan and /design may revise it."
+options:
+  - XS — 1-2 stories, trivial change, no design needed
+  - S  — 3-5 stories, known patterns, light design
+  - M  — 5-8 stories, moderate complexity, multi-component
+  - L  — 9+ stories, multi-repo or architectural change
+```
+
+Mark computed tier as ⭐ Recommended. User selection overrides classification.
 
 ### Q4: Research Questions
 Spike only.

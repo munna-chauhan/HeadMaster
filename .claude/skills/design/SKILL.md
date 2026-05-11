@@ -34,36 +34,34 @@ Mission: PRD → implementation-ready TDD(s). Single source of truth per stage. 
 
 ## Stages
 
-| Stage     | Pattern           | Agent                                                 | Output                                                                       |
-|-----------|-------------------|-------------------------------------------------------|------------------------------------------------------------------------------|
-| Architect | Skill + subagents | `solutions-architect` + `codebase-analyst` (parallel) | SYSTEM_DESIGN_NOTES.md                                                       |
-| Engineer  | Direct            | `tdd-author`                                          | TDD.md or TDD_MASTER.md + TDD_{REPO}.md(s) + MIGRATION_PLAN.md (conditional) |
-| Review    | Subagent          | `tdd-reviewer`                                        | TDD_REVIEW.md                                                                |
+| Stage     | Pattern           | Agent                                                 | Output                                                                       | Session  |
+|-----------|-------------------|-------------------------------------------------------|------------------------------------------------------------------------------|----------|
+| Architect | Skill + subagents | `solutions-architect` + `codebase-analyst` (parallel) | SYSTEM_DESIGN_NOTES.md                                                       | current  |
+| Engineer  | Direct            | `tdd-author`                                          | TDD.md or TDD_MASTER.md + TDD_{REPO}.md(s) + MIGRATION_PLAN.md (conditional) | current  |
+| Review    | Direct            | `tdd-reviewer` (inline)                               | TDD_REVIEW.md                                                                | new      |
 
-Flow: `Architect → Engineer → Review`
+Flow: `Architect → Engineer → [stop] → Review (new session)`
 Loop-backs: `TDD_ISSUE` → Engineer. `DESIGN_GAP` → Architect. Mixed → Architect first.
 
 ---
 
 ## State Detection
 
-Check `docs/features/{project}/{slug}/design/` + `complexity_tier` from loop_state.json:
+Read `design_stages` from `memory/features/{project}/{slug}/loop_state.json`:
 
-```
-# xs tier:
-IMPLEMENTATION_BRIEF.md exists + 5 sections    → COMPLETE (no review needed)
-IMPLEMENTATION_BRIEF.md exists + incomplete     → resume Engineer (xs)
-Nothing + tier=xs                               → start Engineer (xs) — skip Architect
+| `design_stages` state                        | Action                          |
+|----------------------------------------------|---------------------------------|
+| `review = approved`                          | COMPLETE — nothing to do        |
+| `review = in_progress` (new session resume)  | Load → execute review.md        |
+| `engineer = complete` (new session start)    | Load → execute review.md        |
+| `engineer = in_progress`                     | Resume Engineer stage           |
+| `architect = complete`                       | Start Engineer stage            |
+| `architect = in_progress`                    | Resume Architect stage          |
+| not set / all pending                        | Start Architect stage           |
+| `pipeline.design_blocker = DESIGN_GAP`       | Resume Architect (gap-only)     |
+| `pipeline.design_blocker = TDD_ISSUE`        | Resume Engineer (fix only)      |
 
-# s/m/l tier:
-artifacts["design/TDD_REVIEW.md"].status = approved              → COMPLETE
-pipeline.design_blocker = DESIGN_GAP (loop_state.json)           → resume Architect
-pipeline.design_blocker = TDD_ISSUE (loop_state.json)            → resume Engineer
-any TDD_*.md exists + artifact status != approved                → resume Review
-artifacts["design/SYSTEM_DESIGN_NOTES.md"].status = locked       → resume Engineer
-SYSTEM_DESIGN_NOTES.md exists + artifact status != locked        → resume Architect
-Nothing                                                           → start Architect
-```
+xs tier override: if `tier = xs` → skip Architect, go direct to Engineer (IMPLEMENTATION_BRIEF.md). No review.
 
 ---
 

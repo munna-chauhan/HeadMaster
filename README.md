@@ -316,6 +316,16 @@ Generate architecture or flow diagrams as native `.drawio` files.
 
 </details>
 
+### Setup
+
+```bash
+/setup-env [--project <name>] [--reset]
+```
+
+Scan project repos, detect tech stack per module, write `memory/projects/{project}/repo-registry.yml`. **Run once per project before `/init-feature`** — enables repo/module selection without live scanning on every feature. Re-run with `--reset` after repo structure changes.
+
+---
+
 ### Standalone Reviews
 
 Three skills run independently &mdash; no active feature or loop state required.

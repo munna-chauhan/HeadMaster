@@ -84,7 +84,7 @@ All tiers share the same validation logic:
 | Tier | Action |
 |------|--------|
 | xs | Append `<!-- completeness-check: PASSED {ISO-date} -->`, gate_transition to APPROVED, skip Review → breakdown |
-| s/m/l | gate_transition artifact to `draft`, proceed to Review |
+| s/m/l | gate_transition artifact to `draft`, mark engineer complete, stop — Review runs in new session |
 
 ```bash
 # xs:
@@ -96,4 +96,13 @@ python scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" draf
 # s/m/l (multi — run per file):
 python scripts/gate_transition.py {project} {slug} artifact "design/TDD_MASTER.md" draft
 python scripts/gate_transition.py {project} {slug} artifact "design/TDD_{NAME}.md" draft
+
+# s/m/l: mark engineer complete
+python scripts/gate_transition.py {project} {slug} design-stage engineer complete
 ```
+
+**s/m/l hard stop:** Output exactly:
+```
+TDD written. Start a new session: /design {slug} to review.
+```
+Do not proceed to Review in this session.

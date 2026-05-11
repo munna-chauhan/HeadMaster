@@ -42,6 +42,13 @@
     "review":   "pending | in_progress | approved | skipped"
   },
 
+  "design_stages": {
+    "$comment": "Per-stage status within design phase. Written by gate_transition.py design-stage.",
+    "architect": "pending | in_progress | complete",
+    "engineer":  "pending | in_progress | complete",
+    "review":    "pending | in_progress | approved | skipped"
+  },
+
   "released_sections": {
     "$comment": "Absent until first partial breakdown. Authoritative record alongside TDD_MASTER.md.",
     "TDD_{NAME}": {

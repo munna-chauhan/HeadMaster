@@ -227,6 +227,34 @@ def main() -> None:
         print(f"[gate] {slug}: planning_stages.{stage_name} → {stage_status}", file=sys.stderr)
         sys.exit(0)
 
+    # Handle design-stage: gate_transition.py {project} {slug} design-stage {stage} {status}
+    if sys.argv[3] == "design-stage":
+        if len(sys.argv) < 6:
+            print("Usage: gate_transition.py <project> <slug> design-stage <stage> <status>", file=sys.stderr)
+            sys.exit(1)
+        stage_name  = sys.argv[4]
+        stage_status = sys.argv[5]
+        memory_dir = REPO_ROOT / "memory" / "features" / project / slug
+        memory_dir.mkdir(parents=True, exist_ok=True)
+        state_file = memory_dir / "loop_state.json"
+        lock_file = open(state_file, 'a+', encoding="utf-8")
+        file_lock.acquire(lock_file)
+        try:
+            lock_file.seek(0)
+            content = lock_file.read()
+            state = json.loads(content) if content.strip() else {}
+            state.setdefault("design_stages", {})[stage_name] = stage_status
+            state["last_updated"] = datetime.now(timezone.utc).isoformat()
+            lock_file.seek(0)
+            lock_file.truncate()
+            lock_file.write(json.dumps(state, indent=2))
+            lock_file.flush()
+        finally:
+            file_lock.release(lock_file)
+            lock_file.close()
+        print(f"[gate] {slug}: design_stages.{stage_name} → {stage_status}", file=sys.stderr)
+        sys.exit(0)
+
     # Handle route reclassification: gate_transition.py {project} {slug} reclassify --route {route} ...
     if sys.argv[3] == "reclassify":
         args = sys.argv[4:]

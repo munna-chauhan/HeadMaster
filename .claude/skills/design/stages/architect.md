@@ -120,9 +120,22 @@ Interactive mode (from `gates.design.interactive` in config.yml):
 
 | Value | Behavior |
 |-------|----------|
-| `true` | Agent may use AskUserQuestion for ambiguities |
-| `false` + autonomous | Auto-decides, logs rationale to run-log.md |
-| `false` + supervised | Asks only for critical gaps |
+| `true` | Ask for every scenario in the table below. One AskUserQuestion per item. |
+| `false` + autonomous | Auto-decide all; log rationale to run-log.md |
+| `false` + supervised | Ask only P0 scenarios; auto-decide P1 with logged rationale |
+
+**Question triggers when interactive = true:**
+
+| Scenario | Priority | Header | Question |
+|---|---|---|---|
+| Architecture proposal selected (always) | P1 | `Architecture` | "[P1] Choosing {proposal} over {alt} — {one-line reason}. Does this align with your team's direction?" |
+| Breaking change detected (API / contract / schema) | P0 | `Integration` | "[P0] This modifies {interface/contract}. Are all consumers of this interface within scope of this feature?" |
+| Data migration required | P1 | `Migration` | "[P1] Schema change requires migration. Is a maintenance window available, or must this be zero-downtime?" |
+| Async vs sync trade-off | P1 | `Architecture` | "[P1] Async chosen for {flow} — eventual consistency applies. Is this acceptable for {use case}?" |
+| External service integration not in PRD | P0 | `Integration` | "[P0] {Service} integration needed but not in PRD. Is auth mechanism and rate limit defined?" |
+| Multiple viable patterns equally valid | P1 | `Design` | "[P1] {PatternA} and {PatternB} are both viable. Does your team have a preference?" |
+
+Skip a question if PRD already resolves it. Never ask about implementation details (libraries, algorithms) — WHAT only.
 
 Agent produces: full SYSTEM_DESIGN_NOTES.md per `.claude/agents/references/system-design-notes.structure.md`, gate string `Architecture Locked: YES`.
 

@@ -1,8 +1,15 @@
 # REVIEW
 
-**Pattern:** `tdd-reviewer` subagent. Isolated — no authorship memory.
+**Pattern:** Direct (inline). New session required — Engineer must have stopped in prior session.
 
 All AskUserQuestion calls → per `.claude/agents/references/ask-user-protocol.md`.
+
+**Session boundary:** This stage only runs when `design_stages.engineer = complete` in loop_state.json. If called in the same session as Engineer, HALT: "Start a new session: /design {slug} to review."
+
+Mark in_progress on entry:
+```bash
+python scripts/gate_transition.py {project} {slug} design-stage review in_progress
+```
 
 ---
 
@@ -20,9 +27,24 @@ All AskUserQuestion calls → per `.claude/agents/references/ask-user-protocol.m
 
 | Mode | Behavior |
 |------|----------|
-| `human_in_loop` | Present TDD to human via AskUserQuestion → wait for approval → run tdd-reviewer → present findings → wait for approval |
+| `human_in_loop` | TDD alignment session (see below) → run tdd-reviewer → present findings → final approval gate |
 | `auto` | Run tdd-reviewer → APPROVED/CONDITIONAL → auto-approve; REJECTED + convergence failure → escalate to human. Log all to run-log.md |
 | `skip` | Skip tdd-reviewer → mark TDD APPROVED immediately. Log: "TDD review skipped per gates.design.review.mode=skip" |
+
+---
+
+## TDD Alignment Session (human_in_loop only)
+
+Run before spawning tdd-reviewer. Read TDD section headings + first 3 lines per section (offset/limit only — do not load full TDD). Ask these four questions, one at a time via AskUserQuestion:
+
+| # | Header | Question | What to extract from TDD |
+|---|---|---|---|
+| 1 | `Delivery` | "[P1] Vertical slices: {slice list}. Do these match your deployment preference — each slice independently deployable?" | Section: Vertical Delivery Slices |
+| 2 | `Interfaces` | "[P1] Key interfaces: {interface list}. Do these align with your codebase patterns?" | Section: Data Models & Contracts |
+| 3 | `ADRs` | "[P1] Decisions made: {ADR titles}. Any you'd challenge before we run the reviewer?" | Section: ADRs |
+| 4 | `Testing` | "[P1] Testing strategy: {strategy summary}. Does this match your team's testing practices?" | Section: Testing Strategy |
+
+Apply corrections inline to TDD after each answer. Then proceed to spawn tdd-reviewer.
 
 ---
 
@@ -75,7 +97,7 @@ for tdd in sorted(Path('docs/features/{project}/{slug}/design').glob('TDD*.md'))
 ```
 
 ```
-Agent: tdd-reviewer | Model: sonnet
+Agent: tdd-reviewer | Model: haiku
 Prompt:
 "Execute per .claude/agents/tdd-reviewer.md definition.
 Review Mode: {full|delta} | Tier: {tier}
@@ -86,7 +108,7 @@ Delta: changed sections only."
 
 ---
 
-## Post-Subagent Validation
+## Post-Review Validation
 
 1. Verify `docs/features/{project}/{slug}/design/TDD_REVIEW.md` exists
 2. Verify "Verdict:" in first 500 bytes
@@ -106,7 +128,8 @@ python scripts/gate_transition.py {project} {slug} artifact "design/TDD_REVIEW.m
 # Mark TDD(s) — run per file:
 python scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" approved
 # Multi-TDD: also run for TDD_MASTER.md, TDD_{NAME}.md
-# Pipeline phase:
+# Stage + pipeline phase:
+python scripts/gate_transition.py {project} {slug} design-stage review approved
 python scripts/gate_transition.py {project} {slug} design APPROVED
 ```
 
