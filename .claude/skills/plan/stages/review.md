@@ -31,7 +31,7 @@ AskUserQuestion: "Do you have any feedback on the PRD?"
 Read PRD section headings only (bash command below). Derive questions from actual PRD content — not a fixed template.
 
 ```bash
-python3 -c "
+python -c "
 import re
 from pathlib import Path
 lines = Path('docs/features/{project}/{slug}/planning/PRD.md').read_text().split('\n')
@@ -66,7 +66,7 @@ Load `.claude/agents/prd-reviewer.md` inline.
 
 Build section manifest:
 ```bash
-python3 -c "
+python -c "
 import re
 from pathlib import Path
 lines = Path('docs/features/{project}/{slug}/planning/PRD.md').read_text().split('\n')
@@ -88,8 +88,8 @@ Output: `docs/features/{project}/{slug}/planning/PRD_REVIEW.md`
 ## Gate
 
 ```bash
-python3 scripts/gate_transition.py {project} {slug} plan-stage review approved
-python3 scripts/gate_transition.py {project} {slug} planning APPROVED --artifact docs/features/{project}/{slug}/planning/PRD.md
+python scripts/gate_transition.py {project} {slug} plan-stage review approved
+python scripts/gate_transition.py {project} {slug} planning APPROVED --artifact docs/features/{project}/{slug}/planning/PRD.md
 ```
 
 Append to PRD.md header table: `PRD Status: APPROVED | {date} | iteration {N}`.

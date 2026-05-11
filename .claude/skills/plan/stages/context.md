@@ -59,13 +59,13 @@
 - If `workflow = research` → read `.claude/workflows/research.yml`
 - Otherwise → read `.claude/workflows/{tier}.yml`
 
-| Workflow / Tier | Scan | Reason |
-|-----------------|------|--------|
-| research (spike) | deep | Whole point is understanding the codebase |
-| xs | skip | Trivial change, input is enough |
-| s  | skip | Small scope, input is enough |
-| m  | shallow | Multi-component, need orientation |
-| l  | shallow | Complex, need orientation |
+| Workflow / Tier | Scan |
+|-----------------|------|
+| research (spike) | deep |
+| xs | skip |
+| s  | skip |
+| m  | shallow |
+| l  | shallow |
 
 - `skip` (xs/s) → proceed to Step 4 using input files only.
 - `shallow` (m/l) → spawn codebase-analyst with shallow prompt.

@@ -36,11 +36,7 @@ python scripts/workflow_config.py {tier} stages discovery status
 | P1 | Affects ≥2 PRD sections OR changes critical path OR adds ≥3 SP | AskUserQuestion or code research |
 | P2 | Single section impact | `[Assumption: ...]` — document, do not escalate |
 
-**Always escalate to human if ANY:**
-- Gap affects ≥2 PRD sections
-- Gap changes critical path
-- Gap adds ≥3 SP
-- Gap requires external system change not in original scope
+P1 also covers: external system change not in original scope → AskUserQuestion.
 
 **Never auto-resolve** security, observability, or metrics gaps — these are deferred to the Review optional gate. Mark as `[DEFERRED: handled in Review]`.
 

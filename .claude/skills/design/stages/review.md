@@ -61,9 +61,9 @@ Apply corrections inline to TDD after each answer. Then proceed to spawn tdd-rev
 
 ---
 
-## Before Spawning
+## Before Running
 
-1. Grep TDD files for `TBD`, `TODO`, `pending` → if found: AskUserQuestion (human_in_loop) or log decision (auto). Do not spawn with unresolved decisions.
+1. Grep TDD files for `TBD`, `TODO`, `pending` → if found: AskUserQuestion (human_in_loop) or log decision (auto). Do not run with unresolved decisions.
 
 2. Mark TDDs as in_review:
 ```bash
@@ -71,17 +71,15 @@ python scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" in_r
 # Multi-TDD: run per file (TDD_MASTER.md, TDD_{NAME}.md)
 ```
 
-3. Do NOT load TDD into parent context before spawning. Subagent reads fresh from disk.
-
-4. Write `memory/features/{project}/{slug}/design_context.md`: tier, review mode (full|incremental), sections written (count + names), iteration N.
+3. Write `memory/features/{project}/{slug}/design_context.md`: tier, review mode (full|incremental), sections written (count + names), iteration N.
 
 ---
 
-## Spawn tdd-reviewer Subagent
+## Run tdd-reviewer Inline
 
 **Output:** `docs/features/{project}/{slug}/design/TDD_REVIEW.md`
 
-**Build section manifest (before spawning):**
+Load `.claude/agents/tdd-reviewer.md`. Build section manifest, read TDD via offset/limit only — never load full TDD into context:
 
 ```bash
 python -c "
@@ -96,15 +94,7 @@ for tdd in sorted(Path('docs/features/{project}/{slug}/design').glob('TDD*.md'))
 "
 ```
 
-```
-Agent: tdd-reviewer | Model: haiku
-Prompt:
-"Execute per .claude/agents/tdd-reviewer.md definition.
-Review Mode: {full|delta} | Tier: {tier}
-Section manifest: {manifest}
-Inputs: TDD path(s) via manifest offset/limit, PRD.md (Scope + NFR only), TDD_REVIEW.md (delta only)
-Delta: changed sections only."
-```
+Execute per tdd-reviewer definition: Review Mode: {full|delta} | Tier: {tier} | Section manifest: {manifest} | Inputs: TDD path(s) via manifest offset/limit, PRD.md (Scope + NFR only), TDD_REVIEW.md (delta only).
 
 ---
 
@@ -145,7 +135,7 @@ python scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" draf
 
 2. Convergence check:
 ```bash
-python scripts/convergence_check.py {slug} design --blocker-type "TDD_ISSUE|DESIGN_GAP" --findings '[{"section": "S3", "issue": "..."}]' --max-loops {max_loops}
+python scripts/convergence_check.py {slug} design --blocker-type "{blocker-type}" --findings '{findings-json}' --max-loops {max_loops}
 ```
 Parse stdout: `{"verdict": "escalate"}` → report to human, stop. `{"verdict": "continue"}` → loop-back.
 

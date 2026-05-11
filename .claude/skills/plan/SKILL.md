@@ -63,9 +63,9 @@ Fresh features only. Restate problem → 2-3 approaches (table: Approach | Stren
 | Stage    | Workflow Key   | Pattern          | Agent                  | Artifact           |
 |----------|----------------|------------------|------------------------|--------------------|
 | Context  | feature_draft  | Skill + subagent | `codebase-analyst`     | FEATURE_DRAFT.md   |
-| Discover | discovery      | Direct/subagent  | `requirements-analyst` | DISCOVERY_NOTES.md |
+| Discover | discovery      | Direct           | `requirements-analyst` | DISCOVERY_NOTES.md |
 | Draft    | prd            | Direct           | `prd-author`           | PRD.md             |
-| Review   | prd_review     | Subagent         | `prd-reviewer`         | PRD_REVIEW.md      |
+| Review   | prd_review     | Direct           | `prd-reviewer`         | PRD_REVIEW.md      |
 
 Flow: `Brainstorm (fresh only) → Context → Discover → Draft → Review`
 Loop-backs: `DISCOVERY_GAP` → Discover. `PRD_ISSUE` → Draft. Mixed → Discover first.
