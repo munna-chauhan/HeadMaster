@@ -44,29 +44,9 @@ HeadMaster is an orchestration layer that sits **alongside** your feature reposi
 
 Each stage produces structured, human-reviewable artifacts. **Nothing merges automatically. Every gate requires explicit approval.**
 
-<table>
-<tr>
-<td width="50%">
+**What it automates:** requirements elicitation, PRD authoring, architecture decisions, TDD blueprints, Jira story decomposition, test-first implementation, security scanning, code review, QA testing, and cross-story system review.
 
-**What it automates**
-- Requirements elicitation & PRD authoring
-- Architecture decisions & technical design
-- Jira story decomposition with ACs
-- Test-first implementation, atomic commits
-- Security scanning, code review, QA testing
-- Cross-story system review before merge
-
-</td>
-<td width="50%">
-
-**What it does NOT do**
-- Deploy to production
-- Auto-merge PRs
-- Skip human approval gates
-
-</td>
-</tr>
-</table>
+**What it does not do:** deploy, auto-merge, or skip human approval gates.
 
 ---
 
@@ -117,7 +97,7 @@ claude
 ### 5. Verify Setup
 
 ```bash
-python3 scripts/state_manager.py --status
+python scripts/state_manager.py --status
 ```
 
 <details>
@@ -169,7 +149,7 @@ Auto-detected during `/init-feature`. Controls artifact depth and which reviews 
 
 ### State Machine
 
-Every feature has a `loop_state.json` in `memory/features/{project}/{slug}/` — the single source of truth. Tracks current phase, per-stage status (`planning_stages`), artifact statuses, story progress, gate timestamps, and retry counts. Never edit manually; use `gate_transition.py` for transitions.
+Every feature has a `loop_state.json` in `memory/features/{project}/{slug}/` — the single source of truth. Tracks current phase, per-stage status (`planning_stages`, `design_stages`), artifact statuses, story progress, gate timestamps, and retry counts. Never edit manually; use `gate_transition.py` for transitions.
 
 ### Human Gates
 
@@ -219,7 +199,7 @@ Drives design to an approved TDD. Reads PRD. Auto-resumes.
 /design invoice-pdf-export "focus on caching strategy"
 ```
 
-**Stages:** Architect (ADRs + design notes) &rarr; Engineer (TDD blueprint) &rarr; Review (TDD stress-test)
+**Stages:** Architect (ADRs + design notes) &rarr; Engineer (TDD blueprint) &rarr; **stop** &rarr; Review (new session, inline)
 
 </td></tr>
 <tr><td><code>/breakdown &lt;slug&gt;</code></td><td>
@@ -400,6 +380,8 @@ PRD approved &rarr; advance to `/design`.
 
 **Engineer** &mdash; reads locked design. Writes `TDD.md`: interfaces, data models, component design, error handling, testing strategy, vertical slices, ADR references.
 
+Engineer stops. Start a new session and re-run `/design product-catalog-search` to begin Review.
+
 **Review** &mdash; tdd-reviewer reads TDD cold. Verifies interface-to-AC traceability, ADR alignment, error path enumeration. Returns `APPROVED`.
 
 </details>
@@ -511,7 +493,7 @@ For each story: Phase A (implement) &rarr; B (security scan) &rarr; C (review) &
 |---|:---:|---|---|
 | `requirements-analyst` | haiku | Requirements elicitation, gap surfacing | Inline always |
 | `prd-author` | haiku | PRD authoring from discovery | Inline always |
-| `prd-reviewer` | sonnet | PRD mechanical checklist (m/l tiers) | Inline in review session |
+| `prd-reviewer` | haiku | PRD mechanical checklist (m/l tiers) | Inline in review session |
 
 ### Design
 
@@ -520,7 +502,7 @@ For each story: Phase A (implement) &rarr; B (security scan) &rarr; C (review) &
 | `solutions-architect` | opus | Architecture decisions, ADRs, design notes | Inline |
 | `codebase-analyst` | haiku | Codebase scanning | Subagent (read-only) |
 | `tdd-author` | haiku | TDD blueprints from design notes | Inline |
-| `tdd-reviewer` | sonnet | TDD stress-test | Subagent (isolated) |
+| `tdd-reviewer` | haiku | TDD stress-test | Inline in review session |
 | `web-researcher` | sonnet | External library / API research | Subagent |
 
 ### Execution
@@ -528,7 +510,7 @@ For each story: Phase A (implement) &rarr; B (security scan) &rarr; C (review) &
 | Agent | Model | Role | Pattern |
 |---|:---:|---|---|
 | `developer` | sonnet | Test-first implementation, atomic commits | Inline |
-| `review-agent` | sonnet | Code review + OWASP security (diff only) | Subagent (isolated) |
+| `review-agent` | haiku | Code review + OWASP security (diff only) | Subagent (isolated) |
 | `qa-engineer` | sonnet | Integration tests per AC, test fixes | Subagent (isolated) |
 | `release-agent` | haiku | Story decomposition + merge gate | Inline |
 
@@ -665,8 +647,8 @@ memory/features/beta/{slug}/    <- Beta state
 ### Check All Feature States
 
 ```bash
-python3 scripts/state_manager.py --status
-python3 scripts/state_manager.py --status --project acme
+python scripts/state_manager.py --status
+python scripts/state_manager.py --status --project acme
 ```
 
 ---
@@ -691,7 +673,7 @@ Every skill auto-detects where it left off. Just re-run the command:
 Max 3 attempts before human escalation. `failure_ledger.py` prevents retrying the same broken approach.
 
 ```bash
-python3 scripts/failure_ledger.py load acme product-catalog-search ACME-201
+python scripts/failure_ledger.py load acme product-catalog-search ACME-201
 ```
 
 </details>
@@ -732,8 +714,8 @@ Cascades downstream: PRD &rarr; `revision`, design/breakdown/execute &rarr; `rev
 <summary><strong>Emergency Reset</strong></summary>
 
 ```bash
-python3 scripts/cleanup_failed_run.py acme product-catalog-search
-python3 scripts/cleanup_failed_run.py acme product-catalog-search --reset-state
+python scripts/cleanup_failed_run.py acme product-catalog-search
+python scripts/cleanup_failed_run.py acme product-catalog-search --reset-state
 ```
 
 </details>
@@ -749,7 +731,7 @@ python3 scripts/cleanup_failed_run.py acme product-catalog-search --reset-state
 |---|---|
 | `skill_setup.py` | Skill startup config resolver |
 | `state_manager.py` | List/validate feature states |
-| `gate_transition.py` | Atomic state transitions (file-locked). Supports `plan-stage {stage} {status}` for per-stage tracking within planning. |
+| `gate_transition.py` | Atomic state transitions (file-locked). `plan-stage` and `design-stage` subcommands for per-stage status tracking. |
 | `config_utils.py` | Config resolution with project overrides |
 | `failure_ledger.py` | Per-story append-only failure log |
 | `revision_manager.py` | Reopen stage + cascade downstream |
@@ -871,7 +853,7 @@ The gate string must appear verbatim in the PRD header table: `PRD Status: APPRO
 <summary><strong>Story stuck at 3 retries</strong></summary>
 
 ```bash
-python3 scripts/failure_ledger.py load acme {slug} {STORY-KEY}
+python scripts/failure_ledger.py load acme {slug} {STORY-KEY}
 ```
 
 Review `excluded_approaches`. Use `/reopen {slug} breakdown` to revise scope or `/reopen {slug} design` if the TDD interface is unimplementable.
@@ -881,9 +863,9 @@ Review `excluded_approaches`. Use `/reopen {slug} breakdown` to revise scope or 
 <summary><strong>Stale file lock on loop_state.json</strong></summary>
 
 ```bash
-python3 scripts/gate_transition.py acme {slug} rollback
+python scripts/gate_transition.py acme {slug} rollback
 # If backup is also corrupted:
-python3 scripts/cleanup_failed_run.py acme {slug} --reset-state
+python scripts/cleanup_failed_run.py acme {slug} --reset-state
 ```
 </details>
 
@@ -904,7 +886,7 @@ python3 scripts/cleanup_failed_run.py acme {slug} --reset-state
 | 1 | **Always start with `/init-feature`** &mdash; sets tier, route, and pipeline mode correctly |
 | 2 | **Read every artifact before continuing** &mdash; catching issues in PRD/TDD is far cheaper than in execution |
 | 3 | **Keep `jira_push: false` until Jira is configured** &mdash; push manually with `/jira-ops` when ready |
-| 4 | **Review session is a new session** &mdash; `/plan {slug}` after Draft in a fresh Claude Code session for true PRD isolation |
+| 4 | **Review runs in a new session** &mdash; both `/plan` and `/design` stop after authoring; re-run in a fresh session for structural isolation |
 | 5 | **Use `--story` for spot-fixes** &mdash; `/execute {slug} --story ACME-101` then resume the full run |
 | 6 | **Never edit `loop_state.json` manually** &mdash; use `gate_transition.py` for transitions |
 | 7 | **`/reopen` instead of editing artifacts** &mdash; tracks cascade and triggers revision mode |
