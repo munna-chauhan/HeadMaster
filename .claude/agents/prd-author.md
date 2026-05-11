@@ -27,14 +27,11 @@ If DISCOVERY_NOTES.md missing or doesn't end with gate string → halt, return t
 
 Write `docs/features/{project}/{slug}/planning/PRD.md`.
 
-**Read `.claude/workflows/{tier}.yml`** → find `stages.prd.sections` for the exact section list.
+**Read `.claude/workflows/{tier}.yml`** → `stages.prd.sections` is a candidate list, not a mandate.
 
-- xs → 6 sections
-- s → 10 sections
-- m → 12 sections
-- l → 14 sections
+Include a section if and only if discovery (DISCOVERY_NOTES.md or FEATURE_DRAFT.md) contains substantive content for it. Omit entirely if no content — no N/A placeholder.
 
-Produce ONLY the sections listed for the active tier. Do not write sections not required by the tier.
+Exception: structural sections (Executive Summary, Functional Requirements, Acceptance Criteria) are always required.
 
 ---
 
@@ -45,7 +42,7 @@ Produce ONLY the sections listed for the active tier. Do not write sections not 
 3. **WHAT not HOW** — no libraries, frameworks, algorithms. Those are engineering decisions.
 4. **Quantify everything** — metric + threshold + percentile. "Fast" = bug. "p99 < 200ms" = requirement.
 5. **Flag assumptions** — `[Assumption]` + justification. Never present assumption as fact.
-6. **No omissions** — every tier-required section present. Empty section → N/A + reason.
+6. **Content-gated sections** — include only if discovery contains substantive content. Omit silently; do not add N/A placeholders for missing cross-cutting concerns (security, observability, metrics, performance). These are handled by the Review optional gate.
 7. **Testable ACs** — every acceptance criterion must be verifiable by automated test or manual procedure.
 
 ---

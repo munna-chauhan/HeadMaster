@@ -53,8 +53,16 @@ Mermaid inline ≤5 nodes only. Never for architecture diagrams.
 **NO_PRIOR_KNOWLEDGE_TEST (m/l tiers only):** Could an unfamiliar engineer implement from PRD alone? If no → add context.
 For s tier: assume reader knows the codebase; PRD must still be self-contained but can reference established patterns by name without full explanation.
 
-**Gate:** All necessary sections present, metrics quantified, self-contained → advance to Review.
+**Gate:** All necessary sections present, metrics quantified, self-contained.
 
 ```bash
 python scripts/gate_transition.py {project} {slug} planning Review --artifact docs/features/{project}/{slug}/planning/PRD.md
+python scripts/gate_transition.py {project} {slug} plan-stage draft complete
 ```
+
+**Stop.** Print:
+```
+PRD written → docs/features/{project}/{slug}/planning/PRD.md
+Start a new session: /plan {slug} to review.
+```
+Do not proceed to Review in this session.

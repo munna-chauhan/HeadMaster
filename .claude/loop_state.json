@@ -34,6 +34,14 @@
     "parallel": false
   },
 
+  "planning_stages": {
+    "$comment": "Per-stage status within planning phase. Written by gate_transition.py plan-stage.",
+    "context":  "pending | in_progress | complete",
+    "discover": "pending | in_progress | complete",
+    "draft":    "pending | in_progress | complete",
+    "review":   "pending | in_progress | approved | skipped"
+  },
+
   "released_sections": {
     "$comment": "Absent until first partial breakdown. Authoritative record alongside TDD_MASTER.md.",
     "TDD_{NAME}": {

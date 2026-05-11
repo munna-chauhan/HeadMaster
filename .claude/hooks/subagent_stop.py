@@ -11,7 +11,7 @@ import sys
 
 
 VERDICT_KEYWORDS = {"APPROVED", "CONDITIONAL", "REJECTED", "PASS", "FINDINGS",
-                    "BLOCKED", "APPROVED_PARTIAL", "REJECTED-BUG"}
+                    "BLOCKED", "APPROVED_PARTIAL", "REJECTED-BUG", "DONE"}
 
 
 def main():

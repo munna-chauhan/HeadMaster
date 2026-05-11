@@ -155,6 +155,7 @@ Standard table format `| Field | Value |` with:
 
 ```bash
 python scripts/gate_transition.py {project} {slug} planning Context --artifact docs/features/{project}/{slug}/planning/FEATURE_DRAFT.md
+python scripts/gate_transition.py {project} {slug} plan-stage context complete
 ```
 
 **Gate criteria (tier-aware):**

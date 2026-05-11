@@ -27,7 +27,10 @@
       "Bash(gh pr *)",
       "Bash(gh api *)",
       "Bash(python scripts/*)",
+      "Bash(python3 scripts/*)",
       "Bash(python .claude/hooks/*)",
+      "Bash(python3 .claude/hooks/*)",
+      "Bash(node .claude/hooks/pyrun.js *)",
       "Bash(grep *)",
       "Bash(awk *)",
       "Bash(start *)",
@@ -82,7 +85,7 @@
       "Write(../<project-repo>/**/secrets.*)",
       "Write(../<project-repo>/**/application-prod.*)"
     ],
-    "defaultMode": "auto",
+    "defaultMode": "acceptEdits",
     "additionalDirectories": [
       "../<project-repo>"
     ]
@@ -94,12 +97,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/activate.py",
+            "command": "node .claude/hooks/pyrun.js .claude/hooks/activate.py",
             "statusMessage": "Loading project status..."
           },
           {
             "type": "command",
-            "command": "python .claude/hooks/feature_context.py",
+            "command": "node .claude/hooks/pyrun.js .claude/hooks/feature_context.py",
             "statusMessage": "Loading active feature context..."
           }
         ]
@@ -111,7 +114,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/write_guard.py",
+            "command": "node .claude/hooks/pyrun.js .claude/hooks/write_guard.py",
             "statusMessage": "Checking for secrets..."
           }
         ]
@@ -121,7 +124,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/pre_spawn_validation.py",
+            "command": "node .claude/hooks/pyrun.js .claude/hooks/pre_spawn_validation.py",
             "statusMessage": "Validating subagent isolation..."
           }
         ]
@@ -132,7 +135,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/subagent_stop.py",
+            "command": "node .claude/hooks/pyrun.js .claude/hooks/subagent_stop.py",
             "timeout": 10
           }
         ]
@@ -143,7 +146,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/session_end.py",
+            "command": "node .claude/hooks/pyrun.js .claude/hooks/session_end.py",
             "async": true
           }
         ]

@@ -39,17 +39,16 @@ Mission: Raw input → finalized PRD. Source of truth = `PRD.md`.
 
 **`/plan <slug>`** — auto-detect state, resume from where it left off.
 
-**`/plan <slug> <message>`** — message is routed based on current state:
+**`/plan <slug> <message>`** — message routed by `planning_stages`:
 
-| State | Message Handling |
-|-------|------------------|
-| Nothing exists (fresh) | Message becomes **seed input** — write to `input/USER_CONTEXT.md`, use alongside FEATURE_INPUT.md in Context stage |
-| FEATURE_DRAFT exists | Message becomes **discovery context** — append to FEATURE_DRAFT.md Section 6 (Gaps) or Section 7 (Questions) as user-provided clarification, then resume Discover |
-| DISCOVERY_NOTES in progress | Message becomes **answer/clarification** — append as inline answer to next unresolved question in DISCOVERY_NOTES.md, resume Discover |
-| PRD.md exists (not approved) | Message becomes **draft feedback** — parse intent, edit affected PRD sections, resume Review |
-| PRD.md APPROVED | **Reopen flow** — see Reopen Finalized PRD section below |
+| Stage state | Message handling |
+|-------------|-----------------|
+| context in_progress | append to `USER_CONTEXT.md`, resume Context |
+| discover in_progress | append as answer/clarification to FEATURE_DRAFT.md or DISCOVERY_NOTES.md, resume Discover |
+| draft complete / review pending | apply as PRD feedback inline, enter Review |
+| review approved | Reopen flow — see Reopen section |
 
-**Message routing rules:** parse intent (requirement/clarification/feedback/correction/scope) → persist to artifact → resume. FEATURE_INPUT.md is primary if init-feature was run.
+`review` as a message keyword → no special routing. Treated as feedback, same path as above.
 
 ---
 
@@ -77,29 +76,23 @@ Loop-backs: `DISCOVERY_GAP` → Discover. `PRD_ISSUE` → Draft. Mixed → Disco
 
 ## State Detection
 
-**IMPORTANT:** Use `{project}` variable from Setup step 1, never hardcode project name.
+**IMPORTANT:** Use `{project}` from Setup step 1. Never hardcode project name.
 
-Check `docs/features/{project}/{slug}/planning/`:
+Read `planning_stages` from `loop_state.json`. Route to first incomplete stage:
 
 ```
-PRD.md + "PRD Status: APPROVED" + message → REOPEN (apply message, see Reopen section)
-PRD.md + "PRD Status: APPROVED"           → FINALIZED (nothing to do)
-PRD.md + loop_state blocker               → Review loop-back
-PRD.md + message                          → apply message as draft feedback, resume Review
-PRD.md                                    → start Review
-DISCOVERY_NOTES.md ends with YES + msg    → resume Draft (m/l — message as additional context)
-DISCOVERY_NOTES.md ends with YES          → resume Draft (m/l)
-DISCOVERY_NOTES.md without YES + message  → append message as answer/clarification, resume Discover
-DISCOVERY_NOTES.md without YES            → resume Discover
-FEATURE_DRAFT.md + "All Gaps Resolved: YES" + msg → apply message as draft feedback, resume Draft (s tier)
-FEATURE_DRAFT.md + "All Gaps Resolved: YES"       → resume Draft (s tier — gaps resolved inline)
-FEATURE_DRAFT.md + message                → append message to gaps/questions, resume Discover
-FEATURE_DRAFT.md                          → resume Discover
-Nothing + message                         → write USER_CONTEXT.md, start Context
-Nothing                                   → start Context
+review = approved                  → FINALIZED. If message → REOPEN (see Reopen section).
+review = approved + message        → REOPEN
+review = pending, draft = complete → REVIEW SESSION. Must run in new session (see Review stage).
+draft  = complete + message        → apply message as PRD feedback, enter Review.
+draft  = pending | in_progress     → resume Draft
+discover = complete                → start Draft
+discover = pending | in_progress   → resume Discover
+context  = complete                → start Discover
+else (planning_stages absent)      → start Context
 ```
 
-**Note:** `pipeline.phase = "init"` is valid (set by `/init-feature`) — start at Context stage, not an error.
+`pipeline.phase = "init"` is valid — start at Context stage.
 
 ---
 
