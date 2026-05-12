@@ -6,14 +6,14 @@ All AskUserQuestion calls → per `.claude/agents/references/ask-user-protocol.m
 
 ---
 
-## Research Gate (all tiers except xs)
+## Source Detection (all tiers except xs)
 
-Before forming any AskUserQuestion, for each identified gap:
-1. Search codebase (keyword/symbol grep), Jira (comments + ACs + linked issues), Confluence (linked pages), local-docs
-2. If found → `[Resolved from {source}:{ref}]` — no question
-3. Only gaps with no resolvable source → add to Q&A queue
+**deep_analysis:** true if (tier = m or l) AND any of:
+- `input/jira/` has .md files
+- `input/confluence/` has .md files
+- `input/local-docs/` has .md files
 
-User questions are the last resort, not the first.
+Otherwise: false (sequential path).
 
 ---
 
@@ -82,13 +82,43 @@ python scripts/gate_transition.py {project} {slug} plan-stage discover complete
 
 ---
 
-## m/l tier — DISCOVERY_NOTES.md
+## m/l tier — Conditional Execution
 
-Load `.claude/agents/requirements-analyst.md`. Run discovery per agent definition.
+**If deep_analysis: true**
 
-Output: `docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md`
+1. EnterPlanMode — research phase only (no edits, no Q&A, inline AskUserQuestion calls not possible inside Plan Mode)
 
-Format:
+2. Launch parallel Explore agents for each present source (tier-aware breadth):
+   - **jira_present**: Extract decisions, acceptance criteria, constraints, failed/blocked approaches. <500 words.
+   - **confluence_present**: Extract architecture decisions, patterns, contracts, data models. <500 words.
+   - **local_docs_present**: Extract specs, config, constraints, deployment notes. <500 words.
+   - **code_present AND gaps remain after above**: Trace data/control flow from entry points listed in FEATURE_DRAFT Existing System Touchpoints. <500 words.
+
+3. Synthesize findings:
+   - FALSE GAPS → answered in sources → mark `[Resolved from {source}:{ref}]`
+   - REAL GAPS  → genuinely missing → add to question queue (6–10 max, prioritized P0/P1/P2)
+
+4. ExitPlanMode
+
+5. Load `.claude/agents/requirements-analyst.md`. Run Q&A on REAL GAPS only (inline — AskUserQuestion requires inline execution).
+
+Output: `docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md` (same format as sequential path)
+
+Gate:
+```bash
+python scripts/gate_transition.py {project} {slug} planning Draft --artifact docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md
+python scripts/gate_transition.py {project} {slug} plan-stage discover complete
+```
+
+**If deep_analysis: false**
+
+1. Sequential read: FEATURE_DRAFT sections 6+7 → `input/jira/` → `input/confluence/` → `input/local-docs/`
+
+2. Load `.claude/agents/requirements-analyst.md`. Run Q&A on identified gaps (inline).
+
+3. Same output format and gate.
+
+Format (both paths):
 ```
 ### Q{N}: {question}
 **Category:** Business Rules | UX | Edge Cases | Integration | Performance
@@ -97,9 +127,3 @@ Format:
 ```
 
 End with: `All Questions Resolved: YES`
-
-Gate:
-```bash
-python scripts/gate_transition.py {project} {slug} planning Draft --artifact docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md
-python scripts/gate_transition.py {project} {slug} plan-stage discover complete
-```
