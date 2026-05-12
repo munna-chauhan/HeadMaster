@@ -82,48 +82,64 @@ python scripts/gate_transition.py {project} {slug} plan-stage discover complete
 
 ---
 
-## m/l tier — Conditional Execution
+## m/l tier — Continuous Brain Dump (DISCOVERY_NOTES.md)
 
-**If deep_analysis: true**
+DISCOVERY_NOTES.md is a working journal, append-only per phase. TDD author reads it to understand discovery journey. If session ends, re-enter at current phase marker — no re-run needed.
 
-1. EnterPlanMode — research phase only (no edits, no Q&A, inline AskUserQuestion calls not possible inside Plan Mode)
+**Phase markers (one per section):**
+- `[COMPLETE: YYYY-MM-DD]` — phase done, skip on re-run
+- `[IN_PROGRESS]` — current phase
+- `[PENDING]` — not yet started
 
-2. Launch parallel Explore agents for each present source (tier-aware breadth):
-   - **jira_present**: Extract decisions, acceptance criteria, constraints, failed/blocked approaches. <500 words.
-   - **confluence_present**: Extract architecture decisions, patterns, contracts, data models. <500 words.
-   - **local_docs_present**: Extract specs, config, constraints, deployment notes. <500 words.
-   - **code_present AND gaps remain after above**: Trace data/control flow from entry points listed in FEATURE_DRAFT Existing System Touchpoints. <500 words.
+**File structure:**
+```
+## Analysis Phase [IN_PROGRESS]
+(findings from sources or sequential read — append only)
 
-3. Synthesize findings:
-   - FALSE GAPS → answered in sources → mark `[Resolved from {source}:{ref}]`
-   - REAL GAPS  → genuinely missing → add to question queue (6–10 max, prioritized P0/P1/P2)
+## Q&A Phase [PENDING]
+(questions and answers — append only)
 
-4. ExitPlanMode
+## Plan Mode Discussion [PENDING]
+(if entered — discussion and synthesis — append only)
 
-5. Load `.claude/agents/requirements-analyst.md`. Run Q&A on REAL GAPS only (inline — AskUserQuestion requires inline execution).
+---
+All Questions Resolved: YES (append at very end when complete)
+```
 
-Output: `docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md` (same format as sequential path)
+**Execution:**
+
+1. Check if `docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md` exists:
+   - If exists: read phase markers, resume at current phase
+   - If not: create with `## Analysis Phase [IN_PROGRESS]`
+
+2. **Analysis Phase:**
+   - If deep_analysis: true → EnterPlanMode → launch parallel Explore agents per source → synthesize FALSE/REAL gaps → ExitPlanMode → append findings
+   - If deep_analysis: false → sequential read FEATURE_DRAFT + sources → append findings
+   - Identify gaps. If clear, mark `[Analysis Phase] [COMPLETE]` and skip Plan Mode.
+
+3. **During analysis, if doubts arise:**
+   - Ask clarifying questions inline (AskUserQuestion)
+   - Append Q&A to Analysis Phase section
+
+4. **If major uncertainty remains after analysis:**
+   - EnterPlanMode → discuss findings with user → ExitPlanMode
+   - Update `[Analysis Phase]` marker to `[COMPLETE]`
+   - Create `[Plan Mode Discussion]` section, append discussion/synthesis
+
+5. **Q&A Phase (if gaps remain):**
+   - Load `.claude/agents/requirements-analyst.md`
+   - Spawn requirements-analyst (inline) with identified REAL GAPS
+   - Agent uses AskUserQuestion for P0/P1/P2 gaps (one at a time)
+   - Agent verifies category coverage (Biz Rules, Edge Cases, Integration, Performance, UX)
+   - Append Q&A results to Q&A Phase section
+   - Mark `[Q&A Phase] [COMPLETE]`
+
+6. **Finalize:**
+   - Update all phase markers to `[COMPLETE]` if not already
+   - Append: `All Questions Resolved: YES`
 
 Gate:
 ```bash
 python scripts/gate_transition.py {project} {slug} planning Draft --artifact docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md
 python scripts/gate_transition.py {project} {slug} plan-stage discover complete
 ```
-
-**If deep_analysis: false**
-
-1. Sequential read: FEATURE_DRAFT sections 6+7 → `input/jira/` → `input/confluence/` → `input/local-docs/`
-
-2. Load `.claude/agents/requirements-analyst.md`. Run Q&A on identified gaps (inline).
-
-3. Same output format and gate.
-
-Format (both paths):
-```
-### Q{N}: {question}
-**Category:** Business Rules | UX | Edge Cases | Integration | Performance
-**Answer:** {answer}
-**Source:** user | codebase:file:line | jira:KEY | confluence:page
-```
-
-End with: `All Questions Resolved: YES`
