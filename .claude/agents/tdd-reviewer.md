@@ -41,7 +41,7 @@ Adjust checklist depth per tier:
 - l (11 sections) → all items apply
 
 **A — PRD Traceability:** Every interface traces to PRD requirement. Every FR has corresponding component. Missing → `[PRD Gap]`
-**B — ADR Compliance:** Every architectural decision matches SYSTEM_DESIGN_NOTES ADRs. Violation → BLOCKER. No exceptions
+**B — ADR Compliance:** Every architectural decision matches SYSTEM_DESIGN_NOTES ADRs. Violation → BLOCKER. No exceptions. Data models: entities classified (first-class with lineage vs sub-entity as JSONB) with justification → MEDIUM if missing.
 **C — Scalability:** No N+1 queries, no missing indexes, no unbounded collections, pagination present where needed
 **D — Security:** Auth checks on every endpoint, no PII in logs, rate limiting present, sensitive data encrypted
 **E — Slice Integrity:** Every vertical slice is end-to-end functional (not a horizontal layer), independently shippable

@@ -6,6 +6,17 @@ All AskUserQuestion calls → per `.claude/agents/references/ask-user-protocol.m
 
 ---
 
+## Research Gate (all tiers except xs)
+
+Before forming any AskUserQuestion, for each identified gap:
+1. Search codebase (keyword/symbol grep), Jira (comments + ACs + linked issues), Confluence (linked pages), local-docs
+2. If found → `[Resolved from {source}:{ref}]` — no question
+3. Only gaps with no resolvable source → add to Q&A queue
+
+User questions are the last resort, not the first.
+
+---
+
 ## Routing
 
 ```bash

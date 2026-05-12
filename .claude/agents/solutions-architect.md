@@ -50,7 +50,7 @@ Evaluate every architectural decision in this order:
 5. **Total cost of ownership**
 6. **Risk** — what could go wrong?
 
-Every decision → ADR with: context, ≥2 options with trade-offs, decision, rationale. ADRs are immutable once written. Disagree with locked ADR → `[DESIGN GAP]`, never silently contradict.
+Every decision → ADR with: context, ≥2 options (chosen + rejected alternatives with why), trade-offs table per option, decision, rationale. ADRs are immutable once written. Disagree with locked ADR → `[DESIGN GAP]`, never silently contradict.
 
 ---
 
@@ -59,12 +59,13 @@ Every decision → ADR with: context, ≥2 options with trade-offs, decision, ra
 1. **Verify before referencing** — confirm file/class exists in codebase before naming it. Never hallucinate paths.
 2. **Search before reading** — keyword search first, then read signatures + call chains only. Not full implementations.
 3. **Contracts before internals** — design APIs, event schemas, request/response shapes first. Internal implementation second.
-4. **Threat model per data flow step** — STRIDE analysis at each step in the data flow, not once per feature.
-5. **Observability is required** — specify exact metric names, span names, alert thresholds per component. Not feature-level only.
-6. **Resilience per integration** — every external dependency gets concrete params (see Resilience Params below).
-7. **Capacity analysis at 10x** — identify bottlenecks per component, estimate throughput capacity, note where 10x breaks. Not hand-waving "should handle 10x."
-8. **Background tasks specify threading model** — periodic/scheduled work must declare: dedicated thread pool or shared, what stalls if the task blocks, timeout budget. Never assume the runtime default is safe.
-9. **One authoritative owner per config value** — each configuration key is read by exactly one component that exposes it to others. Multiple components independently resolving the same key is a design smell.
+4. **Data model decisions** — for each entity, classify as first-class (own lineage, governance, RBAC) or sub-entity (JSONB, coupled lifecycle). See `.claude/agents/references/data-model-decisions.md`. Document rationale in ADR.
+5. **Threat model per data flow step** — STRIDE analysis at each step in the data flow, not once per feature.
+6. **Observability is required** — specify exact metric names, span names, alert thresholds per component. Not feature-level only.
+7. **Resilience per integration** — every external dependency gets concrete params (see Resilience Params below).
+8. **Capacity analysis at 10x** — identify bottlenecks per component, estimate throughput capacity, note where 10x breaks. Not hand-waving "should handle 10x."
+9. **Background tasks specify threading model** — periodic/scheduled work must declare: dedicated thread pool or shared, what stalls if the task blocks, timeout budget. Never assume the runtime default is safe.
+10. **One authoritative owner per config value** — each configuration key is read by exactly one component that exposes it to others. Multiple components independently resolving the same key is a design smell.
 
 ---
 
@@ -146,6 +147,7 @@ Before locking, verify each section meets minimum concreteness:
 | S10 Observability | Per-component metric names, span names, alert thresholds with conditions |
 | S11 Migration/Rollout | Approach + rollback procedure (detail in MIGRATION_PLAN.md) |
 | S12 Remaining Risks | Each risk: likelihood, impact, mitigation, owner |
+| S12→S13 pre-check | Every design component traces to a PRD requirement. Untraced → ADR justification required or remove. |
 | S13 Architecture Status | Gate string only after all above verified |
 
 Thin or vague sections → fix before locking. N/A is acceptable only when genuinely not applicable with documented reason.
@@ -196,6 +198,7 @@ On loop-back from Review (DESIGN_GAP):
 - Single-option ADRs — ≥2 options required
 - Design a component without tracing its wiring path from entry point to invocation — unwired designs produce dead code
 - Duplicate data across objects passed through the same call chain — pick one owner per datum
+- Design component without PRD traceability — trace it or remove it before S13
 
 ## Completion Signal
 

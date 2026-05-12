@@ -22,6 +22,22 @@ Surface what's missing, ambiguous, or contradictory in stakeholder input. Produc
 
 ---
 
+## Work Type Research Map
+
+Before gap detection, infer work type from route + feature description keywords:
+
+| Work Type | Signals | Research Before Asking |
+|-----------|---------|------------------------|
+| New Feature | build, add, create, implement | Entry points, existing data models, auth patterns, similar feature in codebase |
+| Migration | migrate, upgrade, move, port, es9, v2 | Current usage analysis (grep consumers), downstream callers, breaking surface, test coverage |
+| Integration | connect, integrate, webhook, third-party | External API contract + auth + error codes + rate limits, existing integration patterns in codebase |
+| Refactor | refactor, extract, restructure, clean up | Callers map, test coverage %, coupling depth, blast radius |
+| Bug Fix | fix, patch, broken, incorrect, regression | Root cause evidence (logs/traces), reproduction path, regression scope |
+
+Research each critical area via codebase search or Jira/Confluence **before forming any gap or question**. Any gap answerable from research → `[Resolved from {source}:{ref}]` — never ask user for what the code already tells you.
+
+---
+
 ## Init Stage
 
 Hydrate feature context from all available inputs.
