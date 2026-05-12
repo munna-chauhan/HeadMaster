@@ -11,10 +11,9 @@ Code review + security scanning in single pass. Changed files only. 80%+ confide
 
 ## Review Execution Order
 
-1. **Secret detection** — scan diff for API keys, passwords, private keys, connection strings. If found → BLOCKED immediately.
-2. **Dependency vulnerabilities** — if dependency files changed (pom.xml, package.json, go.mod, requirements.txt), check for critical/high CVEs.
-3. **SAST** — static analysis on changed files. Use available tools (semgrep, bandit, spotbugs, eslint-security). If no tools available → note in report, continue.
-4. **TDD compliance** — every component in diff must exist in TDD. Classify deviations:
+**Phase B (security-scan) covers secrets, CVEs, and SAST.** Skip those here. If Phase B report absent: add secret detection as step 0, flag missing scan in report.
+
+1. **TDD compliance** — every component in diff must exist in TDD. Classify deviations:
 
    | Deviation | Severity | Rationale |
    |-----------|----------|-----------|
@@ -24,10 +23,10 @@ Code review + security scanning in single pass. Changed files only. 80%+ confide
    | Implementation detail differs from TDD | LOW | TDD specifies WHAT, not HOW |
    | Test file not in TDD | PASS | Tests are implementation detail |
 
-5. **OWASP Top 10** — full checklist at `.claude/agents/references/owasp-checklist.md`.
-6. **Logic + quality (changed lines only)** — edge cases, boundary conditions, race conditions, off-by-one, N+1 queries, resource leaks. Apply diff-only rule: if the line was not added or modified, discard the finding.
-7. **Wiring + isolation (changed lines only)** — every new component/field/setter introduced in the diff must have a caller that wires it within the same diff or existing codebase. Flag unwired code (HIGH). For failure-isolation claims ("X failure doesn't affect Y"), trace the runtime path through every method that can throw — verify isolation holds at each, not just teardown.
-8. **Performance (changed lines only)** — inefficient algorithms, memory leaks, blocking ops in async context. Same diff-only rule applies.
+2. **OWASP Top 10** — full checklist at `.claude/agents/references/owasp-checklist.md`.
+3. **Logic + quality (changed lines only)** — edge cases, boundary conditions, race conditions, off-by-one, N+1 queries, resource leaks. Apply diff-only rule: if the line was not added or modified, discard the finding.
+4. **Wiring + isolation (changed lines only)** — every new component/field/setter introduced in the diff must have a caller that wires it within the same diff or existing codebase. Flag unwired code (HIGH). For failure-isolation claims ("X failure doesn't affect Y"), trace the runtime path through every method that can throw — verify isolation holds at each, not just teardown.
+5. **Performance (changed lines only)** — inefficient algorithms, memory leaks, blocking ops in async context. Same diff-only rule applies.
 
 ## Diff-Only Scope Rule
 
@@ -95,13 +94,11 @@ Group output: `Critical (91–100)` → `Important (76–90)` → `Minor (51–7
 
 | Finding | Verdict |
 |---------|---------|
-| Any secret detected | BLOCKED |
-| CRITICAL CVE in dependency | BLOCKED |
-| CRITICAL SAST / security flaw | BLOCKED |
 | HIGH bug / security gap | FINDINGS |
 | MEDIUM/LOW only | PASS |
-| No tools available for deps/SAST | PASS (noted) |
 | No changed files | PASS |
+
+**Note:** Secrets, CVEs, SAST findings are Phase B verdicts (security-scan). If Phase B absent, secret detected → BLOCKED.
 
 **Verdict format:** `## Verdict` must be last section. Verdict word (PASS/FINDINGS/BLOCKED) on its own line after heading. Nothing after verdict word. Use past tense for historical context, never verdict keywords in prose.
 

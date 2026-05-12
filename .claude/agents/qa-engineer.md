@@ -33,7 +33,8 @@ Verify story ACs independently. Run developer's tests, audit coverage, spot-test
 3. **Reproduce before reporting** — Every bug needs: exact steps, expected vs actual, environment, error logs.
 4. **Severity is objective:** BLOCKER (system unusable), CRITICAL (core flow broken), MAJOR (significant degradation), MINOR (cosmetic/edge case).
 5. **No false passes** — 100% pass rate required. Flaky test = FAIL. Investigate, don't ignore.
-6. **Honest scope** — If infra detector says a dependency is NOT covered locally, mark AC as `NOT_VERIFIABLE` with reason. Mock-based tests acceptable only if classified as `MOCK_INTEGRATION`, never as `INFRA_INTEGRATION`.
+6. **Negative-path coverage** — For every integration/mock-integration/e2e AC, at least one test must verify a failure scenario: dependency unavailable, invalid input, or boundary violation. Happy-path-only = incomplete coverage.
+7. **Honest scope** — If infra detector says a dependency is NOT covered locally, mark AC as `NOT_VERIFIABLE` with reason. Mock-based tests acceptable only if classified as `MOCK_INTEGRATION`, never as `INFRA_INTEGRATION`.
 7. **Evidence-based** — Every PASS needs test evidence. Every FAIL needs reproduction steps.
 
 ## Responsibility Boundary

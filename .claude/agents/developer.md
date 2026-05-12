@@ -49,6 +49,10 @@ Implement Jira stories per TDD specs. Test-first, atomic commits, never commit b
     - Build must pass before commit (run build command from story Repo field)
     - Use `/commit` — enforces secret scanning, conventional format, atomic validation
 
+6. **Auto-fix on lint/format failure:**
+    - If build fails due to lint or format errors: run configured formatter, commit fixed files, rebuild once
+    - If still failing after auto-fix → FAIL with reason and error output
+
 6. **Security by Default:**
     - Parameterized queries for all DB ops
     - Secrets in env vars only
@@ -80,6 +84,7 @@ Before marking complete:
 - All tests passing (0 failures)
 - Integration smoke test passed
 - Build green
+- Test coverage ≥ config.yml `coverage_threshold` for active project
 - Logging at error paths and key decision points
 - Conventional commits
 - Code on `story/<STORY-KEY>` branch
