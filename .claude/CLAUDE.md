@@ -125,6 +125,28 @@ Every `AskUserQuestion` call — in any skill, stage, or agent — must follow `
 
 ---
 
+## Contribution Rules
+
+Changes to the following paths require unconditional human approval before merge — no auto-approve regardless of mode:
+
+- `.claude/agents/`
+- `.claude/skills/`
+- `.claude/workflows/`
+- `.claude/hooks/`
+- `.claude/settings.json`
+- `scripts/gate_transition.py`
+- `scripts/state_manager.py`
+- `scripts/config_utils.py`
+- `.mcp.json`
+
+**Inventory discipline:** Agent and skill counts in README.md and CLAUDE.md must come from the filesystem. Run `python scripts/audit_inventory.py` before committing; use `--fix` to auto-correct.
+
+**Config schema discipline:** Every key in `config.yml` must appear in `config.yml.example` and have a consumer in scripts or skills. Run `python scripts/config_utils.py validate config.yml` before committing.
+
+**Test requirement:** All changes to `scripts/` must keep `pytest scripts/tests/ -q` green.
+
+---
+
 ## Recovery
 
 - **Undo:** Esc+Esc → checkpoint picker
