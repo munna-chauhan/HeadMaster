@@ -66,7 +66,7 @@ def cmd_append(agent: str, entry: str) -> None:
     lines = content.splitlines()
 
     if len(lines) >= MEMORY_CAP:
-        print(f"[memory] {agent}/MEMORY.md is at cap ({MEMORY_CAP} lines). Run /compress first.", file=sys.stderr)
+        print(f"[memory] {agent}/MEMORY.md is at cap ({MEMORY_CAP} lines). Run /curate-memory {agent} first.", file=sys.stderr)
         sys.exit(1)
 
     duplicate = _find_duplicate(entry.strip(), lines)

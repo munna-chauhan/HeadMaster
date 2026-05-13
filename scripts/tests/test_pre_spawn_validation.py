@@ -324,6 +324,74 @@ Verify all TDD interfaces are implemented.
     print("  [PASS] tdd-reviewer clean prompt allowed")
 
 
+def test_kotlin_impl_path_blocked():
+    """Test 13: Kotlin implementation file path should block."""
+    print("Test 13: Kotlin impl path...")
+
+    tool_call = {
+        "name": "Agent",
+        "parameters": {
+            "subagent_type": "review-agent",
+            "prompt": "Review the implementation in src/main/UserService.kt for security issues.",
+        },
+    }
+
+    ok, reason = run_validation_hook(tool_call)
+    assert not ok, "Should block Kotlin impl path"
+    print(f"  [PASS] Blocked: {reason}")
+
+
+def test_csharp_impl_path_blocked():
+    """Test 14: C# implementation file path should block."""
+    print("Test 14: C# impl path...")
+
+    tool_call = {
+        "name": "Agent",
+        "parameters": {
+            "subagent_type": "review-agent",
+            "prompt": "Check src/Services/UserService.cs for OWASP issues.",
+        },
+    }
+
+    ok, reason = run_validation_hook(tool_call)
+    assert not ok, "Should block C# impl path"
+    print(f"  [PASS] Blocked: {reason}")
+
+
+def test_rust_impl_path_blocked():
+    """Test 15: Rust implementation file path should block."""
+    print("Test 15: Rust impl path...")
+
+    tool_call = {
+        "name": "Agent",
+        "parameters": {
+            "subagent_type": "review-agent",
+            "prompt": "Review the implementation at src/user_service.rs.",
+        },
+    }
+
+    ok, reason = run_validation_hook(tool_call)
+    assert not ok, "Should block Rust impl path"
+    print(f"  [PASS] Blocked: {reason}")
+
+
+def test_swift_impl_path_blocked():
+    """Test 16: Swift implementation file path should block."""
+    print("Test 16: Swift impl path...")
+
+    tool_call = {
+        "name": "Agent",
+        "parameters": {
+            "subagent_type": "review-agent",
+            "prompt": "See src/UserService.swift for the implementation details.",
+        },
+    }
+
+    ok, reason = run_validation_hook(tool_call)
+    assert not ok, "Should block Swift impl path"
+    print(f"  [PASS] Blocked: {reason}")
+
+
 if __name__ == "__main__":
     print("Running pre-spawn validation tests (FIX-019)...\n")
 
@@ -340,6 +408,10 @@ if __name__ == "__main__":
         test_tdd_reviewer_validated()
         test_prd_reviewer_validated()
         test_tdd_reviewer_clean_prompt_allowed()
+        test_kotlin_impl_path_blocked()
+        test_csharp_impl_path_blocked()
+        test_rust_impl_path_blocked()
+        test_swift_impl_path_blocked()
 
         print("\n" + "="*60)
         print("[PASS] FIX-019: All pre-spawn validation tests passed")

@@ -5,8 +5,14 @@
 # Path 1: User declares
 user_declared:
   behavior: Use declared tier directly. Log to run-log.md.
-  override: User can change tier at any time via /navigate {slug} --tier {new}
+  override: User can change tier at any time by editing loop_state.json complexity_tier via gate_transition.py.
   note: User-declared tier is still subject to re-classification checks.
+
+# Greenfield route
+greenfield:
+  behavior: Tier classified normally at init-feature. Route is locked — never reclassified.
+  pipeline: user chooses full or plan-only at init time.
+  note: No reference_branch. Convention discovery uses stack-defaults instead of existing files.
 
 # Path 2: AI classifies from input
 ai_classification:

@@ -99,14 +99,6 @@ def main() -> None:
         print(json.dumps({"error": f"Workflow file not found: .claude/workflows/{workflow_key}.yml"}))
         sys.exit(1)
 
-    # Token budgets for subagent max_tokens (keyed by tier)
-    all_budgets = resolver.config.get("token_budgets", {})
-    token_budget = all_budgets.get(tier or workflow_key, {
-        "per_story_max": 60000,
-        "review_max": 15000,
-        "qa_max": 15000,
-    })
-
     print(json.dumps({
         "project": project,
         "project_key": project_key,
@@ -118,7 +110,6 @@ def main() -> None:
         "jira_push": jira_push,
         "autonomous": autonomous,
         "gates": gates,
-        "token_budget": token_budget,
         "workflow_file": f".claude/workflows/{workflow_key}.yml",
         "loop_state_path": str(loop_state_path),
         "docs_path": str(REPO_ROOT / "docs" / "features" / project / slug),

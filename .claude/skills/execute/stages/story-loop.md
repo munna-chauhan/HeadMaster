@@ -82,6 +82,12 @@ Back to Phase A. If attempt >= max_loops → escalate/defer.
 ```bash
 python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} complete --phases A,B
 
+# Recurring finding detection — write to developer MEMORY.md before ledger cleanup
+python scripts/recurring_finding_detector.py {project} {slug}
+
+# Phase A/B learning extraction — write failure patterns before ledger cleanup
+python scripts/extract_phase_learnings.py {project} {slug} {STORY-KEY}
+
 # Auto-merge — TARGET = story's parent_branch (resolved in setup Step 4)
 TARGET={parent_branch}
 git checkout {TARGET} && git pull

@@ -99,4 +99,5 @@ Entries >90 days old move to pipeline-learnings-archive.md.
 - `retrospective-analyst` uses haiku — fast, pattern extraction only
 - Memory entries and learnings auto-apply because they are derived from factual run data
 - Config/workflow changes always require deliberate human decision — never auto-applied
-- Run `/curate-memory <agent>` periodically to merge stale or redundant memory entries
+- When `memory/agents/{agent}/MEMORY.md` approaches 200 lines, run `/curate-memory {agent}` — deduplicates and ages out entries older than 90 days. The cap is enforced by `update_agent_memory.py`; entries beyond it are dropped until curation runs.
+- Phase A/B retry patterns are written per-story by `scripts/extract_phase_learnings.py` — do not re-extract from run-log what the script already captured.

@@ -41,7 +41,7 @@ If registry already exists and no `--reset` flag:
 ## Step 2: Scan repos
 
 For each project root — find subdirs at maxdepth 2 containing any build file marker:
-`pom.xml`, `build.gradle`, `settings.gradle`, `package.json`, `go.mod`, `requirements.txt`, `pyproject.toml`
+`pom.xml`, `build.gradle`, `build.gradle.kts`, `settings.gradle`, `package.json`, `go.mod`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `*.fsproj`, `composer.json`, `Gemfile`
 
 Exclude: `node_modules`, `.git`, `target`, `build`, `dist`.
 
@@ -67,24 +67,31 @@ Scan build files in module path:
 | File | Extract |
 |------|---------|
 | `pom.xml` | `java.version`, `maven.compiler.target`, `kotlin.version`, `spring-boot.version`, `spring.version` |
-| `build.gradle` | `sourceCompatibility`, `javaVersion`, `kotlinVersion` |
+| `build.gradle` / `build.gradle.kts` | `sourceCompatibility`, `javaVersion`, `kotlinVersion` |
 | `package.json` | `engines.node`, top 5 `dependencies` keys |
 | `go.mod` | first line (`module` + `go` directive) |
 | `pyproject.toml` / `requirements.txt` | `python_requires`, first 5 deps |
-| `*.csproj` | `TargetFramework` |
+| `*.csproj` / `*.fsproj` | `TargetFramework` |
+| `Cargo.toml` | `[package].rust-version`, `edition` |
+| `composer.json` | `require.php` (PHP version constraint) |
+| `Gemfile` | `ruby` directive |
 
 Infer `build_cmd`:
 - `./mvnw` exists → `./mvnw clean verify`; else `mvn clean verify`
 - `./gradlew` exists → `./gradlew build`; else `gradle build`
 - `package.json` → check `scripts.build`, `scripts.test`; default `npm run build`
 - `go.mod` → `go build ./...`
-- `requirements.txt` → `pytest`
+- `requirements.txt` / `pyproject.toml` → `pytest`
+- `Cargo.toml` → `cargo build`
+- `*.csproj` / `*.fsproj` → `dotnet build`
+- `composer.json` → `composer install`
+- `Gemfile` → `bundle exec rake`
 
 ---
 
 ## Step 5: Auto-detect all tool versions in workspace
 
-From tech stack → determine required tools: Java, Maven, Gradle, Python, Node, Go, .NET.
+From tech stack → determine required tools: Java, Maven, Gradle, Python, Node, Go, .NET, Rust/Cargo, PHP/Composer, Ruby/Bundler.
 
 For each tool:
 - Search PATH: `{tool} --version` or `{tool} -version`
@@ -192,14 +199,55 @@ Create `memory/projects/` dir if absent.
 
 ---
 
-## Step 8: Summary
+## Step 8: Extract style/lint config
+
+For each repo, run:
+```bash
+python scripts/style_extractor.py {repo-path} --output memory/projects/{project}/style/{repo-name}.md
+```
+
+The script discovers style/lint configs at the repo root by file pattern (ini, json, yaml, toml, xml, key=value). No tool names assumed. Exit 1 = no configs found → skip silently, do not write file.
+
+---
+
+## Step 9: Summary
 
 ```
 Registry written: {project} ({N} repos, {M} modules)
 Tools: {tool-list with status}
   - {tool-name} v{version}: {N} repos compatible
   - ... (any mismatches flagged)
+Style: {N} repos with style rules extracted → memory/projects/{project}/style/
 Next: /init-feature — use registry for repo selection.
+```
+
+---
+
+## Step 10: Greenfield scaffold (only when `--greenfield <target-path>` passed)
+
+Create the target directory and write starter files per `greenfield_stack` and `greenfield_template` from loop_state.
+
+| Stack | Build file | Default content |
+|---|---|---|
+| Java/Spring | `pom.xml` | Maven wrapper, Spring Boot parent, single module |
+| Node/TypeScript | `package.json` | `"type": "module"`, typescript + jest devDeps |
+| Python | `pyproject.toml` | `[project]` block, pytest dep |
+| Go | `go.mod` | module path from feature slug |
+| Rust | `Cargo.toml` | `[package]` block, edition 2021 |
+| .NET | `{slug}.csproj` | `<Project Sdk="Microsoft.NET.Sdk">`, net8.0 |
+| Ruby | `Gemfile` | `source 'https://rubygems.org'`, rspec |
+
+Always write:
+- `README.md` — one-line project description from feature name
+- `.gitignore` — standard ignore rules for the stack (language-specific patterns + `.env`, `*.local`)
+
+After writing starter files → proceed with normal scan (Steps 2–9) so `repo-registry.yml` captures the new repo.
+
+Print at end of Step 9:
+```
+Greenfield scaffold: {target-path} ({stack}, {template})
+Starter files: {list of files written}
+Proceeding to scan...
 ```
 
 ---

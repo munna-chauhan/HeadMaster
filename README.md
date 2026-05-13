@@ -11,8 +11,8 @@
   <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.9+">
   <img src="https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 18+">
   <img src="https://img.shields.io/badge/License-Private-red?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Agents-12-00C853?style=for-the-badge" alt="12 Agents">
-  <img src="https://img.shields.io/badge/Skills-17-FF6D00?style=for-the-badge" alt="17 Skills">
+  <img src="https://img.shields.io/badge/Agents-13-00C853?style=for-the-badge" alt="13 Agents">
+  <img src="https://img.shields.io/badge/Skills-18-FF6D00?style=for-the-badge" alt="19 Skills">
 </p>
 
 <p align="center">
@@ -424,7 +424,7 @@ For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (s
 /init-feature hotfix "Fix null pointer in PaymentService"
 # -> tier: xs
 /design my-fix          # writes IMPLEMENTATION_BRIEF.md only
-/execute my-fix         # A -> B -> C -> D, no System Review
+/execute my-fix         # A -> B per story, no Phase C
 ```
 
 </details>
@@ -483,7 +483,7 @@ For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (s
 
 ## Agents
 
-12 specialized agents, each with defined input/output contracts and memory.
+13 specialized agents, each with defined input/output contracts and memory.
 
 ### Planning
 
@@ -511,6 +511,7 @@ For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (s
 | `review-agent` | haiku | Code review + OWASP security (diff only) | Subagent (isolated) |
 | `qa-engineer` | sonnet | Integration tests per AC, test fixes | Subagent (isolated) |
 | `release-agent` | haiku | Story decomposition + merge gate | Inline |
+| `retrospective-analyst` | haiku | Post-feature pattern extraction, memory + learning proposals | Subagent |
 
 **Isolation:** review-agent, qa-engineer, tdd-reviewer receive **no implementation context** — diff + ACs + TDD sections only. Enforced by `pre_spawn_validation.py` hook. prd-reviewer isolation is structural (new session).
 
@@ -518,72 +519,25 @@ For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (s
 
 ## Configuration Reference
 
-<details>
-<summary><strong><code>config.yml</code> &mdash; full reference</strong></summary>
+The canonical reference is [`config.yml.example`](config.yml.example). Copy it to `config.yml` (gitignored) and customize. Every key in the example file has a consumer — no dead keys.
 
-```yaml
-projects:
-  active: acme
-
-  default:
-    name: HeadMaster
-    root: .
-    project_key: HeadMaster
-    technical_owner: Your Name
-    approver: Your Name
-    jira_push: false
-    coverage_threshold: 60
-
-  acme:
-    name: Acme
-    root: ../acme-app
-    project_key: ACME
-    technical_owner: Your Name
-    approver: Your Name
-    jira_push: true
-    confluence: false
-    coverage_threshold: 80
-
-pipeline:
-  max_loops: 3
-  dry_run: false
-  build_command: null       # null = auto-detect from project type
-  loop_caps:
-    plan:    3
-    design:  4
-    execute: 2
-  parallel: false
-
-autonomous: false           # false = human initiates each phase
-
-gates:
-  plan:
-    interactive: true
-    review:
-      mode: human_in_loop  # skip | auto | human_in_loop
-  design:
-    interactive: true
-    review:
-      mode: human_in_loop
-  breakdown:
-    auto_approve: true
-
-token_budgets:
-  xs: { per_story_max: 10000, review_max: 3000,  qa_max: 3000  }
-  s:  { per_story_max: 30000, review_max: 8000,  qa_max: 8000  }
-  m:  { per_story_max: 60000, review_max: 15000, qa_max: 15000 }
-  l:  { per_story_max: 120000, review_max: 25000, qa_max: 25000 }
+```bash
+cp config.yml.example config.yml
 ```
 
-**`gates.plan.review.mode`**
+Validate your config at any time:
+
+```bash
+python scripts/config_utils.py validate config.yml
+```
+
+**`gates.{phase}.review.mode`**
 
 | Mode | Behavior |
 |---|---|
-| `skip` | Mark PRD APPROVED immediately |
-| `auto` | Run prd-reviewer inline, auto-approve PASS/CONDITIONAL |
-| `human_in_loop` | Interactive Q&A + optional sections gate + prd-reviewer (m/l) |
-
-</details>
+| `skip` | Mark artifact APPROVED immediately |
+| `auto` | Run reviewer inline, auto-approve PASS/CONDITIONAL |
+| `human_in_loop` | Interactive Q&A + reviewer (m/l tiers) |
 
 <details>
 <summary><strong><code>.mcp.json</code> &mdash; MCP server config</strong></summary>
@@ -749,7 +703,7 @@ HeadMaster/
 |   +-- CLAUDE.md                     # Core operating rules
 |   +-- settings.json                 # Permissions + hooks
 |   |
-|   +-- agents/                       # 12 agent definitions
+|   +-- agents/                       # 13 agent definitions
 |   |   +-- requirements-analyst.md
 |   |   +-- prd-author.md
 |   |   +-- prd-reviewer.md
@@ -762,9 +716,10 @@ HeadMaster/
 |   |   +-- qa-engineer.md
 |   |   +-- release-agent.md
 |   |   +-- web-researcher.md
+|   |   +-- retrospective-analyst.md
 |   |   +-- references/               # Output protocols
 |   |
-|   +-- skills/                       # 17 skill definitions
+|   +-- skills/                       # 19 skill definitions
 |   |   +-- init-feature/ | plan/ | design/ | breakdown/ | execute/
 |   |   +-- implement/ | security-scan/ | review-code/ | qa-integration/
 |   |   +-- review-system/ | jira-ops/ | reopen/ | retrospect/
@@ -867,6 +822,28 @@ python scripts/cleanup_failed_run.py acme {slug} --reset-state
 
 ---
 
+## Who Can Use This
+
+Target users:
+
+| User | How they use HeadMaster |
+|---|---|
+| Solo senior / staff engineer | Full pipeline across one or more existing repos |
+| Tech lead running design reviews | `/plan`, `/design`, `/review-tdd` standalone — no execution required |
+| Security engineer | `/scan`, `/review-code`, `/review-branch` standalone |
+
+Why it works for a single developer today:
+- `config.yml` is per-machine (gitignored) — no coordination needed
+- `memory/` is per-machine (gitignored) — agent memory is personal
+- Jira creds are personal env vars
+- `setup-env` writes a personal `repo-registry.yml`
+
+Known limitations at Phase 1:
+- Agent memory does not cross machines
+- Two developers cannot share progress on the same feature slug without manually moving `memory/features/{project}/{slug}/loop_state.json`
+
+---
+
 ## Best Practices
 
 | # | Practice |
@@ -880,7 +857,7 @@ python scripts/cleanup_failed_run.py acme {slug} --reset-state
 | 7 | **`/reopen` instead of editing artifacts** &mdash; tracks cascade and triggers revision mode |
 | 8 | **One active project per session** &mdash; change `projects.active` and restart |
 | 9 | **Security/observability/metrics are opt-in** &mdash; offered during PRD review, never auto-added |
-| 10 | **Phase E is mandatory for m/l tiers** &mdash; the only audit comparing intent (TDD) to outcome (commits) |
+| 10 | **Phase C is mandatory for m/l tiers** &mdash; the only audit comparing intent (TDD) to outcome (commits) |
 
 ---
 

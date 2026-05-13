@@ -156,6 +156,25 @@ def cmd_check(project: str, slug: str, story_key: str, approach: str):
     print(json.dumps({"similar": False, "reason": "No significant overlap with prior failures"}))
 
 
+def cmd_summarize(project: str, slug: str, story_key: str) -> None:
+    """Print structured summary of failure records for a story."""
+    records = _load_ledger(project, slug, story_key)
+    if not records:
+        print(json.dumps({"attempts": 0, "error_types": {}, "hypotheses": []}))
+        return
+
+    error_counts: dict[str, int] = {}
+    hypotheses: list[str] = []
+    for r in records:
+        et = r.get("error_type", "unknown")
+        error_counts[et] = error_counts.get(et, 0) + 1
+        h = r.get("hypothesis", "").strip()
+        if h:
+            hypotheses.append(h)
+
+    print(json.dumps({"attempts": len(records), "error_types": error_counts, "hypotheses": hypotheses}, indent=2))
+
+
 def cmd_cleanup(project: str, slug: str, story_key: str):
     """Delete failure ledger for a completed story."""
     path = _ledger_path(project, slug, story_key)
@@ -173,23 +192,26 @@ def cmd_cleanup(project: str, slug: str, story_key: str):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: failure_ledger.py <append|load|check|cleanup> <project> <slug> <story-key> [options]", file=sys.stderr)
+        print("Usage: failure_ledger.py <append|load|check|cleanup|summarize> <project> <slug> <story-key> [options]", file=sys.stderr)
         sys.exit(1)
 
     command = sys.argv[1]
 
-    if command == "cleanup":
+    if command in ("cleanup", "summarize"):
         if len(sys.argv) < 5:
-            print("Usage: failure_ledger.py cleanup <project> <slug> <story-key>", file=sys.stderr)
+            print(f"Usage: failure_ledger.py {command} <project> <slug> <story-key>", file=sys.stderr)
             sys.exit(1)
         project = sys.argv[2]
         slug = sys.argv[3]
         story_key = sys.argv[4]
-        cmd_cleanup(project, slug, story_key)
+        if command == "cleanup":
+            cmd_cleanup(project, slug, story_key)
+        else:
+            cmd_summarize(project, slug, story_key)
         return
 
     if len(sys.argv) < 5:
-        print("Usage: failure_ledger.py <append|load|check|cleanup> <project> <slug> <story-key> [options]", file=sys.stderr)
+        print("Usage: failure_ledger.py <append|load|check|cleanup|summarize> <project> <slug> <story-key> [options]", file=sys.stderr)
         sys.exit(1)
 
     project = sys.argv[2]
@@ -228,7 +250,7 @@ def main():
         cmd_check(project, slug, story_key, sys.argv[idx + 1])
 
     else:
-        print(f"[failure-ledger] Unknown command: {command}", file=sys.stderr)
+        print(f"[failure-ledger] Unknown command: {command}. Valid: append | load | check | cleanup | summarize", file=sys.stderr)
         sys.exit(1)
 
 

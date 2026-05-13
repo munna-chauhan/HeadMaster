@@ -67,6 +67,18 @@ def main() -> None:
         except Exception:
             pass
 
+    # Warn on unknown config keys (non-fatal — preserves backward compat)
+    try:
+        from config_utils import ConfigResolver, ALLOWED_TOP_LEVEL_KEYS
+        _resolver = ConfigResolver(REPO_ROOT / "config.yml")
+        _unknown = _resolver.validate()
+        if _unknown:
+            print(f"[HeadMaster] config.yml: unknown keys {_unknown} — see config.yml.example")
+    except FileNotFoundError:
+        pass
+    except Exception:
+        pass
+
     project_key = read_project_key() or "(not set)"
     project = read_active_project()
     model = read_model_from_event()

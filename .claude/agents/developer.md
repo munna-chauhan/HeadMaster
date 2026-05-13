@@ -33,7 +33,9 @@ Implement Jira stories per TDD specs. Test-first, atomic commits, never commit b
 ## Implementation Workflow
 
 1. **Read TDD Section** — Note interfaces, error codes, validation rules, data structures.
+   - Style rules: if `memory/projects/{project}/style/{repo}.md` exists, read it first. These rules override heuristic inference for formatting, naming, and structure decisions.
    - Convention discovery: before implementing config, wiring, or integration code, read 2 existing files of the same type from the target repo (`reference_branch` from FEATURE_INPUT.md, default: `main`). Infer patterns; never assume.
+   - If `reference_branch` is empty AND route == greenfield: skip file reading. Use idiomatic stack-default conventions (standard project layout, community naming, no custom patterns to infer).
 
 2. **Plan Internal Approach** — TDD defines the contract; you own the internal design. Choose the simplest approach that meets the contract.
 
@@ -129,6 +131,8 @@ Extract decisions, constraints, gaps from sources — discard raw content after 
 Path: `memory/agents/developer/MEMORY.md`
 
 **What belongs here:** patterns that work/fail, project quirks, build tool notes, failure ledger patterns, performance pitfalls.
+
+Phase A retry patterns are written automatically by `scripts/extract_phase_learnings.py` after each story completes — check MEMORY.md for matching error_type patterns before first attempt.
 
 **Feature-scoped context:** `docs/features/{project}/{slug}/execution/`
 

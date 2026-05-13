@@ -28,13 +28,14 @@
 
 ## Agents
 
-**12 agents:** codebase-analyst, developer, prd-author, prd-reviewer, qa-engineer, release-agent, requirements-analyst, review-agent, solutions-architect, tdd-author, tdd-reviewer, web-researcher.
+**13 agents:** codebase-analyst, developer, prd-author, prd-reviewer, qa-engineer, release-agent, requirements-analyst, retrospective-analyst, review-agent, solutions-architect, tdd-author, tdd-reviewer, web-researcher.
 
 - Definition: `.claude/agents/{agent}.md` | Memory: `memory/agents/{agent}/MEMORY.md` (max 200 lines) | Model: in frontmatter
 - Style: concise, fragments OK, → for causality, tables over prose, paths exact
 - Memory: read on start, write on complete (new learnings only), never feature-specific
 - Models: sonnet (default), opus (complex reasoning), haiku (mechanical/fast)
 - **Pipeline mistakes → fix in agent MEMORY.md or CLAUDE.md. Never add Must-Rules to stage/skill files.**
+- When MEMORY.md hits the cap, run `/curate-memory {agent}` to deduplicate and age out entries.
 
 **Isolation rule:** review-agent, qa-engineer, tdd-reviewer NEVER receive implementation context — PRD/TDD/diff only. Enforced by pre_spawn_validation.py.
 
@@ -42,7 +43,7 @@
 
 ## Skills
 
-**17 skills:** archive-feature, breakdown, compress, design, draw, execute, implement, init-feature, jira-ops, plan, publish-confluence, qa-integration, reopen, review-code, review-system, security-scan, setup-env.
+**19 skills:** archive-feature, breakdown, compress, curate-memory, design, draw, execute, implement, init-feature, jira-ops, plan, publish-confluence, qa-integration, reopen, retrospect, review-code, review-system, security-scan, setup-env.
 
 - Definition: `.claude/skills/{skill}/SKILL.md` + stage files
 - Skills own stage logic, read config.yml for gates, call scripts via subprocess, spawn agents with clean context
@@ -113,6 +114,37 @@ Every `AskUserQuestion` call — in any skill, stage, or agent — must follow `
 - Review/QA prompts: git diff + ACs + extracted TDD sections only. Total ≤5000 chars.
 - Never pass PRD, SYSTEM_DESIGN_NOTES, or JIRA_BREAKDOWN to review/QA subagents.
 
+
+---
+
+## Token Efficiency
+
+- Each subagent prompt includes only what the current step needs. PRD, TDD, SYSTEM_DESIGN_NOTES are reference docs — extract sections, never pass whole.
+- Skill instructions are hot code — every token loads per invocation. State each rule once. No examples, no placeholders.
+- Agent memory entries: one-line patterns, not narratives.
+- Standard subagent payload: `git diff` + ACs + extracted TDD section only. Total ≤5000 chars.
+
+---
+
+## Contribution Rules
+
+Changes to the following paths require unconditional human approval before merge — no auto-approve regardless of mode:
+
+- `.claude/agents/`
+- `.claude/skills/`
+- `.claude/workflows/`
+- `.claude/hooks/`
+- `.claude/settings.json`
+- `scripts/gate_transition.py`
+- `scripts/state_manager.py`
+- `scripts/config_utils.py`
+- `.mcp.json`
+
+**Inventory discipline:** Agent and skill counts must come from the filesystem. Run `python scripts/audit_inventory.py` before committing; use `--fix` to auto-correct.
+
+**Config schema discipline:** Every key in `config.yml` must appear in `config.yml.example` and have a consumer in scripts or skills. Run `python scripts/config_utils.py validate config.yml` before committing.
+
+**Test requirement:** All changes to `scripts/` must keep `pytest scripts/tests/ -q` green.
 
 ---
 

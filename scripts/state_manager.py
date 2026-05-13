@@ -114,7 +114,7 @@ def format_validation_error(project: str, slug: str, error_msg: str) -> str:
         f"CORRUPTED STATE: {project}/{slug}\n"
         f"Error: {error_msg}\n"
         f"Recover: python scripts/cleanup_failed_run.py {project} {slug} --reset-state\n"
-        f"Then: /navigate {slug}"
+        f"Then: /plan {slug} or /execute {slug} depending on phase"
     )
 
 
@@ -202,7 +202,7 @@ def _hint_from_phase(phase: str, slug: str) -> str:
         "design":    f"Run /design {slug}",
         "breakdown": f"Run /breakdown {slug}",
         "execute":   f"Run /execute {slug}",
-    }.get(phase, f"Run /navigate {slug}")
+    }.get(phase, f"Run /plan {slug} (phase unknown)")
 
 
 def _phase_from_state(artifacts: dict, stories: dict, slug: str) -> Tuple[str, str, str]:
