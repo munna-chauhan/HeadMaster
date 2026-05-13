@@ -28,6 +28,16 @@ import file_lock
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+def record_gate_passed(project: str, slug: str, phase: str, stage: str) -> None:
+    """Record a gate transition for performance tracking purposes.
+
+    Called after a successful gate transition. Failures here must not block
+    the transition itself.
+    """
+    # Intentionally minimal — hook point for future telemetry integration
+    pass
+
+
 def main() -> None:
     """Execute pipeline gate transition with atomic state updates.
 
@@ -356,6 +366,12 @@ def main() -> None:
         lock_file.close()
 
     print(f"[gate] {slug}: {phase}/{stage}", file=sys.stderr)
+
+    # Performance tracking — failures must not block the transition
+    try:
+        record_gate_passed(project, slug, phase, stage)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

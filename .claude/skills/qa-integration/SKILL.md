@@ -1,6 +1,6 @@
 ---
 name: qa-integration
-description: "Subagent phase D of /execute. Spawned with fresh context — no implementation or review memory. Writes + runs integration tests per AC. Owns test fixes. Reports code bugs. Never touches production code."
+description: "Integration QA skill. Writes + runs integration tests against story or feature ACs. Used as subagent in Phase C of /execute. Owns test fixes. Reports code bugs. Never touches production code."
 argument-hint: <story-key> <slug>
 ---
 

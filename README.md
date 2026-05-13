@@ -226,15 +226,13 @@ Drives all stories through implementation, scan, review, QA, and creates PR.
 
 ### Per-Story Execution Phases
 
-| Phase | Agent | What | Isolated |
-|:---:|---|---|:---:|
-| **A** | `developer` (inline) | Write tests &rarr; implement &rarr; commit | |
-| **B** | `security-scan` (inline) | `diff_scanner.py` &rarr; PASS/FINDINGS/BLOCKED | |
-| **C** | `review-agent` (subagent) | Diff-only review, OWASP checklist | **Yes** |
-| **D** | `qa-engineer` (subagent) | Write + run integration tests per AC | **Yes** |
-| **E** | `review-agent` (subagent) | Cross-story TDD vs actual audit | **Yes** |
+| Phase | Scope | Agent | What | Isolated |
+|:---:|---|---|---|:---:|
+| **A** | Per story | `developer` (inline) | Implement per TDD + security scan | |
+| **B** | Per story | Parent (inline) | Verify diff covers all ACs | |
+| **C** | Feature (once) | `review-agent` + `qa-engineer` (parallel subagents) | System review + integration QA | **Yes** |
 
-Phase E runs once after all stories complete (m/l tiers). Max 3 retries per story before human escalation.
+Phase C runs once after all stories complete. Any blocking findings → escalate before PR.
 
 ### Supporting Skills
 
@@ -245,16 +243,16 @@ Phase E runs once after all stories complete (m/l tiers). Max 3 retries per stor
 Phase A only. Implements a single story inline.
 
 #### `/security-scan <slug> <story-key>`
-Phase B only. Runs `diff_scanner.py` against the story branch.
+Standalone. Runs `diff_scanner.py` against a branch diff. Embedded in Phase A.
 
 #### `/review-code <slug> <story-key>`
-Phase C only. Spawns review-agent as isolated subagent with diff only.
+Standalone code review skill. Reviews a branch diff — TDD compliance, OWASP, logic.
 
 #### `/qa-integration <slug> <story-key>`
-Phase D only. Spawns qa-engineer as isolated subagent.
+Standalone. Writes + runs integration tests. Used as subagent in Phase C.
 
 #### `/review-system <slug>`
-Phase E only. Spawns system review subagent after all stories complete.
+Standalone. Process audit subagent — TDD design vs actual execution. Used in Phase C.
 
 #### `/jira-ops <action> <target> [payload]`
 
@@ -404,7 +402,7 @@ release-agent decomposes TDD into stories. You approve. If `jira_push: true`, it
 /execute product-catalog-search
 ```
 
-For each story: Phase A (implement) &rarr; B (security scan) &rarr; C (review) &rarr; D (QA). Phase E (system review) runs once after all stories complete.
+For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (system review + integration QA) runs once after all stories complete.
 
 </details>
 
@@ -452,7 +450,7 @@ For each story: Phase A (implement) &rarr; B (security scan) &rarr; C (review) &
 /plan my-feature
 /design my-feature      # SYSTEM_DESIGN_NOTES + TDD + required review
 /breakdown my-feature
-/execute my-feature     # A -> B -> C -> D + System Review (Phase E) -> PR
+/execute my-feature     # A -> B (per story) + Phase C (system review + QA) -> PR
 ```
 
 </details>
@@ -679,23 +677,13 @@ python scripts/failure_ledger.py load acme product-catalog-search ACME-201
 </details>
 
 <details>
-<summary><strong>Phase C &mdash; Review Failures</strong></summary>
+<summary><strong>Phase C &mdash; System Review + QA Failures</strong></summary>
 
-| Verdict | Action |
-|---|---|
-| `FINDINGS` | Fix CRITICAL/HIGH findings, commit, Phase C re-runs |
-| `MINOR_FINDINGS` | Targeted edits only, re-verify |
-| `BLOCKED` | Human decides: drop story or `/reopen {slug} design` |
-
-</details>
-
-<details>
-<summary><strong>Phase D &mdash; QA Failures</strong></summary>
-
-| Verdict | Action |
-|---|---|
-| `REJECTED-BUG` | Fix code (never the test), Phase D re-runs |
-| `APPROVED_PARTIAL` | Some ACs `NOT_VERIFIABLE` — acceptable |
+| Agent | Verdict | Action |
+|---|---|---|
+| `review-agent` | `FINDINGS` (CRITICAL/HIGH) | Fix in-place on feature branch or re-dispatch story |
+| `qa-engineer` | `REJECTED-BUG` | Fix code (never the test), Phase C re-runs once |
+| `qa-engineer` | `APPROVED_PARTIAL` | Some ACs `NOT_VERIFIABLE` — acceptable, proceed |
 
 </details>
 

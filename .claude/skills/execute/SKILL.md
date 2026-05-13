@@ -1,6 +1,6 @@
 ---
 name: execute
-description: "Drives JIRA_BREAKDOWN.md stories to completion. Per story: implement (inline) → scan (script) → review (subagent) → qa (subagent). System review (subagent) after all stories. Never writes code directly."
+description: "Drives JIRA_BREAKDOWN.md stories to completion. Per story: Phase A (implement + scan) → Phase B (AC check, inline). Phase C after all stories: system review + integration QA (parallel subagents). Never writes code directly."
 argument-hint: <feature-slug> [BREAKDOWN-FILE] [--story STORY-KEY]
 ---
 
@@ -12,7 +12,23 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 
 Load `.claude/agents/release-agent.md`. Verify `config.yml` exists at repo root. If absent → HALT. Read values: `parallel`, `interactive`.
 
-Mission: drive all stories to completion. Phase A (implement) + Phase B (scan) run inline. Verify phase (review + QA) spawns as a single combined subagent for l/m tiers (xs/s use inline or single subagent). Phase E (system review) spawns as isolated subagent. **Never write code.**
+---
+
+## Pipeline Overview
+
+```
+Setup → [For each story: Phase A → Phase B] → Phase C → Pre-PR Security Gate → PR
+```
+
+| Phase | Scope | Runs as | What |
+|-------|-------|---------|------|
+| A | Per story | Inline (developer) | Implement per TDD + security scan |
+| B | Per story | Inline (parent) | Verify diff covers all ACs |
+| C | Feature (once) | 2 parallel subagents | System review + integration QA |
+
+**Never write code. Never spawn subagents during Phase A or B.**
+
+---
 
 ## Breakdown File Scoping (Optional)
 
@@ -20,7 +36,7 @@ Mission: drive all stories to completion. Phase A (implement) + Phase B (scan) r
 - Resolves TDD as `design/TDD_{NAME}.md` (or `TDD.md` if NAME absent)
 - Validates that specific TDD is approved before proceeding
 - Processes only stories from that breakdown file
-- Phase E (system review) runs after all stories in that file complete
+- Phase C runs after all stories in that file complete
 - Use case: multi-TDD features where each breakdown is executed independently
 
 **`/execute {slug}`** — all breakdowns (merges all `JIRA_BREAKDOWN*.md` files).
@@ -30,8 +46,8 @@ Mission: drive all stories to completion. Phase A (implement) + Phase B (scan) r
 If invoked with `--story STORY-KEY` flag:
 - Load relevant JIRA_BREAKDOWN file and verify STORY-KEY exists
 - Filter story list to process only that story (skip all others)
-- All phases run normally (A → B → C → D)
-- Phase E (system review) skipped (requires multiple stories for comparison)
+- Phase A + Phase B run normally
+- Phase C skipped — targeted re-run, not a full feature gate
 - Use case: re-run failed story after manual fix, or implement single story for testing
 - If story status already ✅ COMPLETE → warn and ask to confirm re-run
 
@@ -40,7 +56,7 @@ If invoked with `--story STORY-KEY` flag:
 ## Context Rules
 
 - JIRA_BREAKDOWN*.md: extract story list (id, title, ACs, repo, SP) at init, cache as text — never hold full file
-- Repo map: from PRD Repos section (l tier) or JIRA_BREAKDOWN story entries (xs/s/m) — grep heading, extract section only
+- Repo map: name → path, build_cmd — from PRD Repos section or JIRA_BREAKDOWN story entries (grep heading, extract section only)
 - TDD: S3/S4 by heading grep per story's `design_section` — never full TDD
 - Each phase reads only what it needs from disk
 

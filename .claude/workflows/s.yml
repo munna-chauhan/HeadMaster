@@ -42,7 +42,7 @@ stages:
       - Out of Scope
       - Risks & Mitigations
       - Acceptance Criteria
-    gate: "All necessary sections present, metrics quantified, ACs testable"
+    gate: "10 sections present, metrics quantified, ACs testable"
 
   prd_review:
     status: skip
@@ -80,8 +80,8 @@ stages:
   execute:
     status: required
     agents: [developer, review-agent, qa-engineer]
-    phases: [implement, security-scan, review-code, qa-integration]
-    gate: all stories COMPLETE
+    phases: [A, B, C]
+    gate: "all stories COMPLETE + Phase C (system review + integration QA) PASS"
 
   system_review:
     status: optional

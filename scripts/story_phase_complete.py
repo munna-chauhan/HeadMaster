@@ -80,7 +80,7 @@ def main() -> None:
         if "--phases" in sys.argv:
             idx = sys.argv.index("--phases")
             phases_str = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else ""
-        phases = [p.strip() for p in phases_str.split(",") if p.strip()] if phases_str else ["A", "C", "D"]
+        phases = [p.strip() for p in phases_str.split(",") if p.strip()] if phases_str else ["A", "B"]
         _update_loop_state(state_file, story_key, phases, "COMPLETE")
         _log(project, slug, story_key, "STORY_COMPLETE", f"phases={','.join(phases)}")
         print(f"[story] {story_key}: complete ({','.join(phases)})", file=sys.stderr)

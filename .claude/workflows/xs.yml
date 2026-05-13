@@ -58,8 +58,8 @@ stages:
   execute:
     status: required
     agents: [developer, review-agent, qa-engineer]
-    phases: [implement, security-scan, review-code, qa-integration]
-    gate: all ACs pass, build green
+    phases: [A, B, C]
+    gate: "all stories COMPLETE + Phase C (system review + integration QA) PASS"
 
   system_review:
     status: skip

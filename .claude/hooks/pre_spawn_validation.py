@@ -103,17 +103,19 @@ def main():
         # Read payload from stdin
         payload = json.loads(sys.stdin.read()) if not sys.stdin.isatty() else {}
 
-        # Claude Code PreToolUse payload: tool_name + tool_input (not tool_call)
-        tool_name = payload.get("tool_name", "")
-        tool_input = payload.get("tool_input", {})
-
-        if not tool_input or tool_name != "Agent":
-            # Not an Agent call or empty payload — allow
-            print(json.dumps({"ok": True}))
-            sys.exit(0)
-
-        # Reconstruct into validate_spawn_prompt's expected shape
-        tool_call = {"name": tool_name, "parameters": tool_input}
+        # Support two payload shapes:
+        # 1. Claude Code PreToolUse: {"tool_name": ..., "tool_input": {...}}
+        # 2. Test/legacy shape:      {"tool_call": {"name": ..., "parameters": {...}}}
+        if "tool_call" in payload:
+            tool_call = payload["tool_call"]
+        else:
+            tool_name = payload.get("tool_name", "")
+            tool_input = payload.get("tool_input", {})
+            if not tool_input or tool_name != "Agent":
+                # Not an Agent call or empty payload — allow
+                print(json.dumps({"ok": True}))
+                sys.exit(0)
+            tool_call = {"name": tool_name, "parameters": tool_input}
 
         # Validate
         is_valid, reason = validate_spawn_prompt(tool_call)

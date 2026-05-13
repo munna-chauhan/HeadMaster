@@ -1,6 +1,6 @@
 ---
 name: security-scan
-description: "Inline phase B of /execute. Runs diff_scanner.py against story branch. Reads JSON verdict. Never fixes."
+description: "Security scan skill. Runs diff_scanner.py against a branch diff — secrets, SAST, CVEs. Embedded in Phase A of /execute. Never fixes."
 argument-hint: <story-key> <slug> <branch> <base> <repo-path>
 ---
 

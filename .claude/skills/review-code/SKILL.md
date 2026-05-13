@@ -1,6 +1,6 @@
 ---
 name: review-code
-description: "Subagent phase C of /execute. Spawned with fresh context — no implementation memory. Reviews git diff only — TDD compliance, OWASP gaps, logic. 80+ confidence. Never fixes."
+description: "Standalone code review skill. Reviews a branch diff — TDD compliance, OWASP gaps, logic bugs. 80+ confidence. Never fixes."
 argument-hint: <story-key> <slug> <branch> <base> <repo-path>
 ---
 

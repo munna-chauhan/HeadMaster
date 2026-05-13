@@ -87,8 +87,6 @@ rework:
   downgrade:
     - "No re-work. Existing artifacts kept. Future stages follow new tier."
 
----
-
 # Route Re-classification
 # Route is checked at the same checkpoints as tier. Spike route is never reclassified.
 

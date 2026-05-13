@@ -20,15 +20,12 @@ from config_utils import ConfigResolver
 
 
 def read_project_key() -> str:
-    """Extract project_key from config.yml (simple parser, no pyyaml)."""
-    cfg = REPO_ROOT / "config.yml"
-    if not cfg.exists():
+    """Extract project_key for the active project via ConfigResolver."""
+    try:
+        resolver = ConfigResolver(REPO_ROOT / "config.yml")
+        return resolver.get("project_key", "") or ""
+    except Exception:
         return ""
-    for line in cfg.read_text(encoding="utf-8").splitlines():
-        if line.startswith("project_key:"):
-            val = line.split(":", 1)[1].split("#")[0].strip().strip('"').strip("'")
-            return val
-    return ""
 
 
 def read_active_project() -> str:
