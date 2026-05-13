@@ -2,7 +2,7 @@
 
 Source: review against the 10-point audit (stale info, config linkage, capabilities, greenfield vs legacy, language independence, project understanding + self-improvement, learnings, multi-dev enrollment, audience, improvements).
 
-This plan converts the audit into a **PR sequence** and an **audience-rollout addition to README**. HeadMaster is built on Claude Code; `.claude/CLAUDE.md` remains the single rule file. Support for non-Claude AI agents (Cursor, Aider, Copilot, Codex, Cody, ChatGPT) is captured as future scope, not built now.
+This plan converts the audit into a **PR sequence** and an **audience-rollout addition to README**. HeadMaster is built on Claude Code; `.claude/CLAUDE.md` remains the single rule file. Future scope (team mode, enterprise, non-Claude AI agents) is in [FUTURE.md](FUTURE.md).
 
 ---
 
@@ -28,24 +28,7 @@ Limitations made explicit in the README:
 - Agent memory does not cross machines
 - Two devs cannot share progress on the same feature slug without manually moving `memory/features/{project}/{slug}/loop_state.json`
 
-### Phase 2 — Team Mode (future scope — captured here, not built in PR1–PR7)
-
-Required mechanisms (each becomes its own future feature):
-
-| Mechanism | What it means | Where it lives |
-|---|---|---|
-| **Shared agent memory** | `memory/agents/{agent}/MEMORY.md` is committed to a `headmaster-team-memory` repo (or a subdirectory of the team's main repo) and pulled at session start. Per-machine entries route to `memory/agents/{agent}/MEMORY.local.md`. | New `memory-shared/` dir, new hook `activate.py` step |
-| **Project-level memory** | `memory/projects/{project}/` (repo registry, style profile, recurring patterns) committed alongside the project repo, not in HeadMaster. | New `projects.{slug}.memory_path` config key |
-| **Shared config baseline** | Split `config.yml` → `config.yml` (shared, committed in team repo) + `config.local.yml` (per-dev overrides for `projects.active`, paths, `jira_push`). `ConfigResolver` merges them. | `scripts/config_utils.py` change |
-| **Portable MCP** | `.mcp.json` drops `cmd /c` shape. `pyrun.js`-style platform detection writes the right form on first run. | `.mcp.json`, new `scripts/setup_mcp.py` |
-| **Onboarding script** | `scripts/onboard.py` copies `.example` files, validates `node`/`python`, prompts for env vars, runs `setup-env`. | New script |
-| **Per-stack permission profiles** | `settings.json` split into a JVM profile, a JS profile, a polyglot profile. User picks one during onboard. | New `.claude/profiles/` dir |
-| **Feature collision handling** | Same slug taken by another dev on the same project → `init-feature` warns, offers a suffix. | `init-feature` SKILL change |
-| **Team telemetry** | `monitoring.skill_tracking.*` keys (currently dead) wired to a real consumer that writes `memory/team-metrics.jsonl`, optionally pushed to a shared dashboard. | `run_logger.py` + new sink |
-
-### Phase 3 — Enterprise (captured-only — not in scope for this plan)
-
-SSO, RBAC per project, centralized telemetry dashboard, SBOM/IaC scanning, audit trail export, multi-region.
+Phase 2 (Team Mode) and Phase 3 (Enterprise) mechanisms are captured in [FUTURE.md](FUTURE.md).
 
 ---
 
@@ -60,7 +43,7 @@ What PR1–PR3 will tighten **inside** `.claude/CLAUDE.md`:
 - **Config schema discipline** — every key must appear in `config.yml.example` and have a consumer; run `python scripts/config_utils.py validate config.yml` before committing.
 - **Token efficiency** — replaces deleted `token_budgets` concept (decided in PR1).
 
-Non-Claude AI agent support (`AGENTS.md` shim or full file) moves to **Phase 2 future scope** (see §4 below).
+Non-Claude AI agent support (`AGENTS.md`) is deferred — see [FUTURE.md](FUTURE.md).
 
 ---
 
@@ -114,7 +97,7 @@ PR2 acceptance:
 
 | File | Change |
 |---|---|
-| `README.md` | Replace the Best Practices section with a new "Who Can Use This" section (per §1 above). Phase 1 named users + limitations explicit; Phase 2 named as future scope with the eight team mechanisms table; Phase 3 captured-only. |
+| `README.md` | Replace the Best Practices section with a new "Who Can Use This" section (per §1 above). Phase 1 named users + limitations explicit; Phase 2 and Phase 3 referenced as future scope with a pointer to FUTURE.md. |
 | `.claude/CLAUDE.md` | Add a "Contribution Rules" section: unconditional human-gate path list, inventory discipline (`scripts/audit_inventory.py`), config schema discipline (`python scripts/config_utils.py validate config.yml`), test requirements. Replaces the implicit/scattered rules. |
 | `.github/PULL_REQUEST_TEMPLATE.md` (new) | PR template enforcing CLAUDE.md Contribution Rules: which PLAN.md PR it addresses, audit_inventory pass, config validate pass, test output. |
 | `.github/workflows/audit.yml` (new) | GitHub Actions: on PR, run `python scripts/audit_inventory.py` and `python scripts/config_utils.py validate config.yml.example`. |
@@ -250,28 +233,7 @@ PR9 acceptance:
 
 ---
 
-## 4. Future Scope Capture (referenced by Phase 2 of audience rollout)
-
-Tracked here so the team-mode work has a single home and isn't re-derived later.
-
-| Item | Phase | Owner (TBD) | Notes |
-|---|---|---|---|
-| Shared agent memory repo | 2 | — | New repo `headmaster-team-memory`; hook at session start syncs |
-| Project-level memory committed to project repo | 2 | — | New `projects.{slug}.memory_path` |
-| `config.yml` + `config.local.yml` split | 2 | — | Merge order: local overrides shared |
-| Portable `.mcp.json` | 2 | — | Drop `cmd /c`, use platform shim |
-| `scripts/onboard.py` | 2 | — | Copy `.example` files, validate runtimes, prompt env vars |
-| Per-stack permission profiles | 2 | — | `.claude/profiles/jvm.json`, `js.json`, `polyglot.json` |
-| Feature-slug collision handling | 2 | — | `init-feature` warn + suffix |
-| Team telemetry sink | 2 | — | Wire `monitoring.skill_tracking` to `memory/team-metrics.jsonl` |
-| Non-Claude AI agent support | 2 | — | Add `AGENTS.md` at repo root (tool-agnostic subset of CLAUDE.md rules) when Cursor/Aider/Copilot use becomes a real need |
-| SSO / RBAC | 3 | — | Captured only |
-| SBOM + IaC scan | 3 | — | Captured only |
-| Audit-trail export | 3 | — | Captured only |
-
----
-
-## 5. Sequencing + Review Gates
+## 4. Sequencing + Review Gates
 
 ```
 PR1 (Doc drift) ──► PR2 (Config schema) ──► PR3 (README + CLAUDE rules) ──► PR4 (Languages) ──► PR5 (Greenfield) ──► PR6 (Style) ──► PR7 (Feedback loop) ──► PR8 (curate-memory)
@@ -284,12 +246,8 @@ Each PR:
 3. Merge to `main`
 4. Next PR rebases on `main`
 
-No PR merges if `AGENTS.md §9` checklist is incomplete.
-
 ---
 
-## 6. Out of Scope (deliberately)
+## 5. Out of Scope (deliberately)
 
-- Team enablement gaps from the original audit §8 — captured in Phase 2, not in PR1–PR7
-- Versioning of agents/skills (audit §10 item 16) — defer until Phase 2 needs it
-- Token-budget enforcement at runtime — replaced by CLAUDE.md token-efficiency guidance per user decision
+- Team enablement gaps, versioning, token-budget enforcement at runtime — all deferred, see [FUTURE.md](FUTURE.md)

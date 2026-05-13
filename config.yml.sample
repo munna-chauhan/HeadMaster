@@ -9,7 +9,6 @@
 # Each project can have its own root path, Jira project, and settings.
 
 projects:
-  # Active project (change with /switch-project <slug>)
   active: platform
 
   # Example: Multi-repo platform project
@@ -54,38 +53,6 @@ pipeline:
                                 # false = auto-select best option + log rationale
                                 # NOTE: Confusion Clause still applies (always ask if ambiguous)
 
-  default_tier: full            # Default complexity tier for /plan
-                                # Options:
-                                #   lite     - Quick features, minimal design
-                                #   standard - Normal complexity, standard TDD
-                                #   full     - Complex features, full design + review
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SESSION MANAGEMENT
-# ═══════════════════════════════════════════════════════════════════════════════
-# Token budget tracking to prevent context window exhaustion
-
-session:
-  budget:
-    turn_warn_yellow: 5         # 🟡 Warning threshold (gentle reminder)
-    turn_warn_orange: 10        # 🟠 Warning + auto-braindump suggestion
-    turn_warn_red: 15           # ⛔ Auto-handoff (blocks /execute, forces /handoff)
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# MONITORING
-# ═══════════════════════════════════════════════════════════════════════════════
-# Passive performance monitoring for skills (Phase 1-6 complete)
-
-monitoring:
-  skill_tracking:
-    enabled: true               # Enable passive monitoring (no overhead)
-    alert_threshold: 1.5        # Alert if phase is 50% slower than baseline
-    baseline_window: 10         # Use last N features for baseline calculation
-    metrics:                    # Tracked metrics
-      - phase_duration          # Time per phase (plan, design, breakdown, execute)
-      - loop_iterations         # Review loop count
-      - tool_calls              # Tool invocation count
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # ENVIRONMENT VARIABLES (not in config.yml)
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -122,8 +89,7 @@ monitoring:
 # 2. Edit projects section with your projects
 # 3. Set active project: projects.active: <slug>
 # 4. (Optional) Set Jira env vars if using jira_push
-# 5. Run: /navigate (shows features in active project)
-# 6. Switch projects: /switch-project <slug>
+# 5. Run: /init-feature <slug> to start a new feature
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PERMISSION MODES (configured in .claude/settings.local.json.example)

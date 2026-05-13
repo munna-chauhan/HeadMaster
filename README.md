@@ -11,8 +11,8 @@
   <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.9+">
   <img src="https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 18+">
   <img src="https://img.shields.io/badge/License-Private-red?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Agents-12-00C853?style=for-the-badge" alt="12 Agents">
-  <img src="https://img.shields.io/badge/Skills-17-FF6D00?style=for-the-badge" alt="17 Skills">
+  <img src="https://img.shields.io/badge/Agents-13-00C853?style=for-the-badge" alt="13 Agents">
+  <img src="https://img.shields.io/badge/Skills-18-FF6D00?style=for-the-badge" alt="18 Skills">
 </p>
 
 <p align="center">
@@ -424,7 +424,7 @@ For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (s
 /init-feature hotfix "Fix null pointer in PaymentService"
 # -> tier: xs
 /design my-fix          # writes IMPLEMENTATION_BRIEF.md only
-/execute my-fix         # A -> B -> C -> D, no System Review
+/execute my-fix         # A -> B per story, no Phase C
 ```
 
 </details>
@@ -483,7 +483,7 @@ For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (s
 
 ## Agents
 
-12 specialized agents, each with defined input/output contracts and memory.
+13 specialized agents, each with defined input/output contracts and memory.
 
 ### Planning
 
@@ -511,6 +511,7 @@ For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (s
 | `review-agent` | haiku | Code review + OWASP security (diff only) | Subagent (isolated) |
 | `qa-engineer` | sonnet | Integration tests per AC, test fixes | Subagent (isolated) |
 | `release-agent` | haiku | Story decomposition + merge gate | Inline |
+| `retrospective-analyst` | haiku | Post-feature pattern extraction, memory + learning proposals | Subagent |
 
 **Isolation:** review-agent, qa-engineer, tdd-reviewer receive **no implementation context** — diff + ACs + TDD sections only. Enforced by `pre_spawn_validation.py` hook. prd-reviewer isolation is structural (new session).
 
@@ -567,12 +568,6 @@ gates:
       mode: human_in_loop
   breakdown:
     auto_approve: true
-
-token_budgets:
-  xs: { per_story_max: 10000, review_max: 3000,  qa_max: 3000  }
-  s:  { per_story_max: 30000, review_max: 8000,  qa_max: 8000  }
-  m:  { per_story_max: 60000, review_max: 15000, qa_max: 15000 }
-  l:  { per_story_max: 120000, review_max: 25000, qa_max: 25000 }
 ```
 
 **`gates.plan.review.mode`**
@@ -749,7 +744,7 @@ HeadMaster/
 |   +-- CLAUDE.md                     # Core operating rules
 |   +-- settings.json                 # Permissions + hooks
 |   |
-|   +-- agents/                       # 12 agent definitions
+|   +-- agents/                       # 13 agent definitions
 |   |   +-- requirements-analyst.md
 |   |   +-- prd-author.md
 |   |   +-- prd-reviewer.md
@@ -762,9 +757,10 @@ HeadMaster/
 |   |   +-- qa-engineer.md
 |   |   +-- release-agent.md
 |   |   +-- web-researcher.md
+|   |   +-- retrospective-analyst.md
 |   |   +-- references/               # Output protocols
 |   |
-|   +-- skills/                       # 17 skill definitions
+|   +-- skills/                       # 18 skill definitions
 |   |   +-- init-feature/ | plan/ | design/ | breakdown/ | execute/
 |   |   +-- implement/ | security-scan/ | review-code/ | qa-integration/
 |   |   +-- review-system/ | jira-ops/ | reopen/ | retrospect/
@@ -880,7 +876,7 @@ python scripts/cleanup_failed_run.py acme {slug} --reset-state
 | 7 | **`/reopen` instead of editing artifacts** &mdash; tracks cascade and triggers revision mode |
 | 8 | **One active project per session** &mdash; change `projects.active` and restart |
 | 9 | **Security/observability/metrics are opt-in** &mdash; offered during PRD review, never auto-added |
-| 10 | **Phase E is mandatory for m/l tiers** &mdash; the only audit comparing intent (TDD) to outcome (commits) |
+| 10 | **Phase C is mandatory for m/l tiers** &mdash; the only audit comparing intent (TDD) to outcome (commits) |
 
 ---
 

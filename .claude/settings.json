@@ -27,8 +27,6 @@
       "Bash(gh pr *)",
       "Bash(gh api *)",
       "Bash(python scripts/*)",
-      "Bash(python scripts/*)",
-      "Bash(python .claude/hooks/*)",
       "Bash(python .claude/hooks/*)",
       "Bash(node .claude/hooks/pyrun.js *)",
       "Bash(grep *)",

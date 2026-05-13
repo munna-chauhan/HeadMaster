@@ -5,7 +5,7 @@
 # Path 1: User declares
 user_declared:
   behavior: Use declared tier directly. Log to run-log.md.
-  override: User can change tier at any time via /navigate {slug} --tier {new}
+  override: User can change tier at any time by editing loop_state.json complexity_tier via gate_transition.py.
   note: User-declared tier is still subject to re-classification checks.
 
 # Path 2: AI classifies from input

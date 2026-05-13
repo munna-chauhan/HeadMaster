@@ -28,7 +28,7 @@
 
 ## Agents
 
-**12 agents:** codebase-analyst, developer, prd-author, prd-reviewer, qa-engineer, release-agent, requirements-analyst, review-agent, solutions-architect, tdd-author, tdd-reviewer, web-researcher.
+**13 agents:** codebase-analyst, developer, prd-author, prd-reviewer, qa-engineer, release-agent, requirements-analyst, retrospective-analyst, review-agent, solutions-architect, tdd-author, tdd-reviewer, web-researcher.
 
 - Definition: `.claude/agents/{agent}.md` | Memory: `memory/agents/{agent}/MEMORY.md` (max 200 lines) | Model: in frontmatter
 - Style: concise, fragments OK, → for causality, tables over prose, paths exact
@@ -42,7 +42,7 @@
 
 ## Skills
 
-**17 skills:** archive-feature, breakdown, compress, design, draw, execute, implement, init-feature, jira-ops, plan, publish-confluence, qa-integration, reopen, review-code, review-system, security-scan, setup-env.
+**18 skills:** archive-feature, breakdown, compress, design, draw, execute, implement, init-feature, jira-ops, plan, publish-confluence, qa-integration, reopen, retrospect, review-code, review-system, security-scan, setup-env.
 
 - Definition: `.claude/skills/{skill}/SKILL.md` + stage files
 - Skills own stage logic, read config.yml for gates, call scripts via subprocess, spawn agents with clean context
@@ -113,6 +113,15 @@ Every `AskUserQuestion` call — in any skill, stage, or agent — must follow `
 - Review/QA prompts: git diff + ACs + extracted TDD sections only. Total ≤5000 chars.
 - Never pass PRD, SYSTEM_DESIGN_NOTES, or JIRA_BREAKDOWN to review/QA subagents.
 
+
+---
+
+## Token Efficiency
+
+- Each subagent prompt includes only what the current step needs. PRD, TDD, SYSTEM_DESIGN_NOTES are reference docs — extract sections, never pass whole.
+- Skill instructions are hot code — every token loads per invocation. State each rule once. No examples, no placeholders.
+- Agent memory entries: one-line patterns, not narratives.
+- Standard subagent payload: `git diff` + ACs + extracted TDD section only. Total ≤5000 chars.
 
 ---
 
