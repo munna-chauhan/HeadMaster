@@ -62,7 +62,8 @@ Structured analysis (max 300 words, tables and code refs exempt):
 
 | Situation | Action |
 |---|---|
-| Keyword search returns 0 hits | Return: "no matches — greenfield for this repo" |
+| Keyword search returns 0 hits AND route != greenfield | Return: "no matches — no prior conventions found" |
+| Keyword search returns 0 hits AND route == greenfield | Return: "GREENFIELD — no prior conventions, proceed without reference patterns" |
 | Repo path doesn't exist | Return error immediately. Do not guess alternative paths |
 | File too large to read (>500 lines) | Search for relevant section, read only that section |
 | Ambiguous keyword (too many hits) | Narrow with file extension + directory filters. Report top 10 |

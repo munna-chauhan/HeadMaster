@@ -211,6 +211,35 @@ Next: /init-feature — use registry for repo selection.
 
 ---
 
+## Step 9: Greenfield scaffold (only when `--greenfield <target-path>` passed)
+
+Create the target directory and write starter files per `greenfield_stack` and `greenfield_template` from loop_state.
+
+| Stack | Build file | Default content |
+|---|---|---|
+| Java/Spring | `pom.xml` | Maven wrapper, Spring Boot parent, single module |
+| Node/TypeScript | `package.json` | `"type": "module"`, typescript + jest devDeps |
+| Python | `pyproject.toml` | `[project]` block, pytest dep |
+| Go | `go.mod` | module path from feature slug |
+| Rust | `Cargo.toml` | `[package]` block, edition 2021 |
+| .NET | `{slug}.csproj` | `<Project Sdk="Microsoft.NET.Sdk">`, net8.0 |
+| Ruby | `Gemfile` | `source 'https://rubygems.org'`, rspec |
+
+Always write:
+- `README.md` — one-line project description from feature name
+- `.gitignore` — standard ignore rules for the stack (language-specific patterns + `.env`, `*.local`)
+
+After writing starter files → proceed with normal scan (Steps 2–8) so `repo-registry.yml` captures the new repo.
+
+Print at end of Step 9:
+```
+Greenfield scaffold: {target-path} ({stack}, {template})
+Starter files: {list of files written}
+Proceeding to scan...
+```
+
+---
+
 ## Token Efficiency Notes
 
 - **Step 0:** Reuse existing registries → skip redundant tool searches on multi-project runs

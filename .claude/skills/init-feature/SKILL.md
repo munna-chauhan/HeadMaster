@@ -38,6 +38,7 @@ Auto-detect from input keywords:
 | fix, bug, patch, hotfix | hotfix |
 | build, add, create, implement, feature, endpoint, service | feature |
 | epic, initiative, multi-phase, program | epic |
+| bootstrap, scaffold, new repo, from scratch, greenfield, new service, new project | greenfield |
 
 **Always confirm via AskUserQuestion** — even when auto-detection is clear. Show all options; mark detected route as ⭐ Recommended:
 
@@ -45,10 +46,11 @@ Auto-detect from input keywords:
 header: Route
 question: "[P0] What type of work is this? Why: determines pipeline shape and which stages run."
 options:
-  - Feature       — new functionality, full pipeline (plan → design → build → PR)
+  - Feature       — new functionality in an existing repo, full pipeline
   - Hotfix        — targeted bug fix, compressed pipeline
   - Epic          — multi-phase initiative, plan-heavy
   - Spike         — research only, no implementation
+  - Greenfield    — bootstrap a new repo from scratch, no existing codebase
 ```
 
 ## Step 3: Q&A (missing fields only)
@@ -59,6 +61,8 @@ All user-facing questions → `AskUserQuestion` per `.claude/agents/references/a
 Ask if not in input.
 
 ### Q2: Repository + Module Discovery
+
+**If route == greenfield → skip to Q2-greenfield below.**
 
 **A. Read project root** from `config.yml → projects.{active}.root`.
 
@@ -88,6 +92,28 @@ If modules found → `AskUserQuestion` with list, `multiSelect: true`. If none �
 - tech: {lang+version, framework, build tool}
 - build_cmd: {command}
 ```
+
+### Q2-greenfield: Target Dir + Stack (greenfield route only)
+
+Ask three questions in sequence:
+
+| Header | Question | Options |
+|---|---|---|
+| `Target Dir` | `[P0] Where should the new repo be created? (path relative to HeadMaster root or absolute)` | Free text |
+| `Stack` | `[P0] Which tech stack?` | Java/Spring · Node/TypeScript · Python · Go · Rust · .NET · Ruby · Other |
+| `Template` | `[P1] Starting point?` | Minimal (build file + README + .gitignore) · REST API scaffold · CLI scaffold · Library scaffold |
+
+Record as:
+```
+greenfield_target: {path}
+greenfield_stack:  {stack}
+greenfield_template: {template}
+reference_branch: ""
+```
+
+Skip Q2b (reference branch) — greenfield has no prior branch.
+
+Call `/setup-env --greenfield {greenfield_target}` in Step 7 after scaffold. Note in summary.
 
 ### Q2b: Reference Branch
 
@@ -155,6 +181,8 @@ Generate `FEATURE_INPUT.md` from answers → HeadMaster root. Placed in feature 
 
 **If route == spike → set `complexity_tier: null`, `workflow: research`. Skip to Step 5. Do not classify.**
 
+**If route == greenfield → classify tier normally** (the feature work still has complexity). Tier is never auto-reclassified for greenfield — the route is locked.
+
 Otherwise: read `.claude/workflows/classification.yml`. Classify from effort + repos + design complexity → propose tier.
 
 Confidence: HIGH (all agree) | MEDIUM (disagree by 1) | LOW (disagree by 2+). LOW → always ask user.
@@ -198,6 +226,8 @@ if p.exists():
 > Next command in Step 7 → `/setup-env` (if registry missing) else guide user to place artifacts.
 
 **loop_state.json:** write per `.claude/loop_state.json` schema. Required fields: `feature_slug`, `route`, `complexity_tier` (null if spike), `workflow`, `pipeline_mode`, `technical_owner`, `approver`.
+
+If route == greenfield: also write `greenfield_target`, `greenfield_stack`, `greenfield_template` into loop_state metadata.
 
 **Ownership:** resolve in order — `projects.{active}` in config.yml → FEATURE_INPUT.md Ownership section → `"TBD"`.
 
