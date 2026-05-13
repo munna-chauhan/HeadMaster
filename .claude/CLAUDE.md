@@ -35,6 +35,7 @@
 - Memory: read on start, write on complete (new learnings only), never feature-specific
 - Models: sonnet (default), opus (complex reasoning), haiku (mechanical/fast)
 - **Pipeline mistakes → fix in agent MEMORY.md or CLAUDE.md. Never add Must-Rules to stage/skill files.**
+- When MEMORY.md hits the cap, run `/curate-memory {agent}` to deduplicate and age out entries.
 
 **Isolation rule:** review-agent, qa-engineer, tdd-reviewer NEVER receive implementation context — PRD/TDD/diff only. Enforced by pre_spawn_validation.py.
 
@@ -42,7 +43,7 @@
 
 ## Skills
 
-**18 skills:** archive-feature, breakdown, compress, design, draw, execute, implement, init-feature, jira-ops, plan, publish-confluence, qa-integration, reopen, retrospect, review-code, review-system, security-scan, setup-env.
+**19 skills:** archive-feature, breakdown, compress, curate-memory, design, draw, execute, implement, init-feature, jira-ops, plan, publish-confluence, qa-integration, reopen, retrospect, review-code, review-system, security-scan, setup-env.
 
 - Definition: `.claude/skills/{skill}/SKILL.md` + stage files
 - Skills own stage logic, read config.yml for gates, call scripts via subprocess, spawn agents with clean context

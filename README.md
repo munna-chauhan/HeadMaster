@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 18+">
   <img src="https://img.shields.io/badge/License-Private-red?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/Agents-13-00C853?style=for-the-badge" alt="13 Agents">
-  <img src="https://img.shields.io/badge/Skills-18-FF6D00?style=for-the-badge" alt="18 Skills">
+  <img src="https://img.shields.io/badge/Skills-18-FF6D00?style=for-the-badge" alt="19 Skills">
 </p>
 
 <p align="center">
@@ -719,7 +719,7 @@ HeadMaster/
 |   |   +-- retrospective-analyst.md
 |   |   +-- references/               # Output protocols
 |   |
-|   +-- skills/                       # 18 skill definitions
+|   +-- skills/                       # 19 skill definitions
 |   |   +-- init-feature/ | plan/ | design/ | breakdown/ | execute/
 |   |   +-- implement/ | security-scan/ | review-code/ | qa-integration/
 |   |   +-- review-system/ | jira-ops/ | reopen/ | retrospect/
