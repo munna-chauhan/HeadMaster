@@ -41,7 +41,7 @@ If registry already exists and no `--reset` flag:
 ## Step 2: Scan repos
 
 For each project root — find subdirs at maxdepth 2 containing any build file marker:
-`pom.xml`, `build.gradle`, `settings.gradle`, `package.json`, `go.mod`, `requirements.txt`, `pyproject.toml`
+`pom.xml`, `build.gradle`, `build.gradle.kts`, `settings.gradle`, `package.json`, `go.mod`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `*.fsproj`, `composer.json`, `Gemfile`
 
 Exclude: `node_modules`, `.git`, `target`, `build`, `dist`.
 
@@ -67,24 +67,31 @@ Scan build files in module path:
 | File | Extract |
 |------|---------|
 | `pom.xml` | `java.version`, `maven.compiler.target`, `kotlin.version`, `spring-boot.version`, `spring.version` |
-| `build.gradle` | `sourceCompatibility`, `javaVersion`, `kotlinVersion` |
+| `build.gradle` / `build.gradle.kts` | `sourceCompatibility`, `javaVersion`, `kotlinVersion` |
 | `package.json` | `engines.node`, top 5 `dependencies` keys |
 | `go.mod` | first line (`module` + `go` directive) |
 | `pyproject.toml` / `requirements.txt` | `python_requires`, first 5 deps |
-| `*.csproj` | `TargetFramework` |
+| `*.csproj` / `*.fsproj` | `TargetFramework` |
+| `Cargo.toml` | `[package].rust-version`, `edition` |
+| `composer.json` | `require.php` (PHP version constraint) |
+| `Gemfile` | `ruby` directive |
 
 Infer `build_cmd`:
 - `./mvnw` exists → `./mvnw clean verify`; else `mvn clean verify`
 - `./gradlew` exists → `./gradlew build`; else `gradle build`
 - `package.json` → check `scripts.build`, `scripts.test`; default `npm run build`
 - `go.mod` → `go build ./...`
-- `requirements.txt` → `pytest`
+- `requirements.txt` / `pyproject.toml` → `pytest`
+- `Cargo.toml` → `cargo build`
+- `*.csproj` / `*.fsproj` → `dotnet build`
+- `composer.json` → `composer install`
+- `Gemfile` → `bundle exec rake`
 
 ---
 
 ## Step 5: Auto-detect all tool versions in workspace
 
-From tech stack → determine required tools: Java, Maven, Gradle, Python, Node, Go, .NET.
+From tech stack → determine required tools: Java, Maven, Gradle, Python, Node, Go, .NET, Rust/Cargo, PHP/Composer, Ruby/Bundler.
 
 For each tool:
 - Search PATH: `{tool} --version` or `{tool} -version`

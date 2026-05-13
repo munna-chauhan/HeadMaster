@@ -27,7 +27,7 @@ from pathlib import Path
 REVIEW_SUBAGENTS = {"review-agent", "qa-engineer", "tdd-reviewer", "prd-reviewer"}
 
 # Default implementation path prefixes (overridden by config.yml security.impl_path_prefixes)
-_DEFAULT_PREFIXES = ["src", "lib", "app", "internal"]
+_DEFAULT_PREFIXES = ["src", "lib", "app", "internal", "cmd", "pkg", "crates"]
 
 
 def _load_impl_prefixes() -> list[str]:
@@ -65,7 +65,7 @@ def validate_spawn_prompt(tool_call: dict) -> tuple[bool, str]:
     prefix_pattern = "|".join(re.escape(p) for p in prefixes)
     impl_file_pattern = (
         rf'(?:Review|Check|Read|See|in|at)\s+'
-        rf'((?:{prefix_pattern})/[^\s]+\.(?:java|ts|tsx|go|py|js|jsx|rb|rs|c|cpp|h))\b'
+        rf'((?:{prefix_pattern})/[^\s]+\.(?:java|ts|tsx|go|py|js|jsx|rb|rs|c|cpp|h|kt|kts|scala|swift|cs|fs|php))\b'
     )
     matches = re.findall(impl_file_pattern, prompt_without_diff, re.IGNORECASE)
     if matches:
