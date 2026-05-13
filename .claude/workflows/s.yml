@@ -42,7 +42,7 @@ stages:
       - Out of Scope
       - Risks & Mitigations
       - Acceptance Criteria
-    gate: "All necessary sections present, metrics quantified, ACs testable"
+    gate: "10 sections present, metrics quantified, ACs testable"
 
   prd_review:
     status: skip
