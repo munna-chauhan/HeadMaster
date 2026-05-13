@@ -63,7 +63,7 @@
     "$comment": "Absent until breakdown. Updated by execute.",
     "STORY-KEY": {
       "status": "NEW | IN_PROGRESS | IN_REVIEW | IN_QA | COMPLETE | FAILED | BLOCKED | DEFERRED",
-      "phases_completed": ["A", "B", "C", "D", "E"],
+      "phases_completed": ["A", "B"],
       "design_section": "string | null"
     }
   },
