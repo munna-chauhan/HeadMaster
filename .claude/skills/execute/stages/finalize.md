@@ -34,51 +34,108 @@ Options:
 
 ---
 
-## Step 6: System Review (isolated subagent after all stories)
+## Step 6: Phase C — System Review + Integration QA (after all stories complete)
 
-**Before starting system review, log phase entry:**
 ```bash
-python scripts/run_logger.py {project} {slug} "Execute/Phase E" "PHASE_START" "Starting system-level review after all stories complete" "HIGH"
+python scripts/run_logger.py {project} {slug} "Execute/Phase C" "PHASE_START" "Starting Phase C: system review + integration QA" "HIGH"
 ```
 
-**Pattern:** Launch `review-agent` as isolated subagent for system-level audit. Fresh context — no per-story memory.
+**Subagent failure policy (Phase E only):**
 
-**Isolation:** Do NOT load execution history into parent context. Subagent reads TDD + git diff fresh.
+| Output | Action |
+|--------|--------|
+| Success verdict | Proceed |
+| NEEDS_CONTEXT | Retry once with missing context |
+| BLOCKED / empty / <50 chars | Retry once |
+| Retry fails | Escalate to human |
+| 529 error | Wait 30s, retry once |
 
-**Spawn subagent:**
+Spawn two subagents in parallel — isolated context, no per-story history:
 
+---
+
+**Subagent 1 — System Review:**
 ```
 Agent: review-agent
 Model: sonnet
 Prompt:
-"Load .claude/skills/review-system/SKILL.md and execute it fully.
+"Load .claude/skills/review-system/SKILL.md and execute fully.
 
-Inputs:
-- slug: {slug}
-- docs/features/{project}/{slug}/execution/story-summaries.md — primary source (read first)
-- docs/features/{project}/{slug}/breakdown/JIRA_BREAKDOWN*.md — Execution Log section ONLY (do not load full file)
-- docs/features/{project}/{slug}/design/TDD*.md — read section-by-section via heading grep, discard after extracting findings. IMPLEMENTATION_BRIEF.md → full file (short by design)
-- docs/features/{project}/{slug}/planning/PRD.md — Repos section only (if exists)
-- Individual review artifacts ONLY for stories flagged as FINDINGS/REJECTED-BUG in story-summaries.md:
-    {flagged_review_paths}
-  Do NOT load review artifacts for PASS stories.
+slug: {slug}
+story-summaries: docs/features/{project}/{slug}/execution/story-summaries.md
+TDD: docs/features/{project}/{slug}/design/TDD*.md or IMPLEMENTATION_BRIEF.md
+PRD Repos section: docs/features/{project}/{slug}/planning/PRD.md — Repos heading only
+No per-story review artifacts exist.
 
 Write: docs/features/{project}/{slug}/retrospective/system-review.md
-
-Return:
-  0 actionable findings → PASS
-  N actionable findings → FINDINGS (list affected stories + severity)"
+Return: PASS | FINDINGS (list affected stories + severity)"
 ```
 
-Before spawning: populate `{flagged_review_paths}` by scanning story-summaries.md for stories where `C=FINDINGS|BLOCKED` or `D=REJECTED-BUG`. List only those `execution/reviews/code-review-{KEY}.md` and `execution/reviews/qa-report-{KEY}.md` paths.
+**Subagent 2 — Integration QA:**
 
-**On subagent return:**
+Before spawning, extract TDD S7 (test strategy) by heading grep, cap 2000 chars — pass inline:
+```bash
+python -c "
+import re
+from pathlib import Path
+tdd = next(Path('docs/features/{project}/{slug}/design').glob('TDD*.md'), None) \
+      or Path('docs/features/{project}/{slug}/design/IMPLEMENTATION_BRIEF.md')
+text = tdd.read_text() if tdd and tdd.exists() else ''
+s = re.findall(r'(?m)^#{1,2}\s+(?:S7|Test Strategy|Testing).*?(?=^#{1,2}\s|\Z)', text, re.DOTALL)
+print('\n'.join(s)[:2000])
+"
+```
 
-0 actionable findings → update pipeline state + proceed to Step 6.5:
+Also flatten all story ACs from cached setup data — one line per AC: `{KEY}|AC-{N}|{text}`.
+
+```
+Agent: qa-engineer
+Model: sonnet
+Prompt:
+"Phase E integration QA for feature {slug}.
+
+Repo: {repo_path} | Branch: feature/{slug} | Build: {build_cmd}
+
+All story ACs:
+{all_acs_block}
+
+TDD test strategy:
+{tdd_s7_extract}
+
+Steps:
+1. git checkout feature/{slug}
+2. Run .claude/skills/qa-integration/scripts/test_infra_detector.py — classify each AC
+3. Run developer tests — verify they pass on feature/{slug}
+4. For ACs not covered by developer tests: write integration tests
+5. Run full test suite — report regressions
+6. Commit new tests to feature/{slug}
+
+Write: docs/features/{project}/{slug}/retrospective/qa-report.md
+Verdict: APPROVED | APPROVED_PARTIAL | REJECTED-BUG"
+```
+
+---
+
+**Combined gate:**
+
+| System Review | QA | Action |
+|---------------|----|--------|
+| PASS | APPROVED | Proceed to Step 6.5 |
+| PASS | APPROVED_PARTIAL | Proceed (NOT_VERIFIABLE noted) |
+| FINDINGS (MEDIUM/LOW only) | APPROVED or APPROVED_PARTIAL | Proceed — non-blocking |
+| FINDINGS (CRITICAL/HIGH) | any | Escalate |
+| any | REJECTED-BUG | Escalate |
+
+**On escalation — AskUserQuestion per `.claude/agents/references/ask-user-protocol.md`:**
+- Topic: "Phase E: {N} blocking findings before PR."
+- Include: finding summaries from both reports.
+- Options: Fix in-place on feature/{slug} / Re-dispatch affected story / Accept and proceed / Stop
+
+After fix → re-run Phase E once. If blocking findings persist → hard stop (AskUserQuestion: accept risk / stop).
+
 ```bash
 python scripts/gate_transition.py {project} {slug} execute complete --artifact docs/features/{project}/{slug}/retrospective/system-review.md
 ```
-N actionable → re-dispatch affected stories through full phase cycle.
 
 ---
 

@@ -50,7 +50,7 @@ Read by heading, extract, discard raw content before next file:
 1. `JIRA_BREAKDOWN.md` — grep `## Execution Log` heading, read that section only via offset/limit
 2. `TDD*.md` — read section-by-section via heading grep + offset/limit. Discard raw content after extracting findings per section. IMPLEMENTATION_BRIEF.md → full file (short by design)
 3. `PRD.md` — grep `## Repos` heading, read that section only
-4. `story-summaries.md` — read first; load individual `execution/reviews/*.md` only for FINDINGS/REJECTED-BUG stories
+4. `story-summaries.md` — read in full (primary signal for adherence analysis)
 
 No re-reads. Hold at most 1 extracted section in context.
 
@@ -167,7 +167,6 @@ Options: Apply all fixes → dispatch /implement | Review first → open file, r
 - JIRA_BREAKDOWN.md Execution Log populated
 - All stories COMPLETE or DEFERRED
 - TDD*.md or IMPLEMENTATION_BRIEF.md exists
-- At least some review artifacts exist
 
 ---
 
