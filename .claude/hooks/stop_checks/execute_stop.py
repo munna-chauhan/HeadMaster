@@ -22,16 +22,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 
 
+_ACTIVE   = {"IN_PROGRESS", "IN PROGRESS", "SCANNING", "IN_REVIEW", "IN_QA"}
+_TERMINAL = {"COMPLETE", "DONE", "DEFERRED", "BLOCKED"}
+_PENDING  = {"NEW"}
+_ALL      = _ACTIVE | _TERMINAL | _PENDING
+
+
 def _parse_story_statuses(content: str) -> list[str]:
-    """Extract story statuses from JIRA_BREAKDOWN.md table rows."""
+    """Extract story statuses from JIRA_BREAKDOWN.md table rows. Normalizes to uppercase."""
     statuses = []
     for line in content.splitlines():
         if "|" in line:
-            cells = [c.strip() for c in line.split("|") if c.strip()]
-            for cell in cells:
-                upper = cell.upper()
-                if upper in ("IN_PROGRESS", "IN PROGRESS", "NEW", "COMPLETE", "DONE",
-                            "BLOCKED", "DEFERRED", "SCANNING", "IN_REVIEW", "IN_QA"):
+            for cell in line.split("|"):
+                upper = cell.strip().upper()
+                if upper in _ALL:
                     statuses.append(upper)
     return statuses
 
@@ -87,13 +91,8 @@ def main():
         print(json.dumps({"ok": False, "reason": f"{new_count} stories remain NEW — execution incomplete"}))
         sys.exit(0)
 
-    # All stories done — check system review
-    review_path = feature_dir / "retrospective" / "system-review.md"
-    if review_path.exists():
-        print(json.dumps({"ok": True}))
-    else:
-        # System review optional — pass anyway if all stories complete
-        print(json.dumps({"ok": True}))
+    # All stories done — pass (system-review.md written by Phase C subagent, not a stop-hook gate)
+    print(json.dumps({"ok": True}))
 
     sys.exit(0)
 

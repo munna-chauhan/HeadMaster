@@ -60,20 +60,6 @@ def parse_verdict(content: str, valid_verdicts: list[str]) -> tuple[int, str, st
 
         normalized = verdict_line.upper()
 
-        # Check for content after verdict section
-        remaining_lines = lines[verdict_section_idx + 1:]
-        found_verdict_line = False
-        content_after = []
-        for line in remaining_lines:
-            stripped = line.strip()
-            if not found_verdict_line and stripped == verdict_line:
-                found_verdict_line = True
-                continue
-            if found_verdict_line and stripped and not stripped.startswith('#'):
-                content_after.append(stripped)
-            elif found_verdict_line and stripped.startswith('#'):
-                content_after.append(stripped)
-
         # Check if there are sections after the verdict
         post_sections = [l for l in lines[verdict_section_idx + 1:] if re.match(r'^##\s+', l)]
         warning = ""
