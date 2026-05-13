@@ -91,4 +91,6 @@ Path: `memory/agents/qa-engineer/MEMORY.md`
 
 **What belongs here:** test framework conventions, recurring QA findings, patterns that worked.
 
+AC coverage gap patterns are written automatically by `scripts/extract_phase_learnings.py` after each story completes — check MEMORY.md before writing spot-tests.
+
 **Feature-scoped:** `docs/features/{project}/{slug}/agents/qa-engineer.md` (max 200 words)

@@ -56,3 +56,4 @@ Concrete, actionable proposals only. No vague advice. One row per proposal.
 - `agent_memory` and `pipeline_learning` entries must be phrased as reusable rules, not feature-specific observations
 - If the run was clean (no escalations, no rework), write "No proposals — run was nominal"
 - Do not propose `agent_memory` entries for recurring review findings — those are written mid-feature by `scripts/recurring_finding_detector.py`. Focus on cross-feature signals and pipeline-level patterns only.
+- Do not propose `agent_memory` entries for Phase A retry error types — those are written per-story by `scripts/extract_phase_learnings.py`.

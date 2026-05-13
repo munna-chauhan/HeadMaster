@@ -132,6 +132,8 @@ Path: `memory/agents/developer/MEMORY.md`
 
 **What belongs here:** patterns that work/fail, project quirks, build tool notes, failure ledger patterns, performance pitfalls.
 
+Phase A retry patterns are written automatically by `scripts/extract_phase_learnings.py` after each story completes — check MEMORY.md for matching error_type patterns before first attempt.
+
 **Feature-scoped context:** `docs/features/{project}/{slug}/execution/`
 
 ## Token Budget
