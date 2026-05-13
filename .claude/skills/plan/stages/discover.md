@@ -39,6 +39,24 @@ python scripts/workflow_config.py {tier} stages discovery status
 
 ---
 
+## Prior Work Check (all tiers except xs)
+
+Before Q&A: check each target repo for branches matching feature keywords.
+
+```bash
+git -C {repo-root} branch -a | grep -i "{feature-keywords}"
+```
+
+If branch found:
+- Read up to 3 test files + 1 config/wiring file from that branch
+- Treat discovered tests as resolved requirements → `[Assumption: matches branch {branch-name}]` (P2)
+- Treat discovered config as convention baseline — reference in Analysis findings
+- Append findings before Q&A phase; do not re-ask what the branch already answers
+
+If no branch found → proceed.
+
+---
+
 ## Question priority
 
 | Priority | Criteria | Action |

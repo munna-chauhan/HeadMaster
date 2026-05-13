@@ -55,6 +55,7 @@ Produce ONLY the sections listed for the active tier. Do not write sections not 
 9. **Token efficiency:** For large TDDs (>800 lines), split by repo or module. Use Glob/Grep to search large files before reading. Read targeted sections only.
 10. **No redundant fields across data objects in the same call chain.** If data is already available on a parent/context object passed through the same method, do not duplicate it onto a child object. Pick one owner.
 11. **Wiring must be traceable.** Every new class/component/field introduced must have a documented path from entry point to invocation. If the TDD introduces a setter or field, it must name the caller that wires it. Unwired components are dead code.
+12. **Test Strategy must map layers.** For each architectural layer in SYSTEM_DESIGN_NOTES (layer names are project-specific — read, do not assume), specify: test type (unit/integration/mock-integration/e2e) and minimum scenarios per integration point: success, each constraint violation, not-found, conflict, error. Any layer without this mapping is a `[DESIGN GAP]`.
 
 ---
 
@@ -111,6 +112,7 @@ Before marking done, verify per slice:
 - [ ] Every stateful entity: valid state transitions listed
 - [ ] Every external dependency: timeout, retry config, failure behavior
 - [ ] Every delivery slice: includes error/edge handling, not just happy path
+- [ ] Test Strategy: test type mapped per architectural layer (from SYSTEM_DESIGN_NOTES); minimum scenarios listed per integration point
 - [ ] Zero vague language (see Concreteness Rule)
 
 ---

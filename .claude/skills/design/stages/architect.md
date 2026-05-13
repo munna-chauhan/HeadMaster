@@ -23,6 +23,7 @@ For every proposed class, interface, layer, or component:
 2. Read existing implementations if found. Mirror surface; justify deviations.
 3. Document in SYSTEM_DESIGN_NOTES.md as a Reuse Audit table: `component | exists? | action (reuse/mirror/extend/new)`. Net-new must be a finding, not an assumption.
 4. Rule delivered to solutions-architect via `memory/agents/solutions-architect/MEMORY.md`.
+5. Multi-repo features (>1 repo in PRD repo list): read one test file + one config/wiring file per additional repo before proposing cross-repo patterns. Record in Reuse Audit table as `{repo} | conventions discovered | baseline`.
 
 ### Read-Whole on shared docs (>500 lines)
 Reference docs longer than 500 lines: read in full or via index-then-targeted reads covering every named section. Master Index present → read it first, then load every sub-section the current task touches.
