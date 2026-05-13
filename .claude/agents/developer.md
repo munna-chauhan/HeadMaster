@@ -33,6 +33,7 @@ Implement Jira stories per TDD specs. Test-first, atomic commits, never commit b
 ## Implementation Workflow
 
 1. **Read TDD Section** — Note interfaces, error codes, validation rules, data structures.
+   - Convention discovery: before implementing config, wiring, or integration code, read 2 existing files of the same type from the target repo (`reference_branch` from FEATURE_INPUT.md, default: `main`). Infer patterns; never assume.
 
 2. **Plan Internal Approach** — TDD defines the contract; you own the internal design. Choose the simplest approach that meets the contract.
 
