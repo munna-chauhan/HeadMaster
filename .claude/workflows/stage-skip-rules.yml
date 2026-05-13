@@ -35,9 +35,8 @@ rules:
     skip_action: "Log 'TDD review skipped — clean TDD' to run-log.md"
 
   system_review:
-    skip_if:
-      - "≤2 stories, all PASS in review-code and qa-integration"
-    skip_action: "Log 'system review skipped — all stories clean' to run-log.md"
+    skip_if: never
+    skip_action: null
 
   merge_gate:
     skip_if: never

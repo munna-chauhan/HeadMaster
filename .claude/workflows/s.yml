@@ -80,8 +80,8 @@ stages:
   execute:
     status: required
     agents: [developer, review-agent, qa-engineer]
-    phases: [implement, security-scan, review-code, qa-integration]
-    gate: all stories COMPLETE
+    phases: [implement, qa-integration, review-system]
+    gate: all stories COMPLETE + Phase C PASS
 
   system_review:
     status: optional

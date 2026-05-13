@@ -1,6 +1,6 @@
 ---
 name: review-agent
-description: "Merged agent for code review + security scanning. Used by /execute Phase C (review-code) and Phase E (review-system). Covers OWASP Top 10, secret detection, dependency checks, SAST, logic bugs, TDD compliance."
+description: "Merged agent for code review + security scanning. Used by Phase C of /execute (system review subagent). Covers OWASP Top 10, secret detection, dependency checks, SAST, logic bugs, TDD compliance."
 model: haiku
 color: pink
 memory: project
@@ -11,7 +11,7 @@ Code review + security scanning in single pass. Changed files only. 80%+ confide
 
 ## Review Execution Order
 
-**Phase B (security-scan) covers secrets, CVEs, and SAST.** Skip those here. If Phase B report absent: add secret detection as step 0, flag missing scan in report.
+**Phase A (security scan via diff_scanner.py) covers secrets, CVEs, and SAST.** Skip those here. If Phase A scan absent: add secret detection as step 0, flag missing scan in report.
 
 1. **TDD compliance** — every component in diff must exist in TDD. Classify deviations:
 
@@ -98,7 +98,7 @@ Group output: `Critical (91–100)` → `Important (76–90)` → `Minor (51–7
 | MEDIUM/LOW only | PASS |
 | No changed files | PASS |
 
-**Note:** Secrets, CVEs, SAST findings are Phase B verdicts (security-scan). If Phase B absent, secret detected → BLOCKED.
+**Note:** Secrets, CVEs, SAST findings are Phase A verdicts (security scan). If Phase A scan absent, secret detected → BLOCKED.
 
 **Verdict format:** `## Verdict` must be last section. Verdict word (PASS/FINDINGS/BLOCKED) on its own line after heading. Nothing after verdict word. Use past tense for historical context, never verdict keywords in prose.
 

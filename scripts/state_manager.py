@@ -33,7 +33,7 @@ VALID_PIPELINE_MODES= {"full", "skip-plan", "skip-to-execute", "plan-only"}
 VALID_PHASES        = {"planning", "design", "breakdown", "execute"}
 VALID_STORY_STATUS  = {"NEW", "IN_PROGRESS", "SCANNING", "IN_REVIEW", "IN_QA",
                        "COMPLETE", "DEFERRED", "BLOCKED"}
-VALID_PHASE_CODES   = {"A", "B", "C", "D", "E"}
+VALID_PHASE_CODES   = {"A", "B", "C"}
 REQUIRED_KEYS       = {"feature_slug", "route", "workflow", "pipeline_mode"}
 
 # ---------------------------------------------------------------------------

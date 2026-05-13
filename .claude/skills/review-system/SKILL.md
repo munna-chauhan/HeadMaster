@@ -1,6 +1,6 @@
 ---
 name: review-system
-description: "Subagent phase E of /execute. Spawned with fresh context after all stories complete. Pre-PR process audit — TDD design vs actual execution. Classifies divergences, root-cause analyzes, generates actionable findings + pipeline improvements. One-shot."
+description: "Subagent in Phase C of /execute. Spawned with fresh context after all stories complete. Pre-PR process audit — TDD design vs actual execution. Classifies divergences, root-cause analyzes, generates actionable findings + pipeline improvements. One-shot."
 argument-hint: <feature-slug>
 ---
 

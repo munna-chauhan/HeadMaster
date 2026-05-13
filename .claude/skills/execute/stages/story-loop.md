@@ -9,7 +9,7 @@ Resolved once from `{setup}` — no per-story subprocess for these:
 
 ---
 
-**Single story filter:** If `--story STORY-KEY` provided: process only that story. Skip Phase E after.
+**Single story filter:** If `--story STORY-KEY` provided: process only that story. Skip Phase C after.
 
 For each story (dependency order):
 
@@ -36,7 +36,7 @@ python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} start
 
 ## Phase A: Implement + Scan
 
-Run per `.claude/skills/implement/SKILL.md`. Security scan is the final step of implement (no separate Phase B).
+Run per `.claude/skills/implement/SKILL.md`. Security scan is the final step of implement. Phase B (AC check) runs after implement returns PASS.
 
 **Ambiguity during implementation:**
 - If `{autonomous}=true` → assume, log decision inline, continue

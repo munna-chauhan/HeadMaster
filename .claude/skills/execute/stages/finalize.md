@@ -40,7 +40,7 @@ Options:
 python scripts/run_logger.py {project} {slug} "Execute/Phase C" "PHASE_START" "Starting Phase C: system review + integration QA" "HIGH"
 ```
 
-**Subagent failure policy (Phase E only):**
+**Subagent failure policy (Phase C only):**
 
 | Output | Action |
 |--------|--------|
@@ -92,7 +92,7 @@ Also flatten all story ACs from cached setup data — one line per AC: `{KEY}|AC
 Agent: qa-engineer
 Model: sonnet
 Prompt:
-"Phase E integration QA for feature {slug}.
+"Phase C integration QA for feature {slug}.
 
 Repo: {repo_path} | Branch: feature/{slug} | Build: {build_cmd}
 
@@ -127,11 +127,11 @@ Verdict: APPROVED | APPROVED_PARTIAL | REJECTED-BUG"
 | any | REJECTED-BUG | Escalate |
 
 **On escalation — AskUserQuestion per `.claude/agents/references/ask-user-protocol.md`:**
-- Topic: "Phase E: {N} blocking findings before PR."
+- Topic: "Phase C: {N} blocking findings before PR."
 - Include: finding summaries from both reports.
 - Options: Fix in-place on feature/{slug} / Re-dispatch affected story / Accept and proceed / Stop
 
-After fix → re-run Phase E once. If blocking findings persist → hard stop (AskUserQuestion: accept risk / stop).
+After fix → re-run Phase C once. If blocking findings persist → hard stop (AskUserQuestion: accept risk / stop).
 
 ```bash
 python scripts/gate_transition.py {project} {slug} execute complete --artifact docs/features/{project}/{slug}/retrospective/system-review.md
