@@ -15,8 +15,12 @@ python -c "
 from pathlib import Path
 import sys, json
 
-design_dir = Path('docs/features/{project}/{slug}/design')
+design_dir  = Path('docs/features/{project}/{slug}/design')
+state_file  = Path('memory/features/{project}/{slug}/loop_state.json')
 breakdown_files = {breakdown_file_list}  # resolved from Step A
+
+state     = json.loads(state_file.read_text()) if state_file.exists() else {}
+artifacts = state.get('artifacts', {})
 
 for bf in breakdown_files:
     name = bf.stem.replace('JIRA_BREAKDOWN_', '').replace('JIRA_BREAKDOWN', '')
@@ -26,17 +30,18 @@ for bf in breakdown_files:
         if (design_dir / 'IMPLEMENTATION_BRIEF.md').exists():
             print(f'OK:brief:{bf}')
             continue
+        artifact_key = 'design/TDD.md'
         tdd = design_dir / 'TDD.md'
     else:
+        artifact_key = f'design/TDD_{name}.md'
         tdd = design_dir / f'TDD_{name}.md'
 
     if not tdd.exists():
         print(f'MISSING:{tdd}')
         sys.exit(1)
 
-    # Check gate string in artifact
-    content = tdd.read_text()
-    if 'TDD Status: APPROVED' not in content:
+    status = artifacts.get(artifact_key, {}).get('status')
+    if status != 'approved':
         print(f'NOT_APPROVED:{tdd}')
         sys.exit(1)
 
@@ -50,8 +55,7 @@ for bf in breakdown_files:
 
 **Step C — PRD gate:**
 ```bash
-python scripts/gate_validator.py \
-  docs/features/{project}/{slug}/planning/PRD.md PRD_APPROVED
+python scripts/gate_validator.py --project {project} --slug {slug} PRD_APPROVED
 ```
 Fail → HALT: "PRD not approved. Run `/plan {slug}` first."
 
@@ -153,14 +157,32 @@ python scripts/gate_transition.py {project} {slug} execute ready
 
 Skip if single repo. For multi-repo features:
 
-| Stack | Dep file |
-|-------|----------|
-| Node | `package.json` |
-| Java | `pom.xml` |
-| Go | `go.mod` |
-| Python | `requirements.txt` / `pyproject.toml` |
+**Path resolution — always use absolute paths:**
+```python
+from pathlib import Path
+import shutil
 
-Block on **major version conflicts** only across repos → escalate with package + versions + repos.
+hm_root   = Path(hm_root)          # absolute HeadMaster root captured in Step 1
+repo_path = Path(repo_path)        # from repo_map; may be relative (e.g. ../PWR/foo)
+abs_repo  = (hm_root / repo_path).resolve()
+```
+Never pass relative paths to `subprocess.run(cwd=...)`. Always `.resolve()` against `hm_root`.
+
+| Stack | Dep file | Check command |
+|-------|----------|---------------|
+| Node  | `package.json` | Read + compare `dependencies` versions across repos |
+| Java  | `pom.xml` | `subprocess.run(['mvn', 'dependency:tree', '-q', '-Dincludes=<pkg>'], cwd=abs_repo)` |
+| Go    | `go.mod` | Read + compare `require` blocks |
+| Python | `requirements.txt` / `pyproject.toml` | Read + compare version pins |
+
+**Tool availability — check before running, never error on missing tool:**
+```python
+if not shutil.which('mvn'):
+    print("WARNING: mvn not found — Java dep scan skipped")
+    # continue, do not exit 1
+```
+
+Block on **major version conflicts** only → escalate with package + versions + repos.
 Minor version differences → acceptable. Missing dep files → log WARNING, continue.
 
 ---

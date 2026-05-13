@@ -735,7 +735,7 @@ python scripts/cleanup_failed_run.py acme product-catalog-search --reset-state
 | `config_utils.py` | Config resolution with project overrides |
 | `failure_ledger.py` | Per-story append-only failure log |
 | `revision_manager.py` | Reopen stage + cascade downstream |
-| `gate_validator.py` | Validate gate string in artifact |
+| `gate_validator.py` | Validate pipeline gates via loop_state.json |
 | `update_agent_memory.py` | Atomic agent MEMORY.md patching |
 | `convergence_check.py` | TDD vs implementation convergence |
 | `cleanup_failed_run.py` | Emergency recovery |

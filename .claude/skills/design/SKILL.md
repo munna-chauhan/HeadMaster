@@ -97,7 +97,7 @@ Based on detected state, load and execute the corresponding stage file:
 
 ## Route Check (after TDD APPROVED)
 
-After `TDD Status: APPROVED` (or IMPLEMENTATION_BRIEF complete for xs), evaluate route reclassification per `.claude/workflows/reclassification.yml` `route_checkpoints.after_design`:
+After TDD artifact status = `approved` in loop_state.json (or IMPLEMENTATION_BRIEF complete for xs), evaluate route reclassification per `.claude/workflows/reclassification.yml` `route_checkpoints.after_design`:
 
 1. Check evidence signals: multi-repo split required? Phased rollout not in PRD? New integration points in SYSTEM_DESIGN_NOTES?
 2. If reclassification warranted: follow `route_behavior` and apply `route_rework` steps
@@ -110,5 +110,5 @@ Spike and hotfix routes are not reclassified at design checkpoint.
 
 ## Prerequisites
 
-- `docs/features/{project}/{slug}/planning/PRD.md` with `PRD Status: APPROVED`
+- `artifacts["planning/PRD.md"].status = approved` in loop_state.json
 - `config.yml` at repo root

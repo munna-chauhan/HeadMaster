@@ -8,10 +8,10 @@ Public API:
   tdd_breakdown_pairs(artifacts)             -> list[dict]
 
 CLI:
-  python scripts/state_manager.py <project> <slug> [project_dir]
+  python scripts/state_manager.py --project <p> --slug <s> [--project-dir <dir>]
   python scripts/state_manager.py --validate <path>
   python scripts/state_manager.py --status [--project <p>]
-  python scripts/state_manager.py --rebuild <project> <slug>
+  python scripts/state_manager.py --rebuild --project <p> --slug <s>
 """
 
 import argparse
@@ -477,12 +477,12 @@ def all_features(project: str, repo_root=None) -> list:
 
 def main():
     parser = argparse.ArgumentParser(description="Pipeline state manager")
-    parser.add_argument("project",     nargs="?", help="Project slug")
-    parser.add_argument("slug",        nargs="?", help="Feature slug")
-    parser.add_argument("project_dir", nargs="?", help="Repo root (default: cwd)")
-    parser.add_argument("--validate",  metavar="PATH", help="Validate loop_state.json at PATH")
-    parser.add_argument("--status",    action="store_true", help="Print feature status JSON")
-    parser.add_argument("--rebuild",   action="store_true", help="Rebuild artifacts key from filesystem")
+    parser.add_argument("--project",     help="Project slug")
+    parser.add_argument("--slug",        help="Feature slug")
+    parser.add_argument("--project-dir", dest="project_dir", help="Repo root (default: cwd)")
+    parser.add_argument("--validate",    metavar="PATH", help="Validate loop_state.json at PATH")
+    parser.add_argument("--status",      action="store_true", help="Print feature status JSON")
+    parser.add_argument("--rebuild",     action="store_true", help="Rebuild artifacts key from filesystem")
     args = parser.parse_args()
 
     if args.validate:
@@ -496,7 +496,7 @@ def main():
 
     if args.rebuild:
         if not args.project or not args.slug:
-            print("--rebuild requires <project> <slug>")
+            print("--rebuild requires --project and --slug")
             raise SystemExit(1)
         artifacts = rebuild_artifacts(args.project, args.slug)
         state_file = REPO_ROOT / "memory" / "features" / args.project / args.slug / "loop_state.json"

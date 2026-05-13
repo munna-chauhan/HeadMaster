@@ -74,4 +74,4 @@ Based on current execution state, load and execute the corresponding stage file:
 
 - `docs/features/{project}/{slug}/breakdown/JIRA_BREAKDOWN*.md` — human-approved
 - `docs/features/{project}/{slug}/design/TDD*.md` OR `docs/features/{project}/{slug}/design/IMPLEMENTATION_BRIEF.md` — exists
-- `docs/features/{project}/{slug}/planning/PRD.md` — PRD Status: APPROVED
+- `artifacts["planning/PRD.md"].status = approved` in loop_state.json

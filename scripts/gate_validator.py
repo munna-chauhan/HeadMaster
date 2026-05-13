@@ -1,56 +1,70 @@
 #!/usr/bin/env python
-"""Validate gate strings in pipeline artifacts.
+"""Validate pipeline gates via loop_state.json.
 
 Usage:
-    python scripts/gate_validator.py <artifact_path> <gate_key>
+    python scripts/gate_validator.py --project <p> --slug <s> PRD_APPROVED
+    python scripts/gate_validator.py --project <p> --slug <s> TDD_APPROVED --name <tdd-name>
+    python scripts/gate_validator.py --project <p> --slug <s> ARCH_LOCKED
+    python scripts/gate_validator.py --project <p> --slug <s> SYSTEM_REVIEW_PASS
 
-Gate keys: PRD_APPROVED | ARCH_LOCKED | TDD_APPROVED | SYSTEM_REVIEW_PASS
-
-Returns: 0 if gate string found, 1 if not (with diagnostic to stderr), 2 on usage error.
+Returns: 0 if gate passes, 1 if not (diagnostic to stderr), 2 on usage error.
 """
+import argparse
+import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-from gate_constants import (
-    GATE_PRD_APPROVED, GATE_ARCH_LOCKED, GATE_TDD_APPROVED, GATE_SYSTEM_REVIEW_PASS,
-)
-
-GATE_MAP = {
-    "PRD_APPROVED":       GATE_PRD_APPROVED,
-    "ARCH_LOCKED":        GATE_ARCH_LOCKED,
-    "TDD_APPROVED":       GATE_TDD_APPROVED,
-    "SYSTEM_REVIEW_PASS": GATE_SYSTEM_REVIEW_PASS,
-}
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def validate_gate(artifact_path: str, gate_key: str) -> tuple[bool, str]:
-    expected = GATE_MAP.get(gate_key.upper())
-    if expected is None:
-        return False, f"Unknown gate key '{gate_key}'. Valid: {list(GATE_MAP)}"
+def validate_gate(project: str, slug: str, gate_key: str, name: str = None, repo_root: Path = None) -> tuple[bool, str]:
+    root = Path(repo_root) if repo_root else REPO_ROOT
+    state_file = root / "memory" / "features" / project / slug / "loop_state.json"
+    if not state_file.exists():
+        return False, f"loop_state.json not found for {project}/{slug}"
 
-    path = Path(artifact_path)
-    if not path.exists():
-        return False, f"Artifact not found: {artifact_path}"
+    state = json.loads(state_file.read_text(encoding="utf-8"))
+    key = gate_key.upper()
 
-    content = path.read_text(encoding="utf-8")
-    if expected in content:
-        return True, ""
+    if key == "PRD_APPROVED":
+        status = state.get("artifacts", {}).get("planning/PRD.md", {}).get("status")
+        if status == "approved":
+            return True, ""
+        return False, f"planning/PRD.md status is '{status or 'not set'}' — run /plan {slug} to get PRD approved"
 
-    lower_expected = expected.lower()
-    for line in content.splitlines():
-        if lower_expected in line.lower():
-            return False, f"Expected '{expected}' — found '{line.strip()}'. Gate strings are case-sensitive."
+    if key == "TDD_APPROVED":
+        if not name:
+            return False, "TDD_APPROVED requires --name <tdd-name>"
+        artifact_key = f"design/TDD_{name}.md"
+        status = state.get("artifacts", {}).get(artifact_key, {}).get("status")
+        if status == "approved":
+            return True, ""
+        return False, f"{artifact_key} status is '{status or 'not set'}' — run /design {slug} to get TDD approved"
 
-    return False, f"Gate string '{expected}' not found in {artifact_path}"
+    if key == "ARCH_LOCKED":
+        arch_status = state.get("design_stages", {}).get("architect")
+        if arch_status == "complete":
+            return True, ""
+        return False, f"design_stages.architect is '{arch_status or 'not set'}' — architect stage not complete"
+
+    if key == "SYSTEM_REVIEW_PASS":
+        review_status = state.get("review", {}).get("status")
+        if review_status == "PASS":
+            return True, ""
+        return False, f"review.status is '{review_status or 'not set'}' — system review has not passed"
+
+    return False, f"Unknown gate key '{gate_key}'. Valid: PRD_APPROVED, TDD_APPROVED, ARCH_LOCKED, SYSTEM_REVIEW_PASS"
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: gate_validator.py <artifact_path> <gate_key>", file=sys.stderr)
-        sys.exit(2)
+    parser = argparse.ArgumentParser(description="Validate pipeline gates via loop_state.json")
+    parser.add_argument("--project", required=True, help="Project slug")
+    parser.add_argument("--slug",    required=True, help="Feature slug")
+    parser.add_argument("--name",    help="TDD name (required for TDD_APPROVED)")
+    parser.add_argument("gate_key",  help="PRD_APPROVED | TDD_APPROVED | ARCH_LOCKED | SYSTEM_REVIEW_PASS")
+    args = parser.parse_args()
 
-    found, msg = validate_gate(sys.argv[1], sys.argv[2])
+    found, msg = validate_gate(args.project, args.slug, args.gate_key, args.name)
     if found:
         sys.exit(0)
     print(f"[gate-validator] FAIL: {msg}", file=sys.stderr)

@@ -108,7 +108,7 @@ Use `project`, `project_key`, `tier`, `max_loops`, `gates.plan` from output. If 
 
 ## Route Check (after PRD APPROVED)
 
-After the gate `PRD Status: APPROVED` is confirmed, evaluate route reclassification per `.claude/workflows/reclassification.yml` `route_checkpoints.after_plan`:
+After `artifacts["planning/PRD.md"].status = approved` in loop_state.json is confirmed, evaluate route reclassification per `.claude/workflows/reclassification.yml` `route_checkpoints.after_plan`:
 
 1. Read current route from `loop_state.json`
 2. Check evidence signals against `route_checkpoints.after_plan.checks`
