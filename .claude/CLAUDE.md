@@ -140,7 +140,7 @@ Changes to the following paths require unconditional human approval before merge
 - `scripts/config_utils.py`
 - `.mcp.json`
 
-**Inventory discipline:** Agent and skill counts in README.md and CLAUDE.md must come from the filesystem. Run `python scripts/audit_inventory.py` before committing; use `--fix` to auto-correct.
+**Inventory discipline:** Agent and skill counts must come from the filesystem. Run `python scripts/audit_inventory.py` before committing; use `--fix` to auto-correct.
 
 **Config schema discipline:** Every key in `config.yml` must appear in `config.yml.example` and have a consumer in scripts or skills. Run `python scripts/config_utils.py validate config.yml` before committing.
 
