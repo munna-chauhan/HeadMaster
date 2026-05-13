@@ -199,19 +199,31 @@ Create `memory/projects/` dir if absent.
 
 ---
 
-## Step 8: Summary
+## Step 8: Extract style/lint config
+
+For each repo, run:
+```bash
+python scripts/style_extractor.py {repo-path} --output memory/projects/{project}/style/{repo-name}.md
+```
+
+The script discovers style/lint configs at the repo root by file pattern (ini, json, yaml, toml, xml, key=value). No tool names assumed. Exit 1 = no configs found → skip silently, do not write file.
+
+---
+
+## Step 9: Summary
 
 ```
 Registry written: {project} ({N} repos, {M} modules)
 Tools: {tool-list with status}
   - {tool-name} v{version}: {N} repos compatible
   - ... (any mismatches flagged)
+Style: {N} repos with style rules extracted → memory/projects/{project}/style/
 Next: /init-feature — use registry for repo selection.
 ```
 
 ---
 
-## Step 9: Greenfield scaffold (only when `--greenfield <target-path>` passed)
+## Step 10: Greenfield scaffold (only when `--greenfield <target-path>` passed)
 
 Create the target directory and write starter files per `greenfield_stack` and `greenfield_template` from loop_state.
 
@@ -229,7 +241,7 @@ Always write:
 - `README.md` — one-line project description from feature name
 - `.gitignore` — standard ignore rules for the stack (language-specific patterns + `.env`, `*.local`)
 
-After writing starter files → proceed with normal scan (Steps 2–8) so `repo-registry.yml` captures the new repo.
+After writing starter files → proceed with normal scan (Steps 2–9) so `repo-registry.yml` captures the new repo.
 
 Print at end of Step 9:
 ```
