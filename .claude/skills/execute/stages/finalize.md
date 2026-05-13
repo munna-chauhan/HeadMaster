@@ -116,6 +116,14 @@ Verdict: APPROVED | APPROVED_PARTIAL | REJECTED-BUG"
 
 ---
 
+**Parse verdicts from subagent output files:**
+```bash
+REVIEW_VERDICT=$(python scripts/parse_verdict.py \
+  docs/features/{project}/{slug}/retrospective/system-review.md "PASS,FINDINGS")
+QA_VERDICT=$(python scripts/parse_verdict.py \
+  docs/features/{project}/{slug}/retrospective/qa-report.md "APPROVED,APPROVED_PARTIAL,REJECTED-BUG")
+```
+
 **Combined gate:**
 
 | System Review | QA | Action |
@@ -125,6 +133,7 @@ Verdict: APPROVED | APPROVED_PARTIAL | REJECTED-BUG"
 | FINDINGS (MEDIUM/LOW only) | APPROVED or APPROVED_PARTIAL | Proceed — non-blocking |
 | FINDINGS (CRITICAL/HIGH) | any | Escalate |
 | any | REJECTED-BUG | Escalate |
+| error / retry exhausted | any | Escalate — subagent context/timeout issue |
 
 **On escalation — AskUserQuestion per `.claude/agents/references/ask-user-protocol.md`:**
 - Topic: "Phase C: {N} blocking findings before PR."

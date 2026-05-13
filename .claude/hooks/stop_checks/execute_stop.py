@@ -30,7 +30,8 @@ def _parse_story_statuses(content: str) -> list[str]:
             cells = [c.strip() for c in line.split("|") if c.strip()]
             for cell in cells:
                 upper = cell.upper()
-                if upper in ("IN PROGRESS", "NEW", "COMPLETE", "DONE", "BLOCKED"):
+                if upper in ("IN_PROGRESS", "IN PROGRESS", "NEW", "COMPLETE", "DONE",
+                            "BLOCKED", "DEFERRED", "SCANNING", "IN_REVIEW", "IN_QA"):
                     statuses.append(upper)
     return statuses
 

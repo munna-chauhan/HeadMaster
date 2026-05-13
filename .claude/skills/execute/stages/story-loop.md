@@ -63,7 +63,17 @@ git diff {base}...story/{STORY-KEY} --name-only
 For each AC, confirm at least one changed file name or path maps to the AC's domain (endpoint, module, model, config).
 
 PASS → story complete.
-FAIL (list uncovered ACs) → back to Phase A. If attempt >= max_loops → escalate/defer.
+FAIL → append uncovered ACs to failure ledger before retrying:
+```bash
+python scripts/failure_ledger.py append {slug} {STORY-KEY} --record '{
+  "approach": "phase_b_ac_check",
+  "error_type": "ac_coverage_gap",
+  "error_summary": "Uncovered ACs: {AC-N, ...}",
+  "files_touched": [],
+  "hypothesis": "Implementation did not touch files for the listed ACs"
+}'
+```
+Back to Phase A. If attempt >= max_loops → escalate/defer.
 
 ---
 
