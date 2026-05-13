@@ -10,6 +10,8 @@ from typing import Any, Optional
 CONFIG_PROJECTS_KEY = "projects"
 CONFIG_ACTIVE_KEY = "active"
 
+ALLOWED_TOP_LEVEL_KEYS = {"projects", "pipeline", "autonomous", "gates", "security", "hm"}
+
 
 class ConfigResolver:
     """Resolves config values with project override support."""
@@ -98,17 +100,9 @@ class ConfigResolver:
         """Get pipeline configuration."""
         return self.config.get("pipeline", {})
 
-    def get_session_config(self) -> dict:
-        """Get session configuration."""
-        return self.config.get("session", {})
-
-    def get_monitoring_config(self) -> dict:
-        """Get monitoring configuration."""
-        return self.config.get("monitoring", {})
-
-    def get_integrations_config(self) -> dict:
-        """Get integrations configuration."""
-        return self.config.get("integrations", {})
+    def validate(self) -> list[str]:
+        """Return list of unknown top-level keys (not in ALLOWED_TOP_LEVEL_KEYS)."""
+        return [k for k in self.config if k not in ALLOWED_TOP_LEVEL_KEYS]
 
 
 # Convenience functions for backward compatibility
@@ -138,10 +132,11 @@ if __name__ == "__main__":
     _USAGE = (
         "Usage: config_utils.py <command> [args]\n"
         "Commands:\n"
-        "  get <dotted.key>                    → value or empty string\n"
+        "  get <dotted.key>                     → value or empty string\n"
         "  feature-memory-path <project> <slug> → absolute path\n"
-        "  features-path [project]             → absolute path\n"
-        "  active-project                      → project slug\n"
+        "  features-path [project]              → absolute path\n"
+        "  active-project                       → project slug\n"
+        "  validate [config.yml]                → exit 0 if clean, 1 if unknown keys\n"
     )
 
     if len(sys.argv) < 2:
@@ -181,6 +176,19 @@ if __name__ == "__main__":
 
     elif cmd == "active-project":
         print(resolver.active_project)
+
+    elif cmd == "validate":
+        config_path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+        try:
+            r = ConfigResolver(config_path)
+        except FileNotFoundError as e:
+            print(f"ERROR: {e}", file=sys.stderr)
+            sys.exit(1)
+        unknown = r.validate()
+        if unknown:
+            print(f"Unknown config keys: {', '.join(unknown)}", file=sys.stderr)
+            sys.exit(1)
+        print("ok")
 
     else:
         print(f"Unknown command: {cmd}", file=sys.stderr)

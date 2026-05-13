@@ -519,66 +519,25 @@ For each story: Phase A (implement + scan) &rarr; Phase B (AC check). Phase C (s
 
 ## Configuration Reference
 
-<details>
-<summary><strong><code>config.yml</code> &mdash; full reference</strong></summary>
+The canonical reference is [`config.yml.example`](config.yml.example). Copy it to `config.yml` (gitignored) and customize. Every key in the example file has a consumer — no dead keys.
 
-```yaml
-projects:
-  active: acme
-
-  default:
-    name: HeadMaster
-    root: .
-    project_key: HeadMaster
-    technical_owner: Your Name
-    approver: Your Name
-    jira_push: false
-    coverage_threshold: 60
-
-  acme:
-    name: Acme
-    root: ../acme-app
-    project_key: ACME
-    technical_owner: Your Name
-    approver: Your Name
-    jira_push: true
-    confluence: false
-    coverage_threshold: 80
-
-pipeline:
-  max_loops: 3
-  dry_run: false
-  build_command: null       # null = auto-detect from project type
-  loop_caps:
-    plan:    3
-    design:  4
-    execute: 2
-  parallel: false
-
-autonomous: false           # false = human initiates each phase
-
-gates:
-  plan:
-    interactive: true
-    review:
-      mode: human_in_loop  # skip | auto | human_in_loop
-  design:
-    interactive: true
-    review:
-      mode: human_in_loop
-  breakdown:
-    auto_approve: true
+```bash
+cp config.yml.example config.yml
 ```
 
-**`gates.plan.review.mode`**
+Validate your config at any time:
+
+```bash
+python scripts/config_utils.py validate config.yml
+```
+
+**`gates.{phase}.review.mode`**
 
 | Mode | Behavior |
 |---|---|
-| `skip` | Mark PRD APPROVED immediately |
-| `auto` | Run prd-reviewer inline, auto-approve PASS/CONDITIONAL |
-| `human_in_loop` | Interactive Q&A + optional sections gate + prd-reviewer (m/l) |
-
-</details>
+| `skip` | Mark artifact APPROVED immediately |
+| `auto` | Run reviewer inline, auto-approve PASS/CONDITIONAL |
+| `human_in_loop` | Interactive Q&A + reviewer (m/l tiers) |
 
 <details>
 <summary><strong><code>.mcp.json</code> &mdash; MCP server config</strong></summary>

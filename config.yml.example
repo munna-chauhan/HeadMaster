@@ -1,0 +1,79 @@
+# HeadMaster Configuration Example
+# Copy to config.yml and customize. config.yml is gitignored (machine-local).
+# All keys listed here are real — each has a consumer in scripts/ or skills/.
+
+# ─── PROJECTS ────────────────────────────────────────────────────────────────
+# Define one entry per feature repo. Set active to the slug you are working on.
+
+projects:
+  active: acme                          # Change to your project slug
+
+  acme:
+    name: Acme Platform
+    root: ../acme-app                   # Path to repo (relative to HeadMaster root or absolute)
+    project_key: ACME                   # Jira project key
+    technical_owner: Your Name          # Written into PRD/TDD headers
+    approver: Your Name                 # Written into PRD/TDD headers
+    jira_push: true                     # Push stories to Jira (requires ATLASSIAN_* env vars)
+    confluence: false                   # Enable /publish-confluence for this project
+    coverage_threshold: 80              # Min test coverage % enforced in Phase A
+
+  # Add more projects as needed:
+  # legacy-app:
+  #   name: Legacy Monolith
+  #   root: C:\Projects\LegacyApp
+  #   project_key: LEG
+  #   jira_push: false
+  #   coverage_threshold: 60
+
+# ─── PIPELINE ────────────────────────────────────────────────────────────────
+
+pipeline:
+  max_loops: 3                          # Max review iterations before human escalation
+  loop_caps:
+    plan:    3                          # Max /plan convergence loops
+    design:  4                          # Max /design convergence loops
+    execute: 2                          # Max /execute retry loops per story
+  parallel: false                       # Run independent stories simultaneously
+  interactive: true                     # Ask at decision points (Confusion Clause still applies)
+
+# ─── AUTONOMY ────────────────────────────────────────────────────────────────
+
+autonomous: false                       # true = auto-flow through phases, logs to run-log.md
+
+# ─── GATES ───────────────────────────────────────────────────────────────────
+# Controls review behavior at each pipeline phase.
+# review.mode: skip | auto | human_in_loop
+
+gates:
+  plan:
+    interactive: true
+    review:
+      mode: human_in_loop
+  design:
+    interactive: true
+    review:
+      mode: human_in_loop
+  breakdown:
+    auto_approve: true
+
+# ─── SECURITY ────────────────────────────────────────────────────────────────
+# impl_path_prefixes: path prefixes treated as implementation files by
+# pre_spawn_validation.py when checking subagent isolation.
+
+security:
+  impl_path_prefixes:
+    - src/
+    - app/
+    - lib/
+    - cmd/
+    - pkg/
+    - crates/
+
+# ─── ENVIRONMENT VARIABLES (not in config.yml) ───────────────────────────────
+# Required when jira_push: true:
+#   ATLASSIAN_DOMAIN=your-org.atlassian.net
+#   JIRA_USER_EMAIL=you@company.com
+#   JIRA_API_TOKEN=your-api-token
+#
+# Set in your shell profile or .env file (HeadMaster does not manage .env).
