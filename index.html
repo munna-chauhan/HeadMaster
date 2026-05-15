@@ -85,11 +85,11 @@
     color: var(--fg);
     line-height: 1.6;
   }
-  main { max-width: 880px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+  main { max-width: 920px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
   header { text-align: center; margin-bottom: 3rem; }
   .banner { max-width: 100%; height: auto; margin-bottom: 1.5rem; }
-  h1 { font-size: 2.2rem; margin: 0 0 0.6rem; letter-spacing: -0.02em; }
-  .tagline { color: var(--muted); font-size: 1.1rem; margin: 0 0 1.5rem; }
+  h1 { font-size: 2.4rem; margin: 0 0 0.6rem; letter-spacing: -0.02em; }
+  .tagline { color: var(--muted); font-size: 1.15rem; margin: 0 0 1.5rem; }
   .ctas { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin: 2rem 0; }
   .btn { display: inline-block; padding: 0.7rem 1.4rem; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid var(--border); transition: transform 0.1s; }
   .btn:hover { transform: translateY(-1px); }
@@ -97,14 +97,50 @@
   .btn-secondary { background: var(--card); color: var(--fg); }
   .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
   .badges img { height: 28px; }
-  section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
-  section h2 { margin-top: 0; font-size: 1.3rem; }
-  pre { background: rgba(127,127,127,0.1); padding: 0.6rem 0.9rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }
+  section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem 2rem; margin-bottom: 1.5rem; }
+  section h2 { margin-top: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 0.5rem; }
+  section h3 { font-size: 1.05rem; margin: 1.25rem 0 0.5rem; }
+  section p { margin: 0.7rem 0; }
+  pre { background: rgba(127,127,127,0.1); padding: 0.8rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.88rem; line-height: 1.5; }
   code { font-family: "SF Mono", Monaco, Consolas, monospace; font-size: 0.92em; }
   ul { padding-left: 1.3rem; }
-  li { margin: 0.3rem 0; }
+  li { margin: 0.35rem 0; }
+  a { color: var(--accent); }
+  /* Pipeline diagram */
+  .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin: 1.5rem 0 1rem; }
+  .stage { text-align: center; padding: 0.8rem 0.4rem; border: 1px solid var(--border); border-radius: 10px; background: rgba(124,58,237,0.06); position: relative; }
+  .stage .num { display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .stage .name { font-weight: 700; font-size: 0.85rem; display: block; }
+  .stage .artifact { color: var(--muted); font-size: 0.72rem; display: block; margin-top: 0.3rem; line-height: 1.3; }
+  @media (max-width: 700px) { .pipeline { grid-template-columns: 1fr 1fr; } }
+  /* Feature grid */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+  .grid .item { padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 8px; }
+  .grid .item h4 { margin: 0 0 0.3rem; font-size: 0.95rem; }
+  .grid .item p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  /* Comparison table */
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  td.y { color: #16a34a; font-weight: 600; }
+  td.n { color: var(--muted); }
+  /* FAQ */
+  details { border-top: 1px solid var(--border); padding: 0.7rem 0; }
+  details:first-of-type { border-top: none; }
+  summary { cursor: pointer; font-weight: 600; padding: 0.2rem 0; list-style: none; }
+  summary::after { content: " +"; color: var(--muted); float: right; }
+  details[open] summary::after { content: " −"; }
+  details p, details ul { color: var(--muted); font-size: 0.94rem; }
+  /* Roadmap */
+  .roadmap-item { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.35rem 0; }
+  .roadmap-item .tag { font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; min-width: 75px; text-align: center; flex-shrink: 0; }
+  .tag.shipped { background: rgba(22,163,74,0.15); color: #16a34a; }
+  .tag.progress { background: rgba(234,179,8,0.18); color: #ca8a04; }
+  .tag.planned { background: rgba(127,127,127,0.18); color: var(--muted); }
   footer { text-align: center; color: var(--muted); margin-top: 3rem; font-size: 0.9rem; }
   footer a { color: var(--muted); }
+  footer .links { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 0.6rem; }
 </style>
 </head>
 <body>
@@ -114,10 +150,10 @@
     <h1>HeadMaster</h1>
     <p class="tagline">Open-source ADLC (AI-Driven Delivery Lifecycle) built on Claude Code.<br>Turns a single conversation into a PRD, a TDD, Jira stories, code, tests, and a reviewed PR.</p>
     <div class="badges">
+      <img src="https://img.shields.io/github/stars/munna-chauhan/HeadMaster?style=for-the-badge&logo=github&color=FFD700" alt="GitHub stars">
+      <img src="https://img.shields.io/github/last-commit/munna-chauhan/HeadMaster?style=for-the-badge&color=7C3AED" alt="Last commit">
+      <img src="https://img.shields.io/github/license/munna-chauhan/HeadMaster?style=for-the-badge&color=blue" alt="License">
       <img src="https://img.shields.io/badge/Built_on-Claude_Code-7C3AED?style=for-the-badge" alt="Built on Claude Code">
-      <img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge" alt="Apache 2.0">
-      <img src="https://img.shields.io/badge/Agents-13-00C853?style=for-the-badge" alt="13 Agents">
-      <img src="https://img.shields.io/badge/Skills-19-FF6D00?style=for-the-badge" alt="19 Skills">
     </div>
     <div class="ctas">
       <a class="btn btn-primary" href="https://github.com/munna-chauhan/HeadMaster">View on GitHub</a>
@@ -127,22 +163,105 @@
   </header>
 
   <section>
-    <h2>What it does</h2>
-    <p>HeadMaster is an orchestration layer that sits alongside your feature repositories. Open Claude Code from the HeadMaster directory, point it at a project, and run slash commands to move features through five stages:</p>
-    <pre><code>/init-feature  →  /plan  →  /design  →  /breakdown  →  /execute  →  PR</code></pre>
-    <p>Each stage produces structured, human-reviewable artifacts. Nothing merges automatically. Every gate requires explicit approval.</p>
+    <h2>Why HeadMaster exists</h2>
+    <p>AI coding tools have collapsed the time it takes to write code. The bottleneck moved upstream: <em>deciding what to build, how to build it, and proving it works.</em> Most teams now have agents that can write a function in seconds but still spend days arguing about requirements, scoping tickets, reviewing PRs, and untangling the changes that nobody designed.</p>
+    <p>HeadMaster is the orchestration layer that closes that loop. It treats software delivery as a pipeline of artifacts — requirements, design, tickets, code, tests, review — and drives a feature through every stage with the right specialist agent at each step. You stay in the loop at every gate. Nothing merges without you saying yes.</p>
   </section>
 
   <section>
-    <h2>Pipeline</h2>
+    <h2>The pipeline</h2>
+    <p>Five stages, five gates, one terminal. Each stage emits a reviewable artifact; the next stage refuses to start until you approve the previous one.</p>
+    <div class="pipeline">
+      <div class="stage"><span class="num">1</span><span class="name">init-feature</span><span class="artifact">Tier + route detected</span></div>
+      <div class="stage"><span class="num">2</span><span class="name">plan</span><span class="artifact">PRD</span></div>
+      <div class="stage"><span class="num">3</span><span class="name">design</span><span class="artifact">SYSTEM_DESIGN + TDD</span></div>
+      <div class="stage"><span class="num">4</span><span class="name">breakdown</span><span class="artifact">Jira epic + stories</span></div>
+      <div class="stage"><span class="num">5</span><span class="name">execute</span><span class="artifact">Code, tests, PR</span></div>
+    </div>
+    <p>Stages auto-skip based on feature size. An XS bug fix runs <code>execute</code> only. An L feature runs all five. Tier classification is mechanical (LOC + risk indicators), not vibes.</p>
+  </section>
+
+  <section>
+    <h2>What you actually get</h2>
+    <p>Every stage produces a markdown artifact in <code>docs/features/{project}/{slug}/</code>. They're not throwaway — downstream agents read them, retrospectives reference them, and you can hand them to a teammate who has never seen the feature.</p>
+    <h3>PRD (from /plan)</h3>
+    <pre><code># PDF Invoice Export — PRD
+
+## Problem
+Finance team manually re-keys invoices from the admin UI into
+their accounting system. ~4 hours/week of error-prone copy work.
+
+## Acceptance Criteria
+- AC1: User clicks "Export PDF" on an invoice; downloads within 3s
+- AC2: PDF contains: header, line items, totals, terms, footer
+- AC3: Bulk export for filtered list (max 100 invoices, zipped)
+- AC4: PDF is rejected if invoice is in DRAFT state
+
+## Out of scope
+- Custom PDF templates per customer (v2)
+- Localized currency formatting (v2)</code></pre>
+    <h3>TDD (from /design)</h3>
+    <pre><code>## S3. Module: invoices/export
+
+Interface:
+  POST /api/invoices/{id}/pdf      → 200 application/pdf
+  POST /api/invoices/export        → 202 + job_id (bulk)
+
+Dependencies: ReportLab 4.x (already in project)
+Failure modes: invoice not found → 404; draft → 409
+
+Delivery slices:
+  Slice 1: single-invoice endpoint, no styling
+  Slice 2: header/footer template + line items
+  Slice 3: bulk endpoint + zip packaging</code></pre>
+    <h3>Jira stories (from /breakdown)</h3>
+    <pre><code>HM-142  Add /api/invoices/{id}/pdf endpoint            [3pt]
+HM-143  Build PDF template (header, line items, footer) [5pt]
+HM-144  Bulk export endpoint with job queue             [5pt]
+HM-145  Reject DRAFT invoices with 409                  [1pt]
+HM-146  Integration tests for AC1-AC4                   [3pt]</code></pre>
+  </section>
+
+  <section>
+    <h2>What's in the box</h2>
+    <div class="grid">
+      <div class="item"><h4>13 specialized agents</h4><p>Requirements, PRD author, solutions architect, TDD author, developer, code reviewer, QA engineer, release, retrospective, plus codebase analyst and web researcher.</p></div>
+      <div class="item"><h4>19 skills</h4><p>init-feature, plan, design, breakdown, execute, implement, review-code, qa-integration, security-scan, jira-ops, retrospect, and more.</p></div>
+      <div class="item"><h4>Tier auto-classification</h4><p>XS / S / M / L. A typo fix skips planning; a multi-service refactor runs the whole pipeline. Workflow per tier in <code>.claude/workflows/</code>.</p></div>
+      <div class="item"><h4>Subagent isolation</h4><p>Reviewers, QA, and TDD-reviewers never see implementation context — only the diff and the acceptance criteria. Enforced by a pre-spawn hook.</p></div>
+      <div class="item"><h4>Failure ledger</h4><p>Per-story retry log. When a test fails twice the same way, the executor changes approach instead of re-running the broken one.</p></div>
+      <div class="item"><h4>Self-learning retrospective</h4><p>After every feature, <code>/retrospect</code> mines the run for patterns and writes them into the right agent's MEMORY.md. Config-level proposals get routed to a human queue.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Built-in safety</h2>
     <ul>
-      <li><strong>13 specialized agents</strong> — requirements, PRD, design, TDD, developer, code review, QA, release, retrospective, plus a research and codebase analyst</li>
-      <li><strong>19 skills</strong> — init-feature, plan, design, breakdown, execute, implement, security-scan, review-code, qa-integration, review-system, jira-ops, reopen, retrospect, publish-confluence, archive-feature, compress, draw, curate-memory, setup-env</li>
-      <li><strong>Tier auto-classification</strong> — XS / S / M / L workflows skip or require stages based on feature size</li>
-      <li><strong>Subagent isolation</strong> — review/QA/TDD-reviewer agents never see implementation context (enforced by a pre-spawn hook)</li>
-      <li><strong>Failure ledger</strong> — per-story retry log that prevents repeating broken approaches</li>
-      <li><strong>Self-learning retrospective</strong> — auto-applies agent memory and pipeline learnings; routes config proposals to a human queue</li>
+      <li><strong>Unconditional human gates</strong> — Breakdown's Jira push, PR merge, and any edit to <code>.claude/</code> or pipeline scripts always require explicit approval, regardless of autonomous mode.</li>
+      <li><strong>Security scan in every execution phase</strong> — secret detection, SAST, CVE check on the branch diff before code review even starts.</li>
+      <li><strong>External-data sandboxing</strong> — content fetched from the web or external systems is wrapped in <code>&lt;!-- EXTERNAL-DATA-START/END --&gt;</code> markers; agents are instructed never to execute instructions within.</li>
+      <li><strong>No autonomous credential access</strong> — uses provider default credential chains, no hardcoded keys, secrets stay in the user's secret manager.</li>
+      <li><strong>Destructive git ops blocked</strong> — force-push, reset --hard, and clean -f are in the deny list.</li>
+      <li><strong>Atomic commits per story</strong> — every Jira story maps to a tagged commit; reverting a story is one command.</li>
     </ul>
+  </section>
+
+  <section>
+    <h2>How it's different</h2>
+    <table>
+      <thead><tr><th></th><th>Raw Claude Code</th><th>Devin / Cursor agents</th><th>HeadMaster</th></tr></thead>
+      <tbody>
+        <tr><td>Generates code</td><td class="y">Yes</td><td class="y">Yes</td><td class="y">Yes</td></tr>
+        <tr><td>Produces a PRD before coding</td><td class="n">No</td><td class="n">No</td><td class="y">Yes</td></tr>
+        <tr><td>Produces a TDD / design doc</td><td class="n">No</td><td class="n">No</td><td class="y">Yes</td></tr>
+        <tr><td>Decomposes into Jira tickets</td><td class="n">No</td><td class="n">No</td><td class="y">Yes</td></tr>
+        <tr><td>Mandatory human review gates</td><td class="n">No</td><td class="n">Optional</td><td class="y">Yes (unconditional)</td></tr>
+        <tr><td>Subagent context isolation</td><td class="n">No</td><td class="n">No</td><td class="y">Enforced by hook</td></tr>
+        <tr><td>Self-learning retrospective</td><td class="n">No</td><td class="n">No</td><td class="y">Yes</td></tr>
+        <tr><td>Runs on your own Claude key</td><td class="y">Yes</td><td class="n">No (hosted)</td><td class="y">Yes</td></tr>
+      </tbody>
+    </table>
+    <p>HeadMaster isn't a replacement for Claude Code — it <em>uses</em> Claude Code as the runtime and adds the pipeline discipline that turns ad-hoc agent output into reviewable software delivery.</p>
   </section>
 
   <section>
@@ -152,12 +271,60 @@ cp config.yml.example config.yml
 python scripts/setup_projects.py
 claude
 /init-feature "Add PDF invoice export"</code></pre>
-    <p>Requirements: <a href="https://claude.ai/code">Claude Code</a>, Python 3.9+, Node.js 18+.</p>
+    <p>Requirements: <a href="https://claude.ai/code">Claude Code</a>, Python 3.9+, Node.js 18+, an Anthropic API key. Optional: Atlassian credentials for Jira/Confluence push, GitHub CLI for PR creation.</p>
+    <p><a href="https://github.com/munna-chauhan/HeadMaster#quick-start">Full Quick Start →</a></p>
+  </section>
+
+  <section>
+    <h2>FAQ</h2>
+    <details><summary>Is HeadMaster just a wrapper around Claude Code?</summary><p>No. Claude Code is the runtime — it's how the agents execute. HeadMaster is the orchestration on top: 13 specialist agents with separate memories and models, 19 skills that drive the stage transitions, hooks that enforce isolation between subagents, scripts that manage state, and workflows that define which stages run for which feature size.</p></details>
+    <details><summary>Does it replace developers?</summary><p>No, and that's by design. Every stage has a human gate. The pipeline produces artifacts (PRD, TDD, stories, PR) that are explicitly designed to be reviewed by a person before the next stage starts. HeadMaster shifts your work from writing boilerplate to reviewing and steering — closer to a tech lead than an IC.</p></details>
+    <details><summary>What if I don't use Jira?</summary><p>The <code>jira-ops</code> skill is gated by a <code>jira_push</code> flag in <code>config.yml</code>. Disable it and Breakdown writes stories to a local markdown file (<code>JIRA_BREAKDOWN.md</code>) that the executor reads instead. Linear / GitHub Projects adapters are on the roadmap.</p></details>
+    <details><summary>How much does it cost to run?</summary><p>HeadMaster itself is Apache 2.0 — free. The cost is your Anthropic API usage. A small feature (XS/S tier) typically runs $0.50–$3 in Claude tokens; a large multi-service feature (L tier) can be $10–$30 depending on codebase size. Prompt caching across stages cuts this significantly.</p></details>
+    <details><summary>Can I trust the code it produces?</summary><p>You don't have to trust it — you review it. Every story produces an atomic commit, every PR has a structured description with traceability back to the Jira story and TDD section, security scans run before review, and the diff is small (story-sized, not feature-sized). Treat agent output the same way you treat a junior engineer's PR.</p></details>
+    <details><summary>What languages does it support?</summary><p>Any language Claude Code can read and write — Python, JavaScript/TypeScript, Go, Rust, Java, C#, Ruby, etc. The pipeline is language-agnostic; only the <code>setup-env</code> skill needs to detect your stack (it reads from <code>repo-registry.yml</code>).</p></details>
+    <details><summary>Is the output deterministic?</summary><p>Agent output isn't deterministic, but the pipeline structure is. The same input produces the same set of artifacts, with the same gates, in the same order. The content within each artifact varies — which is why human review at each gate is mandatory, not optional.</p></details>
+    <details><summary>Can I use this at work?</summary><p>Apache 2.0 license, so yes. The bigger questions are: does your org allow Anthropic API access on your codebase, and do you have approval for AI-assisted commits in your PR process? Most orgs that already permit Claude Code or Copilot will be fine; check with security first if you're in a regulated industry.</p></details>
+  </section>
+
+  <section>
+    <h2>Roadmap</h2>
+    <div class="roadmap-item"><span class="tag shipped">Shipped</span><span>Five-stage pipeline (plan → design → breakdown → execute → PR)</span></div>
+    <div class="roadmap-item"><span class="tag shipped">Shipped</span><span>13 specialist agents with isolated memory</span></div>
+    <div class="roadmap-item"><span class="tag shipped">Shipped</span><span>Tier-based workflow routing (XS/S/M/L)</span></div>
+    <div class="roadmap-item"><span class="tag shipped">Shipped</span><span>Subagent context isolation hook</span></div>
+    <div class="roadmap-item"><span class="tag shipped">Shipped</span><span>Self-learning retrospective with memory write-back</span></div>
+    <div class="roadmap-item"><span class="tag shipped">Shipped</span><span>Jira and Confluence MCP integration</span></div>
+    <div class="roadmap-item"><span class="tag progress">In progress</span><span>Diagram-as-code skill (Mermaid + draw.io)</span></div>
+    <div class="roadmap-item"><span class="tag progress">In progress</span><span>Cost telemetry per feature run</span></div>
+    <div class="roadmap-item"><span class="tag planned">Planned</span><span>Linear and GitHub Projects adapters</span></div>
+    <div class="roadmap-item"><span class="tag planned">Planned</span><span>Multi-repo orchestration (one feature spanning N services)</span></div>
+    <div class="roadmap-item"><span class="tag planned">Planned</span><span>Plugin API for custom agents and skills</span></div>
+    <p style="margin-top:1rem"><a href="https://github.com/munna-chauhan/HeadMaster/blob/main/FUTURE.md">Full roadmap →</a></p>
+  </section>
+
+  <section>
+    <h2>Get involved</h2>
+    <p>HeadMaster is in active development and feedback shapes priorities directly.</p>
+    <ul>
+      <li><strong>Try it</strong> on a small internal project, then open a GitHub Discussion with what worked and what didn't.</li>
+      <li><strong>Report issues</strong> — bugs, surprising agent behavior, missing stages, anything — at <a href="https://github.com/munna-chauhan/HeadMaster/issues">GitHub Issues</a>.</li>
+      <li><strong>Contribute</strong> — agent improvements, new skills, workflow tiers, language-specific setup detection. See <a href="https://github.com/munna-chauhan/HeadMaster/blob/main/.claude/CLAUDE.md">CLAUDE.md</a> for the contribution rules.</li>
+      <li><strong>Share</strong> — if HeadMaster saves you time, post about it. Word of mouth is how OSS projects survive.</li>
+    </ul>
   </section>
 
   <footer>
-    <p>Apache 2.0 licensed · <a href="https://github.com/munna-chauhan/HeadMaster">github.com/munna-chauhan/HeadMaster</a></p>
-    <p><sub>Keywords: ADLC, AI-Driven Delivery Lifecycle, Claude Code, Anthropic Claude, agentic pipeline, autonomous coding agent, PRD generator, TDD generator, Jira automation, MCP, model context protocol, multi-agent workflow.</sub></p>
+    <div class="links">
+      <a href="https://github.com/munna-chauhan/HeadMaster">GitHub</a>
+      <a href="https://github.com/munna-chauhan/HeadMaster#quick-start">Quick Start</a>
+      <a href="https://github.com/munna-chauhan/HeadMaster/blob/main/FUTURE.md">Roadmap</a>
+      <a href="https://github.com/munna-chauhan/HeadMaster/discussions">Discussions</a>
+      <a href="https://github.com/munna-chauhan/HeadMaster/issues">Issues</a>
+      <a href="https://github.com/munna-chauhan/HeadMaster/blob/main/LICENSE">License</a>
+    </div>
+    <p>Apache 2.0 licensed · Built on <a href="https://claude.ai/code">Claude Code</a> by <a href="https://github.com/munna-chauhan">Munna Chauhan</a></p>
+    <p><sub>ADLC · AI-Driven Delivery Lifecycle · Claude Code · Anthropic Claude · agentic pipeline · autonomous coding agent · PRD generator · TDD generator · Jira automation · MCP · model context protocol · multi-agent workflow</sub></p>
   </footer>
 </main>
 </body>
