@@ -1,8 +1,8 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner.svg">
-    <source media="(prefers-color-scheme: light)" srcset=".github/assets/banner.svg">
-    <img src=".github/assets/banner.svg" alt="HeadMaster - AI-Driven Software Delivery Pipeline" width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/banner.svg">
+    <img src="assets/banner.svg" alt="HeadMaster - AI-Driven Software Delivery Pipeline" width="100%">
   </picture>
 </p>
 

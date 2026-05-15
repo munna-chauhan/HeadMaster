@@ -1,0 +1,14 @@
+title: HeadMaster
+description: Open-source ADLC (AI-Driven Delivery Lifecycle) built on Claude Code.
+markdown: GFM
+theme: jekyll-theme-cayman
+
+include:
+  - assets
+
+exclude:
+  - scripts/tests
+  - .claude
+  - memory
+  - docs/features
+  - "*.session.pdf"
