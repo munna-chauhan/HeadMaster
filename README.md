@@ -10,15 +10,15 @@
   <img src="https://img.shields.io/badge/Built_on-Claude_Code-7C3AED?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTEyIDJMMyA3djEwbDkgNSA5LTVWN2wtOS01eiIvPjwvc3ZnPg==" alt="Built on Claude Code">
   <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.9+">
   <img src="https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 18+">
-  <img src="https://img.shields.io/badge/License-Private-red?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge" alt="Apache 2.0">
   <img src="https://img.shields.io/badge/Agents-13-00C853?style=for-the-badge" alt="13 Agents">
   <img src="https://img.shields.io/badge/Skills-19-FF6D00?style=for-the-badge" alt="19 Skills">
 </p>
 
 <p align="center">
-  <strong>AI-driven software delivery pipeline that turns a conversation into production-ready code.</strong>
+  <strong>HeadMaster — an open-source ADLC (AI-Driven Delivery Lifecycle) built on Claude Code.</strong>
   <br>
-  <em>Plan. Design. Build. Review. Ship. &mdash; All from Claude Code.</em>
+  <em>Turns a single conversation into a PRD, a TDD, Jira stories, code, tests, and a reviewed PR. Plan. Design. Build. Review. Ship.</em>
 </p>
 
 <p align="center">
@@ -28,6 +28,10 @@
   <a href="#full-pipeline-walkthrough">Walkthrough</a> &bull;
   <a href="#configuration-reference">Config</a> &bull;
   <a href="#troubleshooting">Help</a>
+</p>
+
+<p align="center">
+  <sub>Keywords: ADLC, AI-Driven Development Lifecycle, Claude Code, Anthropic Claude, agentic pipeline, AI software delivery, autonomous coding agent, PRD generator, TDD generator, Jira automation, MCP, model context protocol, agent orchestration, code review automation, multi-agent workflow</sub>
 </p>
 
 ---

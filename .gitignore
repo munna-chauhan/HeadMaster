@@ -44,9 +44,9 @@ console.log
 # Claude Code settings: settings.json is committed (shared), settings.local.json is machine-specific
 .claude/settings.local.json
 
-# HeadMaster config (user-specific, not shared)
+# HeadMaster config (user-specific, not shared) — root only, not .github/ISSUE_TEMPLATE/config.yml
 # Copy config.yml.example → config.yml and customize
-config.yml
+/config.yml
 
 # Feature memory (project-specific work, never commit)
 memory/

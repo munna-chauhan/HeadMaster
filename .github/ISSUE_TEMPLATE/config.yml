@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/munna-chauhan/HeadMaster/discussions
+    about: Open a Discussion for questions, ideas, or showing what you built with HeadMaster.
