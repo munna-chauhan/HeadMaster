@@ -21,16 +21,19 @@ plugins:
 # jekyll-seo-tag uses these for OG, Twitter Card, and JSON-LD output.
 
 author:
-  name: Munna Chauhan
+  name: munna-chauhan
   url: https://github.com/munna-chauhan
+  twitter: munna-chauhan
 
-logo: /HeadMaster/assets/banner.svg
+# Paths are relative to the site root — jekyll-seo-tag prepends url + baseurl.
+logo: /assets/banner.svg
 
 # Default social image used by OpenGraph and Twitter Card preview cards.
 # Replace with a 1200x630 PNG for best preview rendering across platforms.
-image: /HeadMaster/assets/banner.svg
+image: /assets/banner.svg
 
 twitter:
+  username: munna-chauhan
   card: summary_large_image
 
 social:
