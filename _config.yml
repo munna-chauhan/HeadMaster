@@ -1,7 +1,51 @@
 title: HeadMaster
-description: Open-source ADLC (AI-Driven Delivery Lifecycle) built on Claude Code.
+tagline: Open-source ADLC built on Claude Code
+description: >-
+  HeadMaster is an open-source ADLC (AI-Driven Delivery Lifecycle) built on
+  Claude Code. Turns a single conversation into a PRD, a TDD, Jira stories,
+  code, tests, and a reviewed PR. Plan, design, build, review, ship — all
+  from one terminal.
+
+url: https://munna-chauhan.github.io
+baseurl: /HeadMaster
+repository: munna-chauhan/HeadMaster
+
 markdown: GFM
 theme: jekyll-theme-cayman
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# ─── SEO / Social ───────────────────────────────────────────────────────────
+# jekyll-seo-tag uses these for OG, Twitter Card, and JSON-LD output.
+
+author:
+  name: Munna Chauhan
+  url: https://github.com/munna-chauhan
+
+logo: /HeadMaster/assets/banner.svg
+
+# Default social image used by OpenGraph and Twitter Card preview cards.
+# Replace with a 1200x630 PNG for best preview rendering across platforms.
+image: /HeadMaster/assets/banner.svg
+
+twitter:
+  card: summary_large_image
+
+social:
+  name: HeadMaster
+  links:
+    - https://github.com/munna-chauhan/HeadMaster
+
+# ─── Search engine verification ─────────────────────────────────────────────
+# Replace placeholder with the value from:
+#   Google Search Console → Settings → Ownership verification → HTML tag
+#   Bing Webmaster Tools  → Site settings → Verification
+google_site_verification: REPLACE_WITH_GOOGLE_VERIFICATION_TOKEN
+bing_site_verification: REPLACE_WITH_BING_VERIFICATION_TOKEN
+
+# ─── Build scope ────────────────────────────────────────────────────────────
 
 include:
   - assets
@@ -12,3 +56,5 @@ exclude:
   - memory
   - docs/features
   - "*.session.pdf"
+  - CONTRIBUTING.md
+  - FUTURE.md
