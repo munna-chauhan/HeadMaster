@@ -17,6 +17,16 @@ Goal: keep `plan` and `design` as an architect-owned upstream, and let one or mo
 | Onboarding script | `scripts/onboard.py` validates `node`/`python`, prompts for env vars, copies `.example` files, runs `setup_projects.py` and `setup-env`. | New script |
 | Slug collision handling | Same feature slug taken by another dev on the same project → `init-feature` warns, offers a suffix. | `init-feature` SKILL |
 | Per-stack permission profiles | `.claude/settings.json` split into JVM / JS / polyglot profiles; user picks one during onboard. | `.claude/profiles/` |
+| Project-level memory | `memory/projects/{project}/` (repo registry, style profile, recurring patterns) committed alongside the project repo, not in HeadMaster. | New `projects.{slug}.memory_path` config key |
+| Portable `.mcp.json` | Drop `cmd /c` shape. Platform detection writes the right form on first run. | `.mcp.json`, new `scripts/setup_mcp.py` |
+| Team telemetry sink | `monitoring.skill_tracking.*` keys (currently dead) wired to a real consumer that writes `memory/team-metrics.jsonl`, optionally pushed to a shared dashboard. | `run_logger.py` + new sink |
+| Non-Claude AI agent support | Add `AGENTS.md` at repo root (tool-agnostic subset of CLAUDE.md rules) when Cursor/Aider/Copilot/Codex use becomes a real need. | New `AGENTS.md` |
+
+---
+
+## Phase 3 — Enterprise (captured-only)
+
+SSO/RBAC per project, centralized telemetry dashboard, SBOM/IaC scanning, audit-trail export, multi-region.
 
 ---
 
@@ -28,3 +38,4 @@ Goal: keep `plan` and `design` as an architect-owned upstream, and let one or mo
 | Memory-entry quality signal | No hit/miss tracking on stored patterns today; deduplication is the only quality control |
 | AST / embedding-based codebase understanding | Current keyword + 2-file-read heuristic is sufficient for known patterns |
 | Native mobile build-marker detection (Xcode, SwiftPM) | Add when first iOS feature lands |
+| Token-budget enforcement at runtime | Replaced by CLAUDE.md token-efficiency guidance |
