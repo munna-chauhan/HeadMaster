@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js 18+">
   <img src="https://img.shields.io/badge/License-Private-red?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/Agents-13-00C853?style=for-the-badge" alt="13 Agents">
-  <img src="https://img.shields.io/badge/Skills-18-FF6D00?style=for-the-badge" alt="19 Skills">
+  <img src="https://img.shields.io/badge/Skills-19-FF6D00?style=for-the-badge" alt="19 Skills">
 </p>
 
 <p align="center">
@@ -56,35 +56,33 @@ Each stage produces structured, human-reviewable artifacts. **Nothing merges aut
 
 ```bash
 git clone <headmaster-repo> HeadMaster && cd HeadMaster
+cp config.yml.example config.yml
 ```
 
-Edit `config.yml`:
+Edit `config.yml` — set `projects.active` and add your project entry with a real `root` path.
 
-```yaml
-projects:
-  active: myproject
-  myproject:
-    name: My Project
-    root: ../MyProject       # path to your feature repo
-    project_key: MYPROJ      # Jira project key
-    jira_push: false         # set true when Jira is configured
+### 2. Resolve project paths
+
+```bash
+python scripts/setup_projects.py
 ```
 
-### 2. Install MCP Servers
+Creates `docs/features/{project}/`, `memory/features/{project}/`, and writes `.claude/settings.local.json` (gitignored) with the resolved project root for `additionalDirectories` and per-project Write rules. Re-run after editing `config.yml`.
+
+### 3. Install MCP Servers
 
 ```bash
 npx -y @xuandev/atlassian-mcp    # Jira + Confluence
-npx @drawio/mcp                  # Diagram generation
+npx @drawio/mcp                  # Diagrams
 ```
 
-### 3. Launch
+### 4. Launch
 
 ```bash
-cd HeadMaster
 claude
 ```
 
-### 4. Build Something
+### 5. Build Something
 
 ```bash
 /init-feature "Add PDF invoice export with GDPR compliance"
@@ -94,11 +92,7 @@ claude
 /execute invoice-pdf-export
 ```
 
-### 5. Verify Setup
-
-```bash
-python scripts/state_manager.py --status
-```
+Verify state at any time: `python scripts/state_manager.py --status`.
 
 <details>
 <summary><strong>Prerequisites</strong></summary>
@@ -531,6 +525,8 @@ Validate your config at any time:
 python scripts/config_utils.py validate config.yml
 ```
 
+**`gates.{phase}.interactive`** — `true` asks at decision points, `false` lets the agent decide and document reasoning. Per-phase only — there is no global `pipeline.interactive`.
+
 **`gates.{phase}.review.mode`**
 
 | Mode | Behavior |
@@ -585,7 +581,7 @@ projects:
 
 ### Switch Active Project
 
-Change `projects.active` and restart your Claude Code session.
+Change `projects.active` in `config.yml`, re-run `python scripts/setup_projects.py` (refreshes `.claude/settings.local.json`), then restart your Claude Code session.
 
 All feature directories are isolated by project:
 
@@ -664,27 +660,9 @@ python scripts/cleanup_failed_run.py acme product-catalog-search --reset-state
 
 ---
 
-## Scripts Reference
+## Scripts
 
-<details>
-<summary><strong>All scripts</strong> &mdash; run from HeadMaster root</summary>
-
-| Script | Purpose |
-|---|---|
-| `skill_setup.py` | Skill startup config resolver |
-| `state_manager.py` | List/validate feature states |
-| `gate_transition.py` | Atomic state transitions (file-locked). `plan-stage` and `design-stage` subcommands for per-stage status tracking. |
-| `config_utils.py` | Config resolution with project overrides |
-| `failure_ledger.py` | Per-story append-only failure log |
-| `revision_manager.py` | Reopen stage + cascade downstream |
-| `gate_validator.py` | Validate pipeline gates via loop_state.json |
-| `update_agent_memory.py` | Atomic agent MEMORY.md patching |
-| `convergence_check.py` | TDD vs implementation convergence |
-| `cleanup_failed_run.py` | Emergency recovery |
-| `run_logger.py` | Execution telemetry (called internally) |
-| `input_extractor.py` | Parse Jira/Confluence for requirements |
-
-</details>
+All orchestration scripts live in `scripts/`. Browse the directory for the full list — each script has a docstring at the top describing its purpose and usage. Key entry points are referenced inline throughout this README (state, recovery, failure ledger, setup).
 
 ---
 
@@ -768,7 +746,13 @@ Run `/init-feature` first. It scaffolds all directories and creates `loop_state.
 <details>
 <summary><strong><code>config.yml not found</code></strong></summary>
 
-Run Claude Code from the HeadMaster root directory, not from a feature repo.
+Run Claude Code from the HeadMaster root directory, not from a feature repo. If `config.yml` does not exist, copy it from the example: `cp config.yml.example config.yml`.
+</details>
+
+<details>
+<summary><strong>Read/Write blocked for files in the feature repo</strong></summary>
+
+`.claude/settings.local.json` controls `additionalDirectories` and per-project Write rules. It is generated from `config.yml` by `scripts/setup_projects.py` — re-run it after editing `config.yml.projects.{slug}.root` or adding a new project.
 </details>
 
 <details>
@@ -824,23 +808,14 @@ python scripts/cleanup_failed_run.py acme {slug} --reset-state
 
 ## Who Can Use This
 
-Target users:
+HeadMaster today is built for a **senior developer working solo**: one Claude Code session, one or more sibling repos, all state machine-local.
 
-| User | How they use HeadMaster |
-|---|---|
-| Solo senior / staff engineer | Full pipeline across one or more existing repos |
-| Tech lead running design reviews | `/plan`, `/design`, `/review-tdd` standalone — no execution required |
-| Security engineer | `/scan`, `/review-code`, `/review-branch` standalone |
+- `config.yml`, `memory/`, and `.claude/settings.local.json` are gitignored — per-machine
+- Jira credentials are personal env vars
+- Each pipeline stage runs independently given its required upstream artifact (`/plan`, `/design`, `/breakdown`, `/execute` all resume from `loop_state.json`)
+- Standalone skills (`/review-pr`, `/review-branch`, `/review-tdd`, `/scan`) need no active feature
 
-Why it works for a single developer today:
-- `config.yml` is per-machine (gitignored) — no coordination needed
-- `memory/` is per-machine (gitignored) — agent memory is personal
-- Jira creds are personal env vars
-- `setup-env` writes a personal `repo-registry.yml`
-
-Known limitations at Phase 1:
-- Agent memory does not cross machines
-- Two developers cannot share progress on the same feature slug without manually moving `memory/features/{project}/{slug}/loop_state.json`
+Team rollout (architect owns `plan`/`design`; developers pick up `breakdown`/`execute`) is captured in [`FUTURE.md`](FUTURE.md) and not implemented yet.
 
 ---
 

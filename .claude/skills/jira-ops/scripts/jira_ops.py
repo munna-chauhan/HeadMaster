@@ -17,12 +17,24 @@ from typing import Dict, List, Optional
 try:
     import requests
     import yaml
-except ImportError:
-    print("[ERROR] Missing dependencies. Install with:")
-    print("  pip install requests pyyaml")
-    sys.exit(1)
+except ImportError:  # pragma: no cover — runtime guard for missing deps
+    requests = None
+    yaml = None
 
-from config_utils import ConfigResolver
+try:
+    from config_utils import ConfigResolver
+except ImportError:  # pragma: no cover — pytest may import this module without scripts/ on path
+    ConfigResolver = None
+
+
+def _require_runtime_deps() -> None:
+    """Verify deps the CLI needs. Called from main(), never at import."""
+    if requests is None or yaml is None:
+        print("[ERROR] Missing dependencies. Install with: pip install requests pyyaml")
+        sys.exit(1)
+    if ConfigResolver is None:
+        print("[ERROR] config_utils not importable. Run from HeadMaster root.")
+        sys.exit(1)
 
 
 def build_story_adf(what: str, why: str, acceptance_criteria: List[str], dev_notes: List[str]) -> Dict:
@@ -534,6 +546,8 @@ class JiraClient:
 
 
 def main():
+    _require_runtime_deps()
+
     parser = argparse.ArgumentParser(description="Jira Operations CLI")
     parser.add_argument("--config", help="Path to config file")
     parser.add_argument("action", help="Action to perform")

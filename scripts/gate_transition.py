@@ -34,7 +34,7 @@ def record_gate_passed(project: str, slug: str, phase: str, stage: str) -> None:
     Called after a successful gate transition. Failures here must not block
     the transition itself.
     """
-    # Intentionally minimal — hook point for future telemetry integration
+    # Intentionally a no-op. Kept as a stable call site for gate transitions.
     pass
 
 

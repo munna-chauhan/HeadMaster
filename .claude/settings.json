@@ -67,7 +67,6 @@
       "Bash(curl https://api.atlassian.net *)",
       "Bash(which *)",
       "Bash(echo *)",
-      "Write(../<project-repo>/**)",
       "mcp__atlassian__confluence_search",
       "mcp__atlassian__confluence_get_page",
       "mcp__atlassian__jira_get_issue",
@@ -90,14 +89,12 @@
       "Bash(git clean *)",
       "Write(.claude/settings.json)",
       "Write(.claude/settings.local.json)",
-      "Write(../<project-repo>/**/.env*)",
-      "Write(../<project-repo>/**/secrets.*)",
-      "Write(../<project-repo>/**/application-prod.*)"
+      "Write(**/.env*)",
+      "Write(**/secrets.*)",
+      "Write(**/application-prod.*)"
     ],
     "defaultMode": "acceptEdits",
-    "additionalDirectories": [
-      "../<project-repo>"
-    ]
+    "additionalDirectories": []
   },
   "enableAllProjectMcpServers": true,
   "hooks": {

@@ -8,20 +8,31 @@ Run: python scripts/tests/test_stop_hook_failure_modes.py
 
 import json
 import subprocess
+import sys
 import time
 from pathlib import Path
 import shutil
 import tempfile
 
+import pytest
+
+PYTHON = sys.executable
+
 ROOT = Path(__file__).resolve().parents[2]
 TEST_SLUG = "test-stop-hook-failure"
 
-# Get active project from config.yml
-import yaml
-config_path = ROOT / "config.yml"
-with open(config_path, encoding='utf-8') as f:
-    config = yaml.safe_load(f)
-TEST_PROJECT = config['projects']['active']
+TEST_PROJECT = None  # populated by autouse fixture
+
+
+@pytest.fixture(autouse=True)
+def _resolve_active_project():
+    global TEST_PROJECT
+    import yaml
+    cfg = ROOT / "config.yml"
+    if not cfg.exists():
+        pytest.skip("config.yml not present — copy config.yml.example to run hook tests")
+    with open(cfg, encoding="utf-8") as f:
+        TEST_PROJECT = yaml.safe_load(f)["projects"]["active"]
 
 
 def run_hook_raw(hook_name, stdin_data=None, timeout=5):
@@ -38,7 +49,7 @@ def run_hook_raw(hook_name, stdin_data=None, timeout=5):
     """
     try:
         result = subprocess.run(
-            ["python", f".claude/hooks/stop_checks/{hook_name}_stop.py", TEST_SLUG],
+            [PYTHON, f".claude/hooks/stop_checks/{hook_name}_stop.py", TEST_SLUG],
             cwd=ROOT,
             capture_output=True,
             text=True,

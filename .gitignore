@@ -45,7 +45,7 @@ console.log
 .claude/settings.local.json
 
 # HeadMaster config (user-specific, not shared)
-# Copy config.yml.sample → config.yml and customize
+# Copy config.yml.example → config.yml and customize
 config.yml
 
 # Feature memory (project-specific work, never commit)

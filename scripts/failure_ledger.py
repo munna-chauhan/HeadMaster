@@ -29,16 +29,7 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-def _find_root() -> Path:
-    """Find HeadMaster root by walking up to config.yml."""
-    p = Path(__file__).resolve()
-    while p != p.parent:
-        if (p / "config.yml").exists():
-            return p
-        p = p.parent
-    raise FileNotFoundError("config.yml not found in any parent directory")
-
-REPO_ROOT = _find_root()
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _ledger_path(project: str, slug: str, story_key: str) -> Path:

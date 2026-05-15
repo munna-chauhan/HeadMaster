@@ -6,9 +6,11 @@ Validates that review subagent spawns are blocked if implementation context leak
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+PYTHON = sys.executable
 
 
 def run_validation_hook(tool_call: dict) -> tuple[bool, str]:
@@ -16,7 +18,7 @@ def run_validation_hook(tool_call: dict) -> tuple[bool, str]:
     payload = {"tool_call": tool_call}
 
     result = subprocess.run(
-        ["python", ".claude/hooks/pre_spawn_validation.py"],
+        [PYTHON, ".claude/hooks/pre_spawn_validation.py"],
         cwd=ROOT,
         capture_output=True,
         text=True,
