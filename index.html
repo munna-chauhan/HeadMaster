@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeadMaster — open-source ADLC built on Claude Code</title>
+
+<meta name="description" content="HeadMaster is an open-source ADLC (AI-Driven Delivery Lifecycle) built on Claude Code. Turns a single conversation into a PRD, a TDD, Jira stories, code, tests, and a reviewed PR.">
+<meta name="keywords" content="ADLC, AI-Driven Development Lifecycle, Claude Code, Anthropic Claude, agentic pipeline, AI software delivery, autonomous coding agent, PRD generator, TDD generator, Jira automation, MCP, model context protocol, agent orchestration, multi-agent workflow, HeadMaster">
+<meta name="author" content="munna-chauhan">
+
+<link rel="canonical" href="https://munna-chauhan.github.io/HeadMaster/">
+<link rel="icon" type="image/svg+xml" href="assets/banner.svg">
+
+<!-- OpenGraph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="HeadMaster">
+<meta property="og:title" content="HeadMaster — open-source ADLC built on Claude Code">
+<meta property="og:description" content="Turns a single conversation into a PRD, a TDD, Jira stories, code, tests, and a reviewed PR. Plan, design, build, review, ship — all from one terminal.">
+<meta property="og:url" content="https://munna-chauhan.github.io/HeadMaster/">
+<meta property="og:image" content="https://munna-chauhan.github.io/HeadMaster/assets/banner.svg">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@munna-chauhan">
+<meta name="twitter:creator" content="@munna-chauhan">
+<meta name="twitter:title" content="HeadMaster — open-source ADLC built on Claude Code">
+<meta name="twitter:description" content="Turns a single conversation into a PRD, a TDD, Jira stories, code, tests, and a reviewed PR.">
+<meta name="twitter:image" content="https://munna-chauhan.github.io/HeadMaster/assets/banner.svg">
+
+<!-- Search engine verification — replace placeholders after Search Console / Webmaster Tools verification -->
+<meta name="google-site-verification" content="REPLACE_WITH_GOOGLE_VERIFICATION_TOKEN">
+<meta name="msvalidate.01" content="REPLACE_WITH_BING_VERIFICATION_TOKEN">
+
+<!-- JSON-LD structured data: SoftwareSourceCode + WebSite -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "HeadMaster",
+      "alternateName": "HeadMaster ADLC",
+      "description": "Open-source AI-Driven Delivery Lifecycle (ADLC) built on Claude Code. Drives a feature from a single conversation through PRD, TDD, Jira stories, code, tests, and a reviewed pull request.",
+      "url": "https://munna-chauhan.github.io/HeadMaster/",
+      "codeRepository": "https://github.com/munna-chauhan/HeadMaster",
+      "programmingLanguage": ["Python", "JavaScript", "Markdown"],
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "runtimePlatform": "Claude Code",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows",
+      "author": {
+        "@type": "Person",
+        "name": "Munna Chauhan",
+        "url": "https://github.com/munna-chauhan"
+      },
+      "keywords": "ADLC, Claude Code, agentic pipeline, PRD generator, TDD generator, Jira automation, MCP, multi-agent workflow"
+    },
+    {
+      "@type": "WebSite",
+      "name": "HeadMaster",
+      "url": "https://munna-chauhan.github.io/HeadMaster/"
+    }
+  ]
+}
+</script>
+
+<style>
+  :root {
+    --fg: #1a1a1a;
+    --muted: #555;
+    --accent: #7c3aed;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e5e5e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg: #f1f1f1; --muted: #aaa; --bg: #0d0d0d; --card: #161616; --border: #2a2a2a; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+  header { text-align: center; margin-bottom: 3rem; }
+  .banner { max-width: 100%; height: auto; margin-bottom: 1.5rem; }
+  h1 { font-size: 2.2rem; margin: 0 0 0.6rem; letter-spacing: -0.02em; }
+  .tagline { color: var(--muted); font-size: 1.1rem; margin: 0 0 1.5rem; }
+  .ctas { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin: 2rem 0; }
+  .btn { display: inline-block; padding: 0.7rem 1.4rem; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid var(--border); transition: transform 0.1s; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-secondary { background: var(--card); color: var(--fg); }
+  .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .badges img { height: 28px; }
+  section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; }
+  section h2 { margin-top: 0; font-size: 1.3rem; }
+  pre { background: rgba(127,127,127,0.1); padding: 0.6rem 0.9rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }
+  code { font-family: "SF Mono", Monaco, Consolas, monospace; font-size: 0.92em; }
+  ul { padding-left: 1.3rem; }
+  li { margin: 0.3rem 0; }
+  footer { text-align: center; color: var(--muted); margin-top: 3rem; font-size: 0.9rem; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img class="banner" src="assets/banner.svg" alt="HeadMaster — AI-Driven Delivery Lifecycle">
+    <h1>HeadMaster</h1>
+    <p class="tagline">Open-source ADLC (AI-Driven Delivery Lifecycle) built on Claude Code.<br>Turns a single conversation into a PRD, a TDD, Jira stories, code, tests, and a reviewed PR.</p>
+    <div class="badges">
+      <img src="https://img.shields.io/badge/Built_on-Claude_Code-7C3AED?style=for-the-badge" alt="Built on Claude Code">
+      <img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge" alt="Apache 2.0">
+      <img src="https://img.shields.io/badge/Agents-13-00C853?style=for-the-badge" alt="13 Agents">
+      <img src="https://img.shields.io/badge/Skills-19-FF6D00?style=for-the-badge" alt="19 Skills">
+    </div>
+    <div class="ctas">
+      <a class="btn btn-primary" href="https://github.com/munna-chauhan/HeadMaster">View on GitHub</a>
+      <a class="btn btn-secondary" href="https://github.com/munna-chauhan/HeadMaster#quick-start">Quick Start</a>
+      <a class="btn btn-secondary" href="https://github.com/munna-chauhan/HeadMaster/discussions">Discussions</a>
+    </div>
+  </header>
+
+  <section>
+    <h2>What it does</h2>
+    <p>HeadMaster is an orchestration layer that sits alongside your feature repositories. Open Claude Code from the HeadMaster directory, point it at a project, and run slash commands to move features through five stages:</p>
+    <pre><code>/init-feature  →  /plan  →  /design  →  /breakdown  →  /execute  →  PR</code></pre>
+    <p>Each stage produces structured, human-reviewable artifacts. Nothing merges automatically. Every gate requires explicit approval.</p>
+  </section>
+
+  <section>
+    <h2>Pipeline</h2>
+    <ul>
+      <li><strong>13 specialized agents</strong> — requirements, PRD, design, TDD, developer, code review, QA, release, retrospective, plus a research and codebase analyst</li>
+      <li><strong>19 skills</strong> — init-feature, plan, design, breakdown, execute, implement, security-scan, review-code, qa-integration, review-system, jira-ops, reopen, retrospect, publish-confluence, archive-feature, compress, draw, curate-memory, setup-env</li>
+      <li><strong>Tier auto-classification</strong> — XS / S / M / L workflows skip or require stages based on feature size</li>
+      <li><strong>Subagent isolation</strong> — review/QA/TDD-reviewer agents never see implementation context (enforced by a pre-spawn hook)</li>
+      <li><strong>Failure ledger</strong> — per-story retry log that prevents repeating broken approaches</li>
+      <li><strong>Self-learning retrospective</strong> — auto-applies agent memory and pipeline learnings; routes config proposals to a human queue</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Get started</h2>
+    <pre><code>git clone https://github.com/munna-chauhan/HeadMaster.git &amp;&amp; cd HeadMaster
+cp config.yml.example config.yml
+python scripts/setup_projects.py
+claude
+/init-feature "Add PDF invoice export"</code></pre>
+    <p>Requirements: <a href="https://claude.ai/code">Claude Code</a>, Python 3.9+, Node.js 18+.</p>
+  </section>
+
+  <footer>
+    <p>Apache 2.0 licensed · <a href="https://github.com/munna-chauhan/HeadMaster">github.com/munna-chauhan/HeadMaster</a></p>
+    <p><sub>Keywords: ADLC, AI-Driven Delivery Lifecycle, Claude Code, Anthropic Claude, agentic pipeline, autonomous coding agent, PRD generator, TDD generator, Jira automation, MCP, model context protocol, multi-agent workflow.</sub></p>
+  </footer>
+</main>
+</body>
+</html>

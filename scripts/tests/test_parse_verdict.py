@@ -5,11 +5,13 @@ Unit tests for scripts/parse_verdict.py
 Run: python scripts/tests/test_parse_verdict.py
 """
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PARSER = ROOT / "scripts" / "parse_verdict.py"
+PYTHON = sys.executable
 
 def run_parser(content: str, valid_verdicts: str) -> tuple[int, str, str]:
     """
@@ -25,7 +27,7 @@ def run_parser(content: str, valid_verdicts: str) -> tuple[int, str, str]:
 
     try:
         result = subprocess.run(
-            ["python", str(PARSER), temp_path, valid_verdicts],
+            [PYTHON, str(PARSER), temp_path, valid_verdicts],
             capture_output=True,
             text=True
         )
@@ -147,7 +149,7 @@ PASS
 def test_file_not_found():
     """Test error handling when file doesn't exist."""
     result = subprocess.run(
-        ["python", str(PARSER), "/nonexistent/file.md", "PASS"],
+        [PYTHON, str(PARSER), "/nonexistent/file.md", "PASS"],
         capture_output=True,
         text=True
     )

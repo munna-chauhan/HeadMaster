@@ -35,7 +35,6 @@ pipeline:
     design:  4                          # Max /design convergence loops
     execute: 2                          # Max /execute retry loops per story
   parallel: false                       # Run independent stories simultaneously
-  interactive: true                     # Ask at decision points (Confusion Clause still applies)
 
 # ─── AUTONOMY ────────────────────────────────────────────────────────────────
 

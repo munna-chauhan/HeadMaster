@@ -10,7 +10,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 
 # Execute
 
-Load `.claude/agents/release-agent.md`. Verify `config.yml` exists at repo root. If absent → HALT. Read values: `parallel`, `interactive`.
+Load `.claude/agents/release-agent.md`. Verify `config.yml` exists at repo root. If absent → HALT. Read `pipeline.parallel`.
 
 ---
 

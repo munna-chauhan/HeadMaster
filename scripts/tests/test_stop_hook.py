@@ -10,23 +10,41 @@ NOTE: Tests create artifacts in docs/features/default/test-stop-hook/ which are 
 import json
 import subprocess
 import shutil
+import sys
 from pathlib import Path
+
+import pytest
+
+PYTHON = sys.executable
 
 # HeadMaster root
 ROOT = Path(__file__).resolve().parents[2]
 TEST_SLUG = "test-stop-hook"
 
-# Get active project from config.yml
-import yaml
-config_path = ROOT / "config.yml"
-with open(config_path, encoding='utf-8') as f:
-    config = yaml.safe_load(f)
-TEST_PROJECT = config['projects']['active']
+
+def _active_project() -> str:
+    """Resolve active project lazily. Tests skip if config.yml is absent."""
+    import yaml
+    import pytest
+    cfg = ROOT / "config.yml"
+    if not cfg.exists():
+        pytest.skip("config.yml not present — copy config.yml.example to run hook tests")
+    with open(cfg, encoding="utf-8") as f:
+        return yaml.safe_load(f)["projects"]["active"]
+
+
+TEST_PROJECT = None  # populated by autouse fixture below
+
+
+@pytest.fixture(autouse=True)
+def _resolve_active_project():
+    global TEST_PROJECT
+    TEST_PROJECT = _active_project()
 
 def run_hook(hook_name, payload):
     """Execute a stop hook and return parsed JSON output."""
     result = subprocess.run(
-        ["python", f".claude/hooks/stop_checks/{hook_name}_stop.py", TEST_SLUG],
+        [PYTHON, f".claude/hooks/stop_checks/{hook_name}_stop.py", TEST_SLUG],
         cwd=ROOT,
         capture_output=True,
         text=True,

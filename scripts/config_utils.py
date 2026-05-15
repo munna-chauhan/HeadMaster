@@ -10,7 +10,7 @@ from typing import Any, Optional
 CONFIG_PROJECTS_KEY = "projects"
 CONFIG_ACTIVE_KEY = "active"
 
-ALLOWED_TOP_LEVEL_KEYS = {"projects", "pipeline", "autonomous", "gates", "security", "hm"}
+ALLOWED_TOP_LEVEL_KEYS = {"projects", "pipeline", "autonomous", "gates", "security"}
 
 
 class ConfigResolver:
@@ -47,47 +47,20 @@ class ConfigResolver:
 
     def get(self, key: str, default: Any = None, project: Optional[str] = None) -> Any:
         """
-        Get config value with resolution order:
+        Get config value. Resolution order:
         1. project-specific override
-        2. hm global defaults
+        2. top-level key
         3. provided default
-
-        Args:
-            key: Config key (e.g., "root", "project_key")
-            default: Fallback if not found
-            project: Override active project
-
-        Returns:
-            Resolved config value
         """
         proj_slug = project or self.active_project
 
-        # Check project-specific config
         projects = self.config.get(CONFIG_PROJECTS_KEY, {})
-        if proj_slug in projects:
-            proj_config = projects[proj_slug]
+        if proj_slug in projects and key in projects[proj_slug]:
+            return projects[proj_slug][key]
 
-            key_map = {
-                "root": "root",
-                "project_key": "project_key",
-                "jira_push": "jira_push",
-                "coverage_threshold": "coverage_threshold",
-            }
-
-            actual_key = key_map.get(key, key)
-            if actual_key in proj_config:
-                return proj_config[actual_key]
-
-        # Check hm global defaults
-        hm = self.config.get("hm", {})
-        if key in hm:
-            return hm[key]
-
-        # Check top-level (for non-project keys)
         if key in self.config:
             return self.config[key]
 
-        # Fallback to default
         return default
 
     def get_project_config(self, project: Optional[str] = None) -> dict:
@@ -143,8 +116,23 @@ if __name__ == "__main__":
         print(_USAGE, file=sys.stderr)
         sys.exit(1)
 
-    resolver = ConfigResolver()
     cmd = sys.argv[1]
+
+    if cmd == "validate":
+        config_path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+        try:
+            r = ConfigResolver(config_path)
+        except FileNotFoundError as e:
+            print(f"ERROR: {e}", file=sys.stderr)
+            sys.exit(1)
+        unknown = r.validate()
+        if unknown:
+            print(f"Unknown config keys: {', '.join(unknown)}", file=sys.stderr)
+            sys.exit(1)
+        print("ok")
+        sys.exit(0)
+
+    resolver = ConfigResolver()
 
     if cmd == "get":
         if len(sys.argv) < 3:
@@ -176,19 +164,6 @@ if __name__ == "__main__":
 
     elif cmd == "active-project":
         print(resolver.active_project)
-
-    elif cmd == "validate":
-        config_path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
-        try:
-            r = ConfigResolver(config_path)
-        except FileNotFoundError as e:
-            print(f"ERROR: {e}", file=sys.stderr)
-            sys.exit(1)
-        unknown = r.validate()
-        if unknown:
-            print(f"Unknown config keys: {', '.join(unknown)}", file=sys.stderr)
-            sys.exit(1)
-        print("ok")
 
     else:
         print(f"Unknown command: {cmd}", file=sys.stderr)
