@@ -813,12 +813,23 @@ python scripts/cleanup_failed_run.py acme {slug} --reset-state
 
 ## Who Can Use This
 
-HeadMaster today is built for a **senior developer working solo**: one Claude Code session, one or more sibling repos, all state machine-local.
+Target users:
 
-- `config.yml`, `memory/`, and `.claude/settings.local.json` are gitignored — per-machine
-- Jira credentials are personal env vars
-- Each pipeline stage runs independently given its required upstream artifact (`/plan`, `/design`, `/breakdown`, `/execute` all resume from `loop_state.json`)
-- Standalone skills (`/review-pr`, `/review-branch`, `/review-tdd`, `/scan`) need no active feature
+| User | How they use HeadMaster |
+|---|---|
+| Solo senior / staff engineer | Full pipeline across one or more existing repos |
+| Tech lead running design reviews | `/plan`, `/design`, `/review-tdd` standalone — no execution required |
+| Security engineer | `/scan`, `/review-code`, `/review-branch` standalone |
+
+Why it works for a single developer today:
+- `config.yml` is per-machine (gitignored) — no coordination needed
+- `memory/` is per-machine (gitignored) — agent memory is personal
+- Jira creds are personal env vars
+- `setup-env` writes a personal `repo-registry.yml`
+
+Known limitations at Phase 1:
+- Agent memory does not cross machines
+- Two developers cannot share progress on the same feature slug without manually moving `memory/features/{project}/{slug}/loop_state.json`
 
 Team rollout (architect owns `plan`/`design`; developers pick up `breakdown`/`execute`) is captured in [`FUTURE.md`](FUTURE.md) and not implemented yet.
 

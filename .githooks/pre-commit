@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# HeadMaster pre-commit gate. Enforces CLAUDE.md "Contribution Rules".
+# Install once: git config core.hooksPath .githooks
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+staged() { git diff --cached --name-only --diff-filter=ACMR; }
+
+fail() { echo "pre-commit: $1" >&2; exit 1; }
+
+# 1. Config schema validation — always cheap, always run.
+if ! python scripts/config_utils.py validate config.yml.example >/dev/null; then
+  fail "config_utils.py validate failed"
+fi
+
+# 2. Inventory audit — always cheap, always run.
+if ! python scripts/audit_inventory.py >/dev/null; then
+  fail "audit_inventory.py failed (run with --fix to auto-correct)"
+fi
+
+# 3. Pytest — only when scripts/ or tests/ changed.
+if staged | grep -qE '^(scripts/|tests/)'; then
+  echo "pre-commit: scripts/ or tests/ changed — running pytest"
+  if ! pytest scripts/tests/ tests/ -q; then
+    fail "pytest failed"
+  fi
+fi
+
+exit 0
