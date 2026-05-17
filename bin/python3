@@ -1,3 +1,5 @@
 #!/bin/sh
 # HeadMaster portable shim: same resolver as bin/python.
-exec "$(cd "$(dirname "$0")/../.claude/hooks" && pwd)/pyrun.sh" "$@"
+SELF_DIR="${0%/*}"
+[ "$SELF_DIR" = "$0" ] && SELF_DIR="."
+exec "$SELF_DIR/../.claude/hooks/pyrun.sh" "$@"
