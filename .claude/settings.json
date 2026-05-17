@@ -3,6 +3,9 @@
   "attribution": {
     "commit": "Co-Authored-By: HeadMaster ADLC <noreply@headmaster.dev>"
   },
+  "env": {
+    "PATH": "${CLAUDE_PROJECT_DIR}/bin:${PATH}"
+  },
   "permissions": {
     "allow": [
       "Bash(git status *)",
@@ -28,6 +31,14 @@
       "Bash(gh api *)",
       "Bash(python scripts/*)",
       "Bash(python .claude/hooks/*)",
+      "Bash(python3 scripts/*)",
+      "Bash(python3 .claude/hooks/*)",
+      "Bash(py scripts/*)",
+      "Bash(py .claude/hooks/*)",
+      "Bash(python -m *)",
+      "Bash(python3 -m *)",
+      "Bash(python -c *)",
+      "Bash(python3 -c *)",
       "Bash(node .claude/hooks/pyrun.js *)",
       "Bash(grep *)",
       "Bash(awk *)",

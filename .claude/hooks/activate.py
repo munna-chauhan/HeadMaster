@@ -52,11 +52,32 @@ def read_model_from_event() -> str:
     return ""
 
 
+def check_python_shim_on_path() -> None:
+    """Warn if bin/ shim files are missing or the caller's PATH lacked bin/.
+
+    pyrun strips bin/ from PATH before exec, so we inspect HEADMASTER_ORIG_PATH
+    (set by pyrun) to recover how the parent shell was actually configured.
+    """
+    shim_name = "python.cmd" if os.name == "nt" else "python"
+    shim = REPO_ROOT / "bin" / shim_name
+    if not shim.exists() or (os.name != "nt" and not os.access(shim, os.X_OK)):
+        print(f"[HeadMaster] Python shim missing at {shim} — run scripts/setup_projects.py or chmod +x bin/python bin/python3 bin/py")
+        return
+    orig = os.environ.get("HEADMASTER_ORIG_PATH", os.environ.get("PATH", ""))
+    sep = ";" if os.name == "nt" else ":"
+    shim_dir = str((REPO_ROOT / "bin").resolve())
+    on_path = any(Path(p).resolve() == Path(shim_dir).resolve() for p in orig.split(sep) if p)
+    if not on_path:
+        print(f"[HeadMaster] {shim_dir} not on PATH — `python` will fall back to system. Add to PATH or restart Claude Code (settings.json env is configured).")
+
+
 def main() -> None:
     # Self-heal .remember/logs/ so hook-errors.log is always writable (INFRA-01)
     logs_dir = REPO_ROOT / ".remember" / "logs"
     logs_dir.mkdir(parents=True, exist_ok=True)
     (logs_dir / "hook-errors.log").touch(exist_ok=True)
+
+    check_python_shim_on_path()
 
     # Setup project directories (absorbed from session_reset.py)
     setup_script = REPO_ROOT / "scripts" / "setup_projects.py"
