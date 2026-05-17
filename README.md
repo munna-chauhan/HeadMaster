@@ -732,14 +732,13 @@ HeadMaster/
 <details>
 <summary><strong>Hooks not running / <code>python: command not found</code></strong></summary>
 
-Hooks use `node .claude/hooks/pyrun.js` which resolves `python3 → python → py` automatically. Requires Node.js 18+.
+Hooks call `python .claude/hooks/...`. The `bin/python` shim resolves to whatever interpreter the host has (probes `python3 → py3 → python → py`) and caches the result in `.claude/cache/python-interpreter`.
 
 ```bash
-node --version     # must be 18+
-python3 --version  # must be 3.9+
+python --version   # via shim — must be 3.9+
 ```
 
-If Node.js is missing: `brew install node` (macOS) or download from nodejs.org.
+If the cache points at an uninstalled interpreter, delete `.claude/cache/python-interpreter` to force a re-probe. On Windows, `bin/python.cmd` delegates to `pyrun.js` (Node.js 18+).
 </details>
 
 <details>

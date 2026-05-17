@@ -1,5 +1,0 @@
-#!/bin/sh
-# HeadMaster portable shim: same resolver as bin/python.
-SELF_DIR="${0%/*}"
-[ "$SELF_DIR" = "$0" ] && SELF_DIR="."
-exec "$SELF_DIR/../.claude/hooks/pyrun.sh" "$@"

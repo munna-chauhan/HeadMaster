@@ -1,11 +1,10 @@
 #!/bin/sh
-# Platform-independent Python resolver: python3 → python → py.
-# Strips the project bin/ shim directory from PATH so we resolve to a system
-# interpreter (otherwise bin/python → pyrun.sh → bin/python recurses).
-# Uses only POSIX shell builtins so the resolver works even on a PATH that
-# lacks dirname/tr/grep/sed.
+# Platform-independent Python resolver with cached lookup.
+# Cache file: .claude/cache/python-interpreter (gitignored).
+# On cache hit and executable still valid → exec it directly.
+# On miss/stale → probe python3 → py3 → python → py, write cache, exec.
+# Strips the project bin/ shim directory from PATH to prevent recursion.
 
-# Resolve own dir without `dirname`.
 SELF="$0"
 case "$SELF" in
     /*) ;;
@@ -20,7 +19,6 @@ fi
 
 if [ -n "$SHIM_DIR" ]; then
     export HEADMASTER_ORIG_PATH="${HEADMASTER_ORIG_PATH:-$PATH}"
-    # POSIX in-shell PATH strip (no tr/grep/sed).
     _new_path=""
     _saved_ifs="$IFS"
     IFS=":"
@@ -32,13 +30,28 @@ if [ -n "$SHIM_DIR" ]; then
     PATH="$_new_path"
 fi
 
+HM_ROOT=$(cd "$SELF_DIR/../.." 2>/dev/null && pwd) || HM_ROOT="$SELF_DIR/../.."
+CACHE_DIR="$HM_ROOT/.claude/cache"
+CACHE_FILE="$CACHE_DIR/python-interpreter"
+
+if [ -f "$CACHE_FILE" ]; then
+    cached=""
+    read -r cached < "$CACHE_FILE" 2>/dev/null || cached=""
+    if [ -n "$cached" ] && [ -x "$cached" ]; then
+        exec "$cached" "$@"
+    fi
+fi
+
 cmd=""
-for candidate in python3 python py; do
+for candidate in python3 py3 python py; do
     cmd=$(command -v "$candidate" 2>/dev/null) && [ -n "$cmd" ] && break
     cmd=""
 done
 if [ -z "$cmd" ]; then
-    echo '{"ok": false, "reason": "Python interpreter not found. Install python3, python, or py."}'
+    echo '{"ok": false, "reason": "Python interpreter not found. Install python3, py3, python, or py."}'
     exit 0
 fi
+
+mkdir -p "$CACHE_DIR" 2>/dev/null && printf '%s\n' "$cmd" > "$CACHE_FILE" 2>/dev/null
+
 exec "$cmd" "$@"

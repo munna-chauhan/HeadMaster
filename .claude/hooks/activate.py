@@ -61,7 +61,7 @@ def check_python_shim_on_path() -> None:
     shim_name = "python.cmd" if os.name == "nt" else "python"
     shim = REPO_ROOT / "bin" / shim_name
     if not shim.exists() or (os.name != "nt" and not os.access(shim, os.X_OK)):
-        print(f"[HeadMaster] Python shim missing at {shim} — run scripts/setup_projects.py or chmod +x bin/python bin/python3 bin/py")
+        print(f"[HeadMaster] Python shim missing at {shim} — run scripts/setup_projects.py or chmod +x bin/python")
         return
     orig = os.environ.get("HEADMASTER_ORIG_PATH", os.environ.get("PATH", ""))
     sep = ";" if os.name == "nt" else ":"
