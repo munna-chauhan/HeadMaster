@@ -42,10 +42,10 @@
 
 **Fetch order:**
 1. MCP tools (preferred):
-   - Jira: `python scripts/input_extractor.py -q from-mcp-jira -o docs/features/{project}/{slug}/input/{KEY}.md`
-   - Confluence: `python scripts/input_extractor.py -q from-mcp-confluence -o docs/features/{project}/{slug}/input/{page-slug}.md`
+   - Jira: `sh scripts/input_extractor.py -q from-mcp-jira -o docs/features/{project}/{slug}/input/{KEY}.md`
+   - Confluence: `sh scripts/input_extractor.py -q from-mcp-confluence -o docs/features/{project}/{slug}/input/{page-slug}.md`
 2. Fallback: `/jira-ops fetch` → `.md`
-3. Batch extract any remaining JSON: `python scripts/input_extractor.py -q dir -i docs/features/{project}/{slug}/input/`
+3. Batch extract any remaining JSON: `sh scripts/input_extractor.py -q dir -i docs/features/{project}/{slug}/input/`
 
 **Output:** Extracted `.md` files saved to `input/` alongside FEATURE_INPUT.md.
 
@@ -154,8 +154,8 @@ Standard table format `| Field | Value |` with:
 ## Step 5: Gate transition
 
 ```bash
-python scripts/gate_transition.py {project} {slug} planning Context --artifact docs/features/{project}/{slug}/planning/FEATURE_DRAFT.md
-python scripts/gate_transition.py {project} {slug} plan-stage context complete
+sh scripts/gate_transition.py {project} {slug} planning Context --artifact docs/features/{project}/{slug}/planning/FEATURE_DRAFT.md
+sh scripts/gate_transition.py {project} {slug} plan-stage context complete
 ```
 
 **Gate criteria (tier-aware):**

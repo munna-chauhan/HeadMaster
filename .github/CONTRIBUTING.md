@@ -15,7 +15,7 @@ Thanks for the interest. HeadMaster is an open-source ADLC built on Claude Code;
 ```bash
 git clone https://github.com/<your-fork>/HeadMaster.git && cd HeadMaster
 cp config.yml.example config.yml          # edit projects.active + root
-python scripts/setup_projects.py          # writes .claude/settings.local.json
+sh scripts/setup_projects.py          # writes .claude/settings.local.json
 python -m pytest scripts/tests/ -q
 ```
 

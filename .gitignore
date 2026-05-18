@@ -41,9 +41,6 @@ env/
 .claude/logs/
 console.log
 
-# Resolver cache (host-specific Python interpreter path)
-.claude/cache/
-
 # Claude Code settings: settings.json is committed (shared), settings.local.json is machine-specific
 .claude/settings.local.json
 

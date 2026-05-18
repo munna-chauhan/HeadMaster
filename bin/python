@@ -1,9 +1,0 @@
-#!/bin/sh
-# HeadMaster portable shim: makes `python` work whether the system ships
-# python, python3, or py. Delegates to .claude/hooks/pyrun.sh which strips
-# this bin/ dir from PATH before resolving, preventing recursion.
-# Uses POSIX parameter expansion (no `dirname`) so the shim works even if
-# /usr/bin isn't on PATH.
-SELF_DIR="${0%/*}"
-[ "$SELF_DIR" = "$0" ] && SELF_DIR="."
-exec "$SELF_DIR/../.claude/hooks/pyrun.sh" "$@"

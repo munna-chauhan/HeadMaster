@@ -117,7 +117,7 @@ route_checkpoints:
 route_behavior:
   supervised: |
     Log evidence to run-log.md → AskUserQuestion: CHANGE / KEEP / ABORT
-    On CHANGE: python scripts/gate_transition.py {project} {slug} reclassify --route {new} --from {old} --checkpoint {checkpoint} --evidence "{evidence}"
+    On CHANGE: sh scripts/gate_transition.py {project} {slug} reclassify --route {new} --from {old} --checkpoint {checkpoint} --evidence "{evidence}"
   autonomous: |
     Escalations auto-apply (logged to run-log.md)
     Downgrades always ask (even in autonomous mode)

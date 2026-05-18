@@ -1,19 +1,29 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """
 workflow_config.py — Read tier workflow definitions from .claude/workflows/{tier}.yml
 
 Two interfaces:
   1. Python import:  from scripts.workflow_config import get, get_stages, get_sections
-  2. CLI:            python scripts/workflow_config.py <tier> <dotpath>
+  2. CLI:            sh scripts/workflow_config.py <tier> <dotpath>
 
 Examples:
-  python scripts/workflow_config.py s stages.prd.sections
-  python scripts/workflow_config.py xs stages.tdd.artifact
-  python scripts/workflow_config.py m escalation_thresholds.story_count
-  python scripts/workflow_config.py l stages.system_design.status
-  python scripts/workflow_config.py classification algorithm
-  python scripts/workflow_config.py reclassification rework.s_to_m
-  python scripts/workflow_config.py stage-skip-rules rules.discovery.skip_if
+  sh scripts/workflow_config.py s stages.prd.sections
+  sh scripts/workflow_config.py xs stages.tdd.artifact
+  sh scripts/workflow_config.py m escalation_thresholds.story_count
+  sh scripts/workflow_config.py l stages.system_design.status
+  sh scripts/workflow_config.py classification algorithm
+  sh scripts/workflow_config.py reclassification rework.s_to_m
+  sh scripts/workflow_config.py stage-skip-rules rules.discovery.skip_if
 """
 
 import json
@@ -182,10 +192,10 @@ def get_rework(from_tier: str, to_tier: str) -> list:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python scripts/workflow_config.py <tier|file> [dotpath]", file=sys.stderr)
+        print("Usage: sh scripts/workflow_config.py <tier|file> [dotpath]", file=sys.stderr)
         print("  Tiers: xs, s, m, l", file=sys.stderr)
         print("  Files: classification, reclassification, stage-skip-rules", file=sys.stderr)
-        print("  Example: python scripts/workflow_config.py s stages.prd.sections", file=sys.stderr)
+        print("  Example: sh scripts/workflow_config.py s stages.prd.sections", file=sys.stderr)
         sys.exit(1)
 
     tier_or_file = sys.argv[1]

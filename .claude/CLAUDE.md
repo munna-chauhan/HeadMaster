@@ -63,7 +63,7 @@
 HeadMaster is the **orchestration repo** — all agents, skills, scripts, and hooks live here. Feature repos (configured in `config.yml`) are implementation targets only.
 
 - Agent and skill definitions always resolve from HeadMaster (session project root) — never from feature repos
-- Hooks use relative paths from HeadMaster root (`settings.json` hook commands use `python .claude/hooks/...`)
+- Hooks use relative paths from HeadMaster root (`settings.json` hook commands use `sh .claude/hooks/...`)
 - When inline phases `cd` into a feature repo, call HeadMaster scripts (`scripts/`, `.claude/skills/`) using absolute paths or return to HeadMaster root first
 - Never read or write `.claude/` files inside a feature repo — treat feature repos as black boxes
 
@@ -140,9 +140,9 @@ Changes to the following paths require unconditional human approval before merge
 - `scripts/config_utils.py`
 - `.mcp.json`
 
-**Inventory discipline:** Agent and skill counts must come from the filesystem. Run `python scripts/audit_inventory.py` before committing; use `--fix` to auto-correct.
+**Inventory discipline:** Agent and skill counts must come from the filesystem. Run `sh scripts/audit_inventory.py` before committing; use `--fix` to auto-correct.
 
-**Config schema discipline:** Every key in `config.yml` must appear in `config.yml.example` and have a consumer in scripts or skills. Run `python scripts/config_utils.py validate config.yml` before committing.
+**Config schema discipline:** Every key in `config.yml` must appear in `config.yml.example` and have a consumer in scripts or skills. Run `sh scripts/config_utils.py validate config.yml` before committing.
 
 **Test requirement:** All changes to `scripts/` must keep `pytest scripts/tests/ -q` green.
 
@@ -151,5 +151,5 @@ Changes to the following paths require unconditional human approval before merge
 ## Recovery
 
 - **Undo:** Esc+Esc → checkpoint picker
-- **Emergency:** `python scripts/cleanup_failed_run.py <project> <slug> [--reset-state]`
-- **Resume:** Run `python scripts/state_manager.py --status`
+- **Emergency:** `sh scripts/cleanup_failed_run.py <project> <slug> [--reset-state]`
+- **Resume:** Run `sh scripts/state_manager.py --status`

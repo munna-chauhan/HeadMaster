@@ -29,7 +29,7 @@ Run after a feature's PR is created.
 ### 1. Load run data
 
 ```bash
-python scripts/skill_setup.py {slug}
+sh scripts/skill_setup.py {slug}
 ```
 
 Read from `memory/features/{project}/{slug}/`:
@@ -48,7 +48,7 @@ Read proposals from `RETROSPECTIVE.md` and apply immediately based on type:
 
 **`agent_memory` proposals → auto-apply:**
 ```bash
-python scripts/update_agent_memory.py {agent} append "{entry}"
+sh scripts/update_agent_memory.py {agent} append "{entry}"
 ```
 Dedup check runs inside the script — skipped silently if too similar to an existing entry.
 

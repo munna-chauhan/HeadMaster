@@ -1,20 +1,30 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """Atomic pipeline state transition. Called by skills when a gate passes.
 
 Usage:
-    python scripts/gate_transition.py <project> <slug> <phase> <stage>
-    python scripts/gate_transition.py <project> <slug> rollback
-    python scripts/gate_transition.py <project> <slug> artifact <rel-path> <status>
-    python scripts/gate_transition.py <project> <slug> execute phase-complete --story <key> --phase <code>
+    sh scripts/gate_transition.py <project> <slug> <phase> <stage>
+    sh scripts/gate_transition.py <project> <slug> rollback
+    sh scripts/gate_transition.py <project> <slug> artifact <rel-path> <status>
+    sh scripts/gate_transition.py <project> <slug> execute phase-complete --story <key> --phase <code>
 
 Examples:
-    python scripts/gate_transition.py acme my-feature planning APPROVED
-    python scripts/gate_transition.py acme my-feature design Engineer
-    python scripts/gate_transition.py acme my-feature artifact "planning/PRD.md" APPROVED
-    python scripts/gate_transition.py acme my-feature artifact "design/TDD_search-service.md" approved
-    python scripts/gate_transition.py acme my-feature artifact "breakdown/JIRA_BREAKDOWN_search-service.md" pushed
-    python scripts/gate_transition.py acme my-feature released-section "search-service" "breakdown/JIRA_BREAKDOWN_search-service.md" 5 13
-    python scripts/gate_transition.py acme my-feature rollback
+    sh scripts/gate_transition.py acme my-feature planning APPROVED
+    sh scripts/gate_transition.py acme my-feature design Engineer
+    sh scripts/gate_transition.py acme my-feature artifact "planning/PRD.md" APPROVED
+    sh scripts/gate_transition.py acme my-feature artifact "design/TDD_search-service.md" approved
+    sh scripts/gate_transition.py acme my-feature artifact "breakdown/JIRA_BREAKDOWN_search-service.md" pushed
+    sh scripts/gate_transition.py acme my-feature released-section "search-service" "breakdown/JIRA_BREAKDOWN_search-service.md" 5 13
+    sh scripts/gate_transition.py acme my-feature rollback
 """
 import json
 import sys

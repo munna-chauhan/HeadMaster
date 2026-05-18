@@ -1,11 +1,21 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """Validate pipeline gates via loop_state.json.
 
 Usage:
-    python scripts/gate_validator.py --project <p> --slug <s> PRD_APPROVED
-    python scripts/gate_validator.py --project <p> --slug <s> TDD_APPROVED --name <tdd-name>
-    python scripts/gate_validator.py --project <p> --slug <s> ARCH_LOCKED
-    python scripts/gate_validator.py --project <p> --slug <s> SYSTEM_REVIEW_PASS
+    sh scripts/gate_validator.py --project <p> --slug <s> PRD_APPROVED
+    sh scripts/gate_validator.py --project <p> --slug <s> TDD_APPROVED --name <tdd-name>
+    sh scripts/gate_validator.py --project <p> --slug <s> ARCH_LOCKED
+    sh scripts/gate_validator.py --project <p> --slug <s> SYSTEM_REVIEW_PASS
 
 Returns: 0 if gate passes, 1 if not (diagnostic to stderr), 2 on usage error.
 """

@@ -1,4 +1,14 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """Structured failure ledger for deterministic retry logic.
 
 Maintains an append-only JSON ledger of failed approaches per story,
@@ -7,21 +17,21 @@ before every retry to avoid repeating failed approaches.
 
 Usage:
     # Append a failure record after a failed attempt
-    python scripts/failure_ledger.py append <project> <slug> <story-key> --record '<json>'
+    sh scripts/failure_ledger.py append <project> <slug> <story-key> --record '<json>'
 
     # Load all failure records for a story (stdout as JSON)
-    python scripts/failure_ledger.py load <project> <slug> <story-key>
+    sh scripts/failure_ledger.py load <project> <slug> <story-key>
 
     # Check if an approach description is too similar to a prior failure
-    python scripts/failure_ledger.py check <project> <slug> <story-key> --approach "description"
+    sh scripts/failure_ledger.py check <project> <slug> <story-key> --approach "description"
 
     # Clean up ledger after story completes
-    python scripts/failure_ledger.py cleanup <project> <slug> <story-key>
+    sh scripts/failure_ledger.py cleanup <project> <slug> <story-key>
 
 Examples:
-    python scripts/failure_ledger.py append acme my-feature ACME-123 --record '{"approach":"added null check","error_type":"test_failure","error_summary":"NPE at line 42","files_touched":["UserService.java"],"hypothesis":"mock not configured"}'
-    python scripts/failure_ledger.py load acme my-feature ACME-123
-    python scripts/failure_ledger.py check acme my-feature ACME-123 --approach "add null check in validate()"
+    sh scripts/failure_ledger.py append acme my-feature ACME-123 --record '{"approach":"added null check","error_type":"test_failure","error_summary":"NPE at line 42","files_touched":["UserService.java"],"hypothesis":"mock not configured"}'
+    sh scripts/failure_ledger.py load acme my-feature ACME-123
+    sh scripts/failure_ledger.py check acme my-feature ACME-123 --approach "add null check in validate()"
 """
 import json
 import sys

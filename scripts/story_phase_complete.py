@@ -1,17 +1,27 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """Single-call story completion — replaces per-phase gate_transition + run_logger calls.
 
 Before: 4x gate_transition + 4x run_logger = 8 subprocess calls per story.
 After:  story_phase_complete start + complete = 2 subprocess calls per story.
 
 Usage:
-  python scripts/story_phase_complete.py <project> <slug> <story-key> start
-  python scripts/story_phase_complete.py <project> <slug> <story-key> complete [--phases A,C,D]
-  python scripts/story_phase_complete.py <project> <slug> <story-key> fail <reason>
-  python scripts/story_phase_complete.py <project> <slug> <story-key> defer <reason>
-  python scripts/story_phase_complete.py <project> <slug> <story-key> blocked <reason>
-  python scripts/story_phase_complete.py <project> <slug> <story-key> review
-  python scripts/story_phase_complete.py <project> <slug> <story-key> qa
+  sh scripts/story_phase_complete.py <project> <slug> <story-key> start
+  sh scripts/story_phase_complete.py <project> <slug> <story-key> complete [--phases A,C,D]
+  sh scripts/story_phase_complete.py <project> <slug> <story-key> fail <reason>
+  sh scripts/story_phase_complete.py <project> <slug> <story-key> defer <reason>
+  sh scripts/story_phase_complete.py <project> <slug> <story-key> blocked <reason>
+  sh scripts/story_phase_complete.py <project> <slug> <story-key> review
+  sh scripts/story_phase_complete.py <project> <slug> <story-key> qa
 
 Story status is written to loop_state.json only. JIRA_BREAKDOWN*.md files are read-only content.
 """

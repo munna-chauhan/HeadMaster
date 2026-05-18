@@ -20,7 +20,7 @@ Otherwise: false (sequential path).
 ## Routing
 
 ```bash
-python scripts/workflow_config.py {tier} stages discovery status
+sh scripts/workflow_config.py {tier} stages discovery status
 ```
 - `skip` → HALT
 - `optional` → check gaps: ≤2 skip, 3-5 ask user, 6+ run
@@ -94,8 +94,8 @@ If a category has no applicable gaps → mark `[N/A: {reason}]`, do not ask.
 
 Gate:
 ```bash
-python scripts/gate_transition.py {project} {slug} planning Draft --artifact docs/features/{project}/{slug}/planning/FEATURE_DRAFT.md
-python scripts/gate_transition.py {project} {slug} plan-stage discover complete
+sh scripts/gate_transition.py {project} {slug} planning Draft --artifact docs/features/{project}/{slug}/planning/FEATURE_DRAFT.md
+sh scripts/gate_transition.py {project} {slug} plan-stage discover complete
 ```
 
 ---
@@ -158,6 +158,6 @@ All Questions Resolved: YES (append at very end when complete)
 
 Gate:
 ```bash
-python scripts/gate_transition.py {project} {slug} planning Draft --artifact docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md
-python scripts/gate_transition.py {project} {slug} plan-stage discover complete
+sh scripts/gate_transition.py {project} {slug} planning Draft --artifact docs/features/{project}/{slug}/planning/DISCOVERY_NOTES.md
+sh scripts/gate_transition.py {project} {slug} plan-stage discover complete
 ```

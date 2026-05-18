@@ -1,4 +1,14 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """Pipeline state management — single module for loop_state.json operations.
 
 Public API:
@@ -8,10 +18,10 @@ Public API:
   tdd_breakdown_pairs(artifacts)             -> list[dict]
 
 CLI:
-  python scripts/state_manager.py --project <p> --slug <s> [--project-dir <dir>]
-  python scripts/state_manager.py --validate <path>
-  python scripts/state_manager.py --status [--project <p>]
-  python scripts/state_manager.py --rebuild --project <p> --slug <s>
+  sh scripts/state_manager.py --project <p> --slug <s> [--project-dir <dir>]
+  sh scripts/state_manager.py --validate <path>
+  sh scripts/state_manager.py --status [--project <p>]
+  sh scripts/state_manager.py --rebuild --project <p> --slug <s>
 """
 
 import argparse
@@ -113,7 +123,7 @@ def format_validation_error(project: str, slug: str, error_msg: str) -> str:
     return (
         f"CORRUPTED STATE: {project}/{slug}\n"
         f"Error: {error_msg}\n"
-        f"Recover: python scripts/cleanup_failed_run.py {project} {slug} --reset-state\n"
+        f"Recover: sh scripts/cleanup_failed_run.py {project} {slug} --reset-state\n"
         f"Then: /plan {slug} or /execute {slug} depending on phase"
     )
 

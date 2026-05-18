@@ -1,10 +1,20 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """Revision lifecycle manager for pipeline re-openings.
 
 Usage:
-    python scripts/revision_manager.py reopen <project> <slug> <stage> [message]
-    python scripts/revision_manager.py check  <project> <slug> <stage>
-    python scripts/revision_manager.py close  <project> <slug> <rev_id>
+    sh scripts/revision_manager.py reopen <project> <slug> <stage> [message]
+    sh scripts/revision_manager.py check  <project> <slug> <stage>
+    sh scripts/revision_manager.py close  <project> <slug> <rev_id>
 
 Commands:
     reopen  Reopen a stage: transitions loop_state.json, writes REVISION_NOTES.md

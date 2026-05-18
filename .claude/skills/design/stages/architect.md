@@ -11,7 +11,7 @@
 | `artifacts["planning/PRD.md"].status = approved` | proceed |
 | `complexity_tier = xs` | skip stage → Engineer |
 | Loop-back from Review (DESIGN_GAP) | read `memory/features/{project}/{slug}/open_questions.md` → scope to listed gaps only |
-| `pipeline.revision_open = true` | run `python scripts/revision_manager.py check {project} {slug} design` → read REVISION_NOTES.md Design section → delta-only edits → append decisions before gate |
+| `pipeline.revision_open = true` | run `sh scripts/revision_manager.py check {project} {slug} design` → read REVISION_NOTES.md Design section → delta-only edits → append decisions before gate |
 
 ---
 
@@ -154,8 +154,8 @@ On failure: retry solutions-architect once with `"SYSTEM_DESIGN_NOTES.md incompl
 **6. Gate transition**
 
 ```bash
-python scripts/gate_transition.py {project} {slug} artifact "design/SYSTEM_DESIGN_NOTES.md" locked
-python scripts/gate_transition.py {project} {slug} design Engineer
+sh scripts/gate_transition.py {project} {slug} artifact "design/SYSTEM_DESIGN_NOTES.md" locked
+sh scripts/gate_transition.py {project} {slug} design Engineer
 ```
 
 Auto-proceed to Engineer stage.

@@ -88,8 +88,8 @@ Output: `docs/features/{project}/{slug}/planning/PRD_REVIEW.md`
 ## Gate
 
 ```bash
-python scripts/gate_transition.py {project} {slug} plan-stage review approved
-python scripts/gate_transition.py {project} {slug} planning APPROVED --artifact docs/features/{project}/{slug}/planning/PRD.md
+sh scripts/gate_transition.py {project} {slug} plan-stage review approved
+sh scripts/gate_transition.py {project} {slug} planning APPROVED --artifact docs/features/{project}/{slug}/planning/PRD.md
 ```
 
 Append to PRD.md header table: `PRD Status: APPROVED | {date} | iteration {N}`.

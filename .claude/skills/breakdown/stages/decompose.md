@@ -101,7 +101,7 @@ Keyword-match story titles against Jira keys found in Step 3:
 | Match + open | ⬆️ EXISTING — diff title/desc/ACs, surface for human review. Do NOT auto-update. |
 | No match | ⏳ NEW |
 
-**Revision Mode** (when `python scripts/revision_manager.py check {project} {slug} breakdown` confirms `revision_open`):
+**Revision Mode** (when `sh scripts/revision_manager.py check {project} {slug} breakdown` confirms `revision_open`):
 
 | REVISION_NOTES directive | Action |
 |--------------------------|--------|
@@ -174,7 +174,7 @@ If section doesn't exist, create it. Never modify existing rows.
 
 2. Write to loop_state.json:
 ```bash
-python scripts/gate_transition.py {project} {slug} released-section \
+sh scripts/gate_transition.py {project} {slug} released-section \
   "{NAME}" "breakdown/JIRA_BREAKDOWN_{NAME}.md" "{N}" "{N_SP}"
 ```
 
@@ -231,9 +231,9 @@ If Jira unavailable after 3 retries (5s/10s/20s) → write `JIRA_MANUAL_LOG.md`,
 ## Completion
 
 ```bash
-python scripts/gate_transition.py {project} {slug} artifact \
+sh scripts/gate_transition.py {project} {slug} artifact \
   "breakdown/JIRA_BREAKDOWN{_NAME}.md" "{push_status}"
-python scripts/gate_transition.py {project} {slug} breakdown approved
+sh scripts/gate_transition.py {project} {slug} breakdown approved
 ```
 
 `{push_status}` = `pushed` | `local` | `draft`

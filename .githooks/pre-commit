@@ -11,12 +11,12 @@ staged() { git diff --cached --name-only --diff-filter=ACMR; }
 fail() { echo "pre-commit: $1" >&2; exit 1; }
 
 # 1. Config schema validation — always cheap, always run.
-if ! python scripts/config_utils.py validate config.yml.example >/dev/null; then
+if ! sh scripts/config_utils.py validate config.yml.example >/dev/null; then
   fail "config_utils.py validate failed"
 fi
 
 # 2. Inventory audit — always cheap, always run.
-if ! python scripts/audit_inventory.py >/dev/null; then
+if ! sh scripts/audit_inventory.py >/dev/null; then
   fail "audit_inventory.py failed (run with --fix to auto-correct)"
 fi
 

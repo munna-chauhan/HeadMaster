@@ -55,7 +55,7 @@ for bf in breakdown_files:
 
 **Step C — PRD gate:**
 ```bash
-python scripts/gate_validator.py --project {project} --slug {slug} PRD_APPROVED
+sh scripts/gate_validator.py --project {project} --slug {slug} PRD_APPROVED
 ```
 Fail → HALT: "PRD not approved. Run `/plan {slug}` first."
 
@@ -148,7 +148,7 @@ TaskCreate({title: "[EXEC] {LOCAL-ID}: {title}", status: "pending", ...})
 **Update pipeline state:**
 
 ```bash
-python scripts/gate_transition.py {project} {slug} execute ready
+sh scripts/gate_transition.py {project} {slug} execute ready
 ```
 
 ---

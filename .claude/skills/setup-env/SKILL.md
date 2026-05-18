@@ -203,7 +203,7 @@ Create `memory/projects/` dir if absent.
 
 For each repo, run:
 ```bash
-python scripts/style_extractor.py {repo-path} --output memory/projects/{project}/style/{repo-name}.md
+sh scripts/style_extractor.py {repo-path} --output memory/projects/{project}/style/{repo-name}.md
 ```
 
 The script discovers style/lint configs at the repo root by file pattern (ini, json, yaml, toml, xml, key=value). No tool names assumed. Exit 1 = no configs found → skip silently, do not write file.

@@ -78,7 +78,7 @@ Implement Jira stories per TDD specs. Test-first, atomic commits, never commit b
 - **Simplicity required** — Simplest solution that meets the AC. No speculative extensibility.
 - **Performance: obvious issues only** — Avoid O(n²) when O(n) is available, avoid unnecessary DB round-trips. Do not profile or optimize beyond what the AC requires.
 - **Review feedback is collaborative** — Understand reasoning behind Phase C findings before fixing. If incorrect or conflicts with TDD, flag with justification.
-- **Failure ledger is mandatory on retry** — On attempt > 1, run `python scripts/failure_ledger.py load {slug} {STORY-KEY}` BEFORE writing any code. Read every `excluded_approaches` entry. Approach must be structurally different from all listed. On FAIL, run `python scripts/failure_ledger.py append` BEFORE returning.
+- **Failure ledger is mandatory on retry** — On attempt > 1, run `sh scripts/failure_ledger.py load {slug} {STORY-KEY}` BEFORE writing any code. Read every `excluded_approaches` entry. Approach must be structurally different from all listed. On FAIL, run `sh scripts/failure_ledger.py append` BEFORE returning.
 
 ## Gate Condition
 

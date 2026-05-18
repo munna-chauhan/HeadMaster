@@ -8,7 +8,7 @@ All AskUserQuestion calls → per `.claude/agents/references/ask-user-protocol.m
 
 Mark in_progress on entry:
 ```bash
-python scripts/gate_transition.py {project} {slug} design-stage review in_progress
+sh scripts/gate_transition.py {project} {slug} design-stage review in_progress
 ```
 
 ---
@@ -67,7 +67,7 @@ Apply corrections inline to TDD after each answer. Then proceed to spawn tdd-rev
 
 2. Mark TDDs as in_review:
 ```bash
-python scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" in_review
+sh scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" in_review
 # Multi-TDD: run per file (TDD_MASTER.md, TDD_{NAME}.md)
 ```
 
@@ -114,13 +114,13 @@ CONDITIONAL: log HIGH findings as tech debt, do not block.
 
 ```bash
 # Mark review artifact:
-python scripts/gate_transition.py {project} {slug} artifact "design/TDD_REVIEW.md" approved
+sh scripts/gate_transition.py {project} {slug} artifact "design/TDD_REVIEW.md" approved
 # Mark TDD(s) — run per file:
-python scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" approved
+sh scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" approved
 # Multi-TDD: also run for TDD_MASTER.md, TDD_{NAME}.md
 # Stage + pipeline phase:
-python scripts/gate_transition.py {project} {slug} design-stage review approved
-python scripts/gate_transition.py {project} {slug} design APPROVED
+sh scripts/gate_transition.py {project} {slug} design-stage review approved
+sh scripts/gate_transition.py {project} {slug} design APPROVED
 ```
 
 Auto-proceed to breakdown.
@@ -129,13 +129,13 @@ Auto-proceed to breakdown.
 
 1. Revert TDD status:
 ```bash
-python scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" draft
+sh scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" draft
 # Multi-TDD: run per affected file
 ```
 
 2. Convergence check:
 ```bash
-python scripts/convergence_check.py {slug} design --blocker-type "{blocker-type}" --findings '{findings-json}' --max-loops {max_loops}
+sh scripts/convergence_check.py {slug} design --blocker-type "{blocker-type}" --findings '{findings-json}' --max-loops {max_loops}
 ```
 Parse stdout: `{"verdict": "escalate"}` → report to human, stop. `{"verdict": "continue"}` → loop-back.
 

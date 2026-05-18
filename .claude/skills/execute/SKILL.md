@@ -67,10 +67,10 @@ If invoked with `--story STORY-KEY` flag:
 Before dispatch, run:
 
 ```bash
-python scripts/revision_manager.py check {project} {slug} execute
+sh scripts/revision_manager.py check {project} {slug} execute
 ```
 
-If `revision_open: true` → read `docs/features/{project}/{slug}/REVISION_NOTES.md` — Execute section of the open rev_id. Delta only: new stories (not in loop_state.json) + any `reopen: <KEY>` entries. COMPLETE stories not listed → skip. After all delta stories complete, append execution summary to Execute section, then close: `python scripts/revision_manager.py close {project} {slug} {rev_id}`.
+If `revision_open: true` → read `docs/features/{project}/{slug}/REVISION_NOTES.md` — Execute section of the open rev_id. Delta only: new stories (not in loop_state.json) + any `reopen: <KEY>` entries. COMPLETE stories not listed → skip. After all delta stories complete, append execution summary to Execute section, then close: `sh scripts/revision_manager.py close {project} {slug} {rev_id}`.
 
 ---
 

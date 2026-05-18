@@ -3,9 +3,6 @@
   "attribution": {
     "commit": "Co-Authored-By: HeadMaster ADLC <noreply@headmaster.dev>"
   },
-  "env": {
-    "PATH": "${CLAUDE_PROJECT_DIR}/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin"
-  },
   "permissions": {
     "allow": [
       "Bash(git status *)",
@@ -29,10 +26,9 @@
       "Bash(git check-ignore *)",
       "Bash(gh pr *)",
       "Bash(gh api *)",
-      "Bash(python scripts/*)",
-      "Bash(python .claude/hooks/*)",
-      "Bash(python -m *)",
-      "Bash(python -c *)",
+      "Bash(sh scripts/*)",
+      "Bash(sh .claude/hooks/*)",
+      "Bash(sh .claude/skills/*)",
       "Bash(grep *)",
       "Bash(awk *)",
       "Bash(start *)",
@@ -107,12 +103,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/activate.py",
+            "command": "sh .claude/hooks/activate.py",
             "statusMessage": "Loading project status..."
           },
           {
             "type": "command",
-            "command": "python .claude/hooks/feature_context.py",
+            "command": "sh .claude/hooks/feature_context.py",
             "statusMessage": "Loading active feature context..."
           }
         ]
@@ -124,7 +120,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/write_guard.py",
+            "command": "sh .claude/hooks/write_guard.py",
             "statusMessage": "Checking for secrets..."
           }
         ]
@@ -134,7 +130,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/pre_spawn_validation.py",
+            "command": "sh .claude/hooks/pre_spawn_validation.py",
             "statusMessage": "Validating subagent isolation..."
           }
         ]
@@ -145,7 +141,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/subagent_stop.py",
+            "command": "sh .claude/hooks/subagent_stop.py",
             "timeout": 10
           }
         ]
@@ -156,7 +152,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/session_end.py",
+            "command": "sh .claude/hooks/session_end.py",
             "async": true
           }
         ]

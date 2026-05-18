@@ -63,7 +63,7 @@ Split input on commas. `all` expands to every capability.
 Run `diff_scanner.py` with appropriate scope:
 
 ```
-python .claude/skills/security-scan/scripts/diff_scanner.py --repo {repo} [--branch X --base Y | --full | --staged]
+sh .claude/skills/security-scan/scripts/diff_scanner.py --repo {repo} [--branch X --base Y | --full | --staged]
 ```
 
 Focused modes if only specific capabilities requested:

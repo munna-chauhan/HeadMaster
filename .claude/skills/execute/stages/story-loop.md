@@ -24,12 +24,12 @@ NEW=$(git log feature/{slug}..origin/{MAIN} --oneline)
 ```
 
 If merge exit code != 0 (conflict):
-- `python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} blocked "merge conflict"`
+- `sh scripts/story_phase_complete.py {project} {slug} {STORY-KEY} blocked "merge conflict"`
 - Escalate: "Back-merge conflict on {STORY-KEY}. Resolve manually then re-run."
 - **Do NOT proceed to Phase A.**
 
 ```bash
-python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} start
+sh scripts/story_phase_complete.py {project} {slug} {STORY-KEY} start
 ```
 
 ---
@@ -47,7 +47,7 @@ PASS → Phase B.
 FAIL (attempt < max_loops) → load failure ledger, retry with structurally different approach.
 
 FAIL (attempt >= max_loops):
-- If `{autonomous}=true` → defer story: `python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} defer "max_loops exceeded"`; continue to next story
+- If `{autonomous}=true` → defer story: `sh scripts/story_phase_complete.py {project} {slug} {STORY-KEY} defer "max_loops exceeded"`; continue to next story
 - If `{autonomous}=false` → AskUserQuestion: Fix TDD / Fix Story / Defer Story
 
 ---
@@ -65,7 +65,7 @@ For each AC, confirm at least one changed file name or path maps to the AC's dom
 PASS → story complete.
 FAIL → append uncovered ACs to failure ledger before retrying:
 ```bash
-python scripts/failure_ledger.py append {slug} {STORY-KEY} --record '{
+sh scripts/failure_ledger.py append {slug} {STORY-KEY} --record '{
   "approach": "phase_b_ac_check",
   "error_type": "ac_coverage_gap",
   "error_summary": "Uncovered ACs: {AC-N, ...}",
@@ -80,13 +80,13 @@ Back to Phase A. If attempt >= max_loops → escalate/defer.
 ## Story Complete
 
 ```bash
-python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} complete --phases A,B
+sh scripts/story_phase_complete.py {project} {slug} {STORY-KEY} complete --phases A,B
 
 # Recurring finding detection — write to developer MEMORY.md before ledger cleanup
-python scripts/recurring_finding_detector.py {project} {slug}
+sh scripts/recurring_finding_detector.py {project} {slug}
 
 # Phase A/B learning extraction — write failure patterns before ledger cleanup
-python scripts/extract_phase_learnings.py {project} {slug} {STORY-KEY}
+sh scripts/extract_phase_learnings.py {project} {slug} {STORY-KEY}
 
 # Auto-merge — TARGET = story's parent_branch (resolved in setup Step 4)
 TARGET={parent_branch}
@@ -99,12 +99,12 @@ git merge --no-ff story/{STORY-KEY} -m "merge: {STORY-KEY} into {TARGET}"
 if last_story_in_repo:
     {build_cmd} || {
         git revert HEAD --no-edit && git push origin {TARGET}
-        python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} fail "post-merge build failed"
+        sh scripts/story_phase_complete.py {project} {slug} {STORY-KEY} fail "post-merge build failed"
         # Escalate; do NOT continue to next story
     }
 
 # Cleanup
-python scripts/failure_ledger.py cleanup {project} {slug} {STORY-KEY}
+sh scripts/failure_ledger.py cleanup {project} {slug} {STORY-KEY}
 git branch -d story/{STORY-KEY}
 git push origin --delete story/{STORY-KEY}
 

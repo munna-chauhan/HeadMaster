@@ -1,9 +1,19 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """Deduplicate and age-out entries in agent MEMORY.md files.
 
 Usage:
-  python scripts/curate_agent_memory.py <agent> [--age-days N] [--dry-run]
-  python scripts/curate_agent_memory.py --all [--age-days N] [--dry-run]
+  sh scripts/curate_agent_memory.py <agent> [--age-days N] [--dry-run]
+  sh scripts/curate_agent_memory.py --all [--age-days N] [--dry-run]
 
 Exit codes:
   0  changes written

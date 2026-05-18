@@ -69,7 +69,7 @@ Edit `config.yml` — set `projects.active` and add your project entry with a re
 ### 2. Resolve project paths
 
 ```bash
-python scripts/setup_projects.py
+sh scripts/setup_projects.py
 ```
 
 Creates `docs/features/{project}/`, `memory/features/{project}/`, and writes `.claude/settings.local.json` (gitignored) with the resolved project root for `additionalDirectories` and per-project Write rules. Re-run after editing `config.yml`.
@@ -97,7 +97,7 @@ claude
 /execute invoice-pdf-export
 ```
 
-Verify state at any time: `python scripts/state_manager.py --status`.
+Verify state at any time: `sh scripts/state_manager.py --status`.
 
 <details>
 <summary><strong>Prerequisites</strong></summary>
@@ -105,8 +105,8 @@ Verify state at any time: `python scripts/state_manager.py --status`.
 | Requirement | Version | Notes |
 |---|---|---|
 | [Claude Code](https://claude.ai/code) | Latest | CLI or desktop app |
-| Python | 3.9+ | For orchestration scripts |
-| Node.js | 18+ | **Required** — hooks use `node` for cross-platform Python resolution |
+| Python | 3.9+ | For orchestration scripts. HeadMaster auto-resolves `python3`/`py3`/`python`/`py` plus common Windows install dirs. |
+| Node.js | 18+ | Only for MCP servers (Atlassian, drawio) — not for HeadMaster itself. |
 | Git | Any | For story branches and commits |
 | Jira access | Optional | Required only if `jira_push: true` |
 
@@ -527,7 +527,7 @@ cp config.yml.example config.yml
 Validate your config at any time:
 
 ```bash
-python scripts/config_utils.py validate config.yml
+sh scripts/config_utils.py validate config.yml
 ```
 
 **`gates.{phase}.interactive`** — `true` asks at decision points, `false` lets the agent decide and document reasoning. Per-phase only — there is no global `pipeline.interactive`.
@@ -586,7 +586,7 @@ projects:
 
 ### Switch Active Project
 
-Change `projects.active` in `config.yml`, re-run `python scripts/setup_projects.py` (refreshes `.claude/settings.local.json`), then restart your Claude Code session.
+Change `projects.active` in `config.yml`, re-run `sh scripts/setup_projects.py` (refreshes `.claude/settings.local.json`), then restart your Claude Code session.
 
 All feature directories are isolated by project:
 
@@ -600,8 +600,8 @@ memory/features/beta/{slug}/    <- Beta state
 ### Check All Feature States
 
 ```bash
-python scripts/state_manager.py --status
-python scripts/state_manager.py --status --project acme
+sh scripts/state_manager.py --status
+sh scripts/state_manager.py --status --project acme
 ```
 
 ---
@@ -626,7 +626,7 @@ Every skill auto-detects where it left off. Just re-run the command:
 Max 3 attempts before human escalation. `failure_ledger.py` prevents retrying the same broken approach.
 
 ```bash
-python scripts/failure_ledger.py load acme product-catalog-search ACME-201
+sh scripts/failure_ledger.py load acme product-catalog-search ACME-201
 ```
 
 </details>
@@ -657,8 +657,8 @@ Cascades downstream: PRD &rarr; `revision`, design/breakdown/execute &rarr; `rev
 <summary><strong>Emergency Reset</strong></summary>
 
 ```bash
-python scripts/cleanup_failed_run.py acme product-catalog-search
-python scripts/cleanup_failed_run.py acme product-catalog-search --reset-state
+sh scripts/cleanup_failed_run.py acme product-catalog-search
+sh scripts/cleanup_failed_run.py acme product-catalog-search --reset-state
 ```
 
 </details>
@@ -710,7 +710,6 @@ HeadMaster/
 |   |
 |   +-- workflows/                    # Tier algorithms (xs/s/m/l)
 |   +-- hooks/                        # Auto-run on session events
-|       +-- pyrun.js                  # Cross-platform Python resolver (node)
 |       +-- pre_spawn_validation.py   # Subagent isolation enforcement
 |       +-- write_guard.py            # Secret detection on writes
 |       +-- subagent_stop.py          # Subagent output validation
@@ -732,13 +731,7 @@ HeadMaster/
 <details>
 <summary><strong>Hooks not running / <code>python: command not found</code></strong></summary>
 
-Hooks call `python .claude/hooks/...`. The `bin/python` shim resolves to whatever interpreter the host has (probes `python3 → py3 → python → py`) and caches the result in `.claude/cache/python-interpreter`.
-
-```bash
-python --version   # via shim — must be 3.9+
-```
-
-If the cache points at an uninstalled interpreter, delete `.claude/cache/python-interpreter` to force a re-probe. On Windows, `bin/python.cmd` delegates to `pyrun.js` (Node.js 18+).
+Hooks and scripts are invoked as `sh path/to/file.py`. Each `.py` file starts with a polyglot shebang that probes `python3 → py3 → python → py` on `PATH`, then common Windows install dirs (`/c/Program Files/Python/Python*`, `$LOCALAPPDATA/Programs/Python/Python*`). Install Python 3.9+ anywhere standard and HeadMaster finds it — no shim, no PATH setup.
 </details>
 
 <details>
@@ -784,7 +777,7 @@ The gate string must appear verbatim in the PRD header table: `PRD Status: APPRO
 <summary><strong>Story stuck at 3 retries</strong></summary>
 
 ```bash
-python scripts/failure_ledger.py load acme {slug} {STORY-KEY}
+sh scripts/failure_ledger.py load acme {slug} {STORY-KEY}
 ```
 
 Review `excluded_approaches`. Use `/reopen {slug} breakdown` to revise scope or `/reopen {slug} design` if the TDD interface is unimplementable.
@@ -794,9 +787,9 @@ Review `excluded_approaches`. Use `/reopen {slug} breakdown` to revise scope or 
 <summary><strong>Stale file lock on loop_state.json</strong></summary>
 
 ```bash
-python scripts/gate_transition.py acme {slug} rollback
+sh scripts/gate_transition.py acme {slug} rollback
 # If backup is also corrupted:
-python scripts/cleanup_failed_run.py acme {slug} --reset-state
+sh scripts/cleanup_failed_run.py acme {slug} --reset-state
 ```
 </details>
 

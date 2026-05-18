@@ -34,8 +34,8 @@
       "Bash(git ls-files *)",
       "Bash(git config *)",
       "Bash(git pull *)",
-      "Bash(python scripts/*)",
-      "Bash(python .claude/hooks/*)"
+      "Bash(sh scripts/*)",
+      "Bash(sh .claude/hooks/*)"
     ],
     "deny": [
       "Bash(git push * --force *)",
@@ -54,12 +54,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/activate.py",
+            "command": "sh .claude/hooks/activate.py",
             "statusMessage": "Loading project status..."
           },
           {
             "type": "command",
-            "command": "python .claude/hooks/feature_context.py",
+            "command": "sh .claude/hooks/feature_context.py",
             "statusMessage": "Loading active feature context..."
           }
         ]

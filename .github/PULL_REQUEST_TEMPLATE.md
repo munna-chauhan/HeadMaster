@@ -10,8 +10,8 @@
 ## Validation
 
 - [ ] `pytest scripts/tests/ -q` green
-- [ ] `python scripts/audit_inventory.py` green
-- [ ] `python scripts/config_utils.py validate config.yml.example` green
+- [ ] `sh scripts/audit_inventory.py` green
+- [ ] `sh scripts/config_utils.py validate config.yml.example` green
 - [ ] If `.claude/agents/`, `.claude/skills/`, `.claude/workflows/`, `.claude/hooks/`, `.claude/settings.json`, or a guarded script changed → human approval requested in this PR (per `.claude/CLAUDE.md` Contribution Rules)
 
 ## Notes

@@ -19,7 +19,7 @@ Resolve input → detect route → Q&A for gaps → classify tier (if not spike)
 
 **Validate config first:**
 ```bash
-python scripts/skill_setup.py --config-only
+sh scripts/skill_setup.py --config-only
 ```
 If `error` returned → HALT with message. Confirms `config.yml` exists, `projects.active` is set, active project `root` path is defined.
 
@@ -253,7 +253,7 @@ if not ok: print('INVALID:' + err)
 If `INVALID:` → HALT: "loop_state.json failed validation: {err}. Do not proceed."
 
 ```bash
-python scripts/gate_transition.py {project} {slug} init complete \
+sh scripts/gate_transition.py {project} {slug} init complete \
   --artifact memory/features/{project}/{slug}/loop_state.json
 ```
 

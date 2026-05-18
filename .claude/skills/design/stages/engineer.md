@@ -88,17 +88,17 @@ All tiers share the same validation logic:
 
 ```bash
 # xs:
-python scripts/gate_transition.py {project} {slug} artifact "design/IMPLEMENTATION_BRIEF.md" approved
-python scripts/gate_transition.py {project} {slug} design APPROVED
+sh scripts/gate_transition.py {project} {slug} artifact "design/IMPLEMENTATION_BRIEF.md" approved
+sh scripts/gate_transition.py {project} {slug} design APPROVED
 
 # s/m/l (single):
-python scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" draft
+sh scripts/gate_transition.py {project} {slug} artifact "design/TDD.md" draft
 # s/m/l (multi — run per file):
-python scripts/gate_transition.py {project} {slug} artifact "design/TDD_MASTER.md" draft
-python scripts/gate_transition.py {project} {slug} artifact "design/TDD_{NAME}.md" draft
+sh scripts/gate_transition.py {project} {slug} artifact "design/TDD_MASTER.md" draft
+sh scripts/gate_transition.py {project} {slug} artifact "design/TDD_{NAME}.md" draft
 
 # s/m/l: mark engineer complete
-python scripts/gate_transition.py {project} {slug} design-stage engineer complete
+sh scripts/gate_transition.py {project} {slug} design-stage engineer complete
 ```
 
 **s/m/l hard stop:** Output exactly:

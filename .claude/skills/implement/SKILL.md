@@ -36,7 +36,7 @@ On FAIL → append to failure ledger (see "On Failure" below) → increment atte
 On retry (attempt > 1), BEFORE any code changes:
 
 ```bash
-python scripts/failure_ledger.py load {project} {slug} {STORY-KEY} --last 2
+sh scripts/failure_ledger.py load {project} {slug} {STORY-KEY} --last 2
 ```
 
 Returns last 2 failure records + full `excluded_approaches` list. Plan a structurally different approach (>70% word overlap with any excluded → choose different strategy). Do NOT include earlier ledger records — `excluded_approaches` covers them.
@@ -70,7 +70,7 @@ Fix sequence: type errors → lint → format → tests. Never return broken bra
 **4. Security scan (inline — no separate Phase B)**
 
 ```bash
-python .claude/skills/security-scan/scripts/diff_scanner.py \
+sh .claude/skills/security-scan/scripts/diff_scanner.py \
   --branch story/{STORY-KEY} \
   --base {base_branch} \
   --repo {repo_path}
@@ -89,7 +89,7 @@ python .claude/skills/security-scan/scripts/diff_scanner.py \
 ## On Failure — Record to Ledger (mandatory before returning FAIL)
 
 ```bash
-python scripts/failure_ledger.py append {slug} {STORY-KEY} --record '{
+sh scripts/failure_ledger.py append {slug} {STORY-KEY} --record '{
   "approach": "<one-line description of what you tried>",
   "error_type": "<build_failure|test_failure|lint_error|runtime_error>",
   "error_summary": "<exact error message, max 200 chars>",

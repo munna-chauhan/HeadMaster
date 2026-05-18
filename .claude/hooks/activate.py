@@ -1,4 +1,14 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """SessionStart hook — setup projects, print status, validate state."""
 import os
 import subprocess
@@ -52,38 +62,17 @@ def read_model_from_event() -> str:
     return ""
 
 
-def check_python_shim_on_path() -> None:
-    """Warn if bin/ shim files are missing or the caller's PATH lacked bin/.
-
-    pyrun strips bin/ from PATH before exec, so we inspect HEADMASTER_ORIG_PATH
-    (set by pyrun) to recover how the parent shell was actually configured.
-    """
-    shim_name = "python.cmd" if os.name == "nt" else "python"
-    shim = REPO_ROOT / "bin" / shim_name
-    if not shim.exists() or (os.name != "nt" and not os.access(shim, os.X_OK)):
-        print(f"[HeadMaster] Python shim missing at {shim} — run scripts/setup_projects.py or chmod +x bin/python")
-        return
-    orig = os.environ.get("HEADMASTER_ORIG_PATH", os.environ.get("PATH", ""))
-    sep = ";" if os.name == "nt" else ":"
-    shim_dir = str((REPO_ROOT / "bin").resolve())
-    on_path = any(Path(p).resolve() == Path(shim_dir).resolve() for p in orig.split(sep) if p)
-    if not on_path:
-        print(f"[HeadMaster] {shim_dir} not on PATH — `python` will fall back to system. Add to PATH or restart Claude Code (settings.json env is configured).")
-
-
 def main() -> None:
     # Self-heal .remember/logs/ so hook-errors.log is always writable (INFRA-01)
     logs_dir = REPO_ROOT / ".remember" / "logs"
     logs_dir.mkdir(parents=True, exist_ok=True)
     (logs_dir / "hook-errors.log").touch(exist_ok=True)
 
-    check_python_shim_on_path()
-
     # Setup project directories (absorbed from session_reset.py)
     setup_script = REPO_ROOT / "scripts" / "setup_projects.py"
     if setup_script.exists():
         try:
-            subprocess.run(["python", str(setup_script)], cwd=str(REPO_ROOT),
+            subprocess.run([sys.executable, str(setup_script)], cwd=str(REPO_ROOT),
                            capture_output=True, timeout=5, check=False)
         except Exception:
             pass

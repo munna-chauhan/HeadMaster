@@ -28,7 +28,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 Run:
 
 ```bash
-python .claude/skills/publish-confluence/scripts/confluence_publish.py preprocess <file-path>
+sh .claude/skills/publish-confluence/scripts/confluence_publish.py preprocess <file-path>
 ```
 
 This produces a temporary processed file. The script handles:
@@ -58,13 +58,13 @@ If user enters anything other than `y` or `Y`: abort, log `Publish cancelled`.
 **Replace existing page (`--page-id`):**
 
 ```bash
-python .claude/skills/publish-confluence/scripts/confluence_publish.py update <page-id> <processed-file> "<title>"
+sh .claude/skills/publish-confluence/scripts/confluence_publish.py update <page-id> <processed-file> "<title>"
 ```
 
 **New page in folder or under parent (`--folder-id` or `--parent-id`):**
 
 ```bash
-python .claude/skills/publish-confluence/scripts/confluence_publish.py create "<title>" <processed-file> <parent-or-folder-id>
+sh .claude/skills/publish-confluence/scripts/confluence_publish.py create "<title>" <processed-file> <parent-or-folder-id>
 ```
 
 ### Step 5: Output
@@ -84,4 +84,4 @@ On failure: print the error from the script and HALT. Do not retry automatically
 - `ATLASSIAN_DOMAIN`, `JIRA_USER_EMAIL`, `JIRA_API_TOKEN` environment variables set
 - `integrations.confluence.enabled: true` in resolved config
 - `projects.{project}.confluence: true` to check the permission
-- `python .claude/skills/publish-confluence/scripts/confluence_publish.py` exists (pre-processing script)
+- `sh .claude/skills/publish-confluence/scripts/confluence_publish.py` exists (pre-processing script)

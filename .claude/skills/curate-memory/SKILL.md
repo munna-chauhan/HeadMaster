@@ -33,8 +33,8 @@ Deduplicate and age-out entries in agent MEMORY.md files.
 ### 2. Run curation
 
 ```bash
-python scripts/curate_agent_memory.py {agent}          # single agent
-python scripts/curate_agent_memory.py --all            # all agents
+sh scripts/curate_agent_memory.py {agent}          # single agent
+sh scripts/curate_agent_memory.py --all            # all agents
 ```
 
 Add `--dry-run` to preview without writing.

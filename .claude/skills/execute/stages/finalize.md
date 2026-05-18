@@ -7,13 +7,13 @@ Triggered at attempt >= max_loops or merge conflict.
 **Load failure ledger for escalation context:**
 
 ```bash
-python scripts/failure_ledger.py load {slug} {STORY-KEY}
+sh scripts/failure_ledger.py load {slug} {STORY-KEY}
 ```
 
 Include the full ledger output in the escalation report so the human sees all attempted approaches.
 
 ```bash
-python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} fail "{reason}"
+sh scripts/story_phase_complete.py {project} {slug} {STORY-KEY} fail "{reason}"
 ```
 
 Write: `docs/features/{project}/{slug}/execution/reviews/escalation-{STORY-KEY}.md`
@@ -29,7 +29,7 @@ Ask per `.claude/agents/references/ask-user-protocol.md` — topic: "Story {STOR
 Options:
 - **Reset + retry** — clear failure ledger, re-run story from Phase A
 - **Fix manually** — re-run `/execute {slug} --story {STORY-KEY}` when done
-- **Skip (defer)** — `python scripts/story_phase_complete.py {project} {slug} {STORY-KEY} defer "escalated"`
+- **Skip (defer)** — `sh scripts/story_phase_complete.py {project} {slug} {STORY-KEY} defer "escalated"`
 - **Stop** — halt execution, leave state as-is
 
 ---
@@ -37,7 +37,7 @@ Options:
 ## Step 6: Phase C — System Review + Integration QA (after all stories complete)
 
 ```bash
-python scripts/run_logger.py {project} {slug} "Execute/Phase C" "PHASE_START" "Starting Phase C: system review + integration QA" "HIGH"
+sh scripts/run_logger.py {project} {slug} "Execute/Phase C" "PHASE_START" "Starting Phase C: system review + integration QA" "HIGH"
 ```
 
 **Subagent failure policy (Phase C only):**
@@ -118,9 +118,9 @@ Verdict: APPROVED | APPROVED_PARTIAL | REJECTED-BUG"
 
 **Parse verdicts from subagent output files:**
 ```bash
-REVIEW_VERDICT=$(python scripts/parse_verdict.py \
+REVIEW_VERDICT=$(sh scripts/parse_verdict.py \
   docs/features/{project}/{slug}/retrospective/system-review.md "PASS,FINDINGS")
-QA_VERDICT=$(python scripts/parse_verdict.py \
+QA_VERDICT=$(sh scripts/parse_verdict.py \
   docs/features/{project}/{slug}/retrospective/qa-report.md "APPROVED,APPROVED_PARTIAL,REJECTED-BUG")
 ```
 
@@ -143,7 +143,7 @@ QA_VERDICT=$(python scripts/parse_verdict.py \
 After fix → re-run Phase C once. If blocking findings persist → hard stop (AskUserQuestion: accept risk / stop).
 
 ```bash
-python scripts/gate_transition.py {project} {slug} execute complete --artifact docs/features/{project}/{slug}/retrospective/system-review.md
+sh scripts/gate_transition.py {project} {slug} execute complete --artifact docs/features/{project}/{slug}/retrospective/system-review.md
 ```
 
 ---
@@ -154,7 +154,7 @@ Two sequential scans on full feature diff. Both must pass before PR creation.
 
 | # | Command | Catches |
 |---|---------|---------|
-| 1 | `python scripts/security_prescan.py --project {project} --feature {slug} --diff-target {MAIN} --quiet` | Secrets, SAST, dependency CVEs |
+| 1 | `sh scripts/security_prescan.py --project {project} --feature {slug} --diff-target {MAIN} --quiet` | Secrets, SAST, dependency CVEs |
 | 2 | `/scan diff --pr` | OWASP scan, cross-story regressions, merge-introduced issues |
 
 **Exit 0:** proceed. **Exit 1 (BLOCKED):** halt — AskUserQuestion: fix + re-run / review + proceed / stop.

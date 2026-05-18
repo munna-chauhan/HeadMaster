@@ -99,7 +99,7 @@ else (planning_stages absent)      → start Context
 ## Setup (every invocation)
 
 ```bash
-python scripts/skill_setup.py {slug}
+sh scripts/skill_setup.py {slug}
 ```
 
 Use `project`, `project_key`, `tier`, `max_loops`, `gates.plan` from output. If `error` is set → HALT. Detect state → load corresponding stage file.

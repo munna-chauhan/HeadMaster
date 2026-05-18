@@ -67,7 +67,7 @@ If last commit message matches the intended message → STOP, report "Already co
 ### 4. Secret scan
 
 ```
-python scripts/secret_scanner.py --staged
+sh scripts/secret_scanner.py --staged
 ```
 
 If secrets detected → STOP. Report findings. Do not commit.

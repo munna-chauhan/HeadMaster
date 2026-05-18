@@ -21,7 +21,7 @@ Move completed features to archive directory. Preserves docs, memory, cost histo
 ## Step 1: Validate + Archive
 
 ```
-python .claude/skills/archive-feature/scripts/archive_feature.py archive {project} {slug}
+sh .claude/skills/archive-feature/scripts/archive_feature.py archive {project} {slug}
 ```
 
 Script checks `loop_state.json` status = "completed". If not completed → prompts for confirmation or `--force`.
@@ -41,7 +41,7 @@ Creates `archive_metadata.json` with timestamp.
 ## Restore
 
 ```
-python .claude/skills/archive-feature/scripts/archive_feature.py restore {project} {slug}
+sh .claude/skills/archive-feature/scripts/archive_feature.py restore {project} {slug}
 ```
 
 Moves back to active locations.
@@ -49,7 +49,7 @@ Moves back to active locations.
 ## List Archives
 
 ```
-python .claude/skills/archive-feature/scripts/archive_feature.py list {project}
+sh .claude/skills/archive-feature/scripts/archive_feature.py list {project}
 ```
 
 Shows all archived features with timestamps.

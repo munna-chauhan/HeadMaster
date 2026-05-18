@@ -13,7 +13,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 **Agents:** `release-agent`
 
 ```bash
-python scripts/skill_setup.py {slug}
+sh scripts/skill_setup.py {slug}
 ```
 
 Use `project`, `project_key`, `jira_push`, `autonomous` from output. If `error` is set → HALT.
@@ -39,7 +39,7 @@ Check argument + artifacts:
 |-----------|--------|
 | Argument = "merge-gate" | Load `.claude/skills/breakdown/stages/merge-gate.md` |
 | Any `JIRA_BREAKDOWN*.md` exists + status = `pushed` + `pipeline.revision_open != true` | Breakdown done — report status, offer merge-gate |
-| Any `JIRA_BREAKDOWN*.md` exists + status = `pushed` + `pipeline.revision_open = true` | Revision mode — `python scripts/revision_manager.py check {project} {slug} breakdown` → read Breakdown section of open rev_id in `REVISION_NOTES.md`, run decompose treating COMPLETE stories as reconcilable (not skipped) |
+| Any `JIRA_BREAKDOWN*.md` exists + status = `pushed` + `pipeline.revision_open = true` | Revision mode — `sh scripts/revision_manager.py check {project} {slug} breakdown` → read Breakdown section of open rev_id in `REVISION_NOTES.md`, run decompose treating COMPLETE stories as reconcilable (not skipped) |
 | Any `JIRA_BREAKDOWN*.md` exists + status = `local` or `draft` | Resume from Step 7 (human gate) |
 | Nothing | Load `.claude/skills/breakdown/stages/decompose.md` |
 

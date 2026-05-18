@@ -27,7 +27,7 @@ Valid stages: `planning` | `design` | `breakdown` | `execute`
 ## Setup
 
 ```bash
-python scripts/skill_setup.py {slug}
+sh scripts/skill_setup.py {slug}
 ```
 
 Use `project`, `slug` from output. If `error` is set → HALT.
@@ -67,7 +67,7 @@ Proceed only on explicit confirmation.
 ## Execution
 
 ```bash
-python scripts/revision_manager.py reopen {project} {slug} {stage} "{message}"
+sh scripts/revision_manager.py reopen {project} {slug} {stage} "{message}"
 ```
 
 Script output JSON fields: `rev_id`, `cascade`, `artifacts_affected`, `log`, `next`, `error`.
@@ -108,5 +108,5 @@ Next steps:
 Revisions are closed automatically by downstream skills on completion. Manual close:
 
 ```bash
-python scripts/revision_manager.py close {project} {slug} {rev_id}
+sh scripts/revision_manager.py close {project} {slug} {rev_id}
 ```

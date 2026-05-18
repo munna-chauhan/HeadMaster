@@ -1,14 +1,24 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """
 Input Extractor — strips API metadata noise from fetched Jira/Confluence JSON.
 Converts raw API responses to lean markdown. Saves ~70-85% tokens on input files.
 
 Usage:
-    python scripts/input_extractor.py jira -i <input.json> -o <output.md>
-    python scripts/input_extractor.py confluence -i <input.json> -o <output.md>
-    python scripts/input_extractor.py dir -i <input-dir>
-    python scripts/input_extractor.py from-mcp-confluence -o <output.md>
-    python scripts/input_extractor.py from-mcp-jira -o <output.md>
+    sh scripts/input_extractor.py jira -i <input.json> -o <output.md>
+    sh scripts/input_extractor.py confluence -i <input.json> -o <output.md>
+    sh scripts/input_extractor.py dir -i <input-dir>
+    sh scripts/input_extractor.py from-mcp-confluence -o <output.md>
+    sh scripts/input_extractor.py from-mcp-jira -o <output.md>
 """
 
 import argparse

@@ -56,8 +56,8 @@ For s tier: assume reader knows the codebase; PRD must still be self-contained b
 **Gate:** All necessary sections present, metrics quantified, self-contained.
 
 ```bash
-python scripts/gate_transition.py {project} {slug} planning Review --artifact docs/features/{project}/{slug}/planning/PRD.md
-python scripts/gate_transition.py {project} {slug} plan-stage draft complete
+sh scripts/gate_transition.py {project} {slug} planning Review --artifact docs/features/{project}/{slug}/planning/PRD.md
+sh scripts/gate_transition.py {project} {slug} plan-stage draft complete
 ```
 
 **Stop.** Print:

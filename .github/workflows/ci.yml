@@ -21,10 +21,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Validate config schema
-        run: python scripts/config_utils.py validate config.yml.example
+        run: sh scripts/config_utils.py validate config.yml.example
 
       - name: Audit agent/skill inventory
-        run: python scripts/audit_inventory.py
+        run: sh scripts/audit_inventory.py
 
       - name: Run tests
         run: pytest scripts/tests/ tests/ -q

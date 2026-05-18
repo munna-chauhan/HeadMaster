@@ -22,7 +22,7 @@ git rev-list --count main..HEAD
 ### 2. Run analysis
 
 ```
-python scripts/analyze_complexity.py -q
+sh scripts/analyze_complexity.py -q
 ```
 
 ### 3. Output

@@ -31,7 +31,7 @@ Read `memory/agents/qa-engineer/MEMORY.md` if exists.
 **0. Detect Test Infrastructure (mandatory first step)**
 
 ```bash
-python .claude/skills/qa-integration/scripts/test_infra_detector.py --repo {repo_path} --format json
+sh .claude/skills/qa-integration/scripts/test_infra_detector.py --repo {repo_path} --format json
 ```
 
 **TDD Strategy Validation (after detector runs):**

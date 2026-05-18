@@ -1,4 +1,14 @@
-#!/usr/bin/env python
+#!/bin/sh
+""":"
+for c in python3 py3 python py; do command -v "$c" >/dev/null 2>&1 && exec "$c" "$0" "$@"; done
+for d in /c/Python* /c/Python*/Python* "/c/Program Files/Python"* "/c/Program Files/Python"*/Python* "/c/Program Files (x86)/Python"* "/c/Program Files (x86)/Python"*/Python* "$HOME/AppData/Local/Programs/Python/Python"* "$LOCALAPPDATA/Programs/Python/Python"*; do
+  for n in python.exe python3.exe; do
+    [ -x "$d/$n" ] && exec "$d/$n" "$0" "$@"
+  done
+done
+echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
+exit 127
+":"""
 """Extract implementation learnings from a story's failure ledger and write to agent MEMORY.md.
 
 Called after story completes, before failure_ledger.py cleanup.
@@ -7,7 +17,7 @@ ac_coverage_gap → qa-engineer MEMORY.md. All others → developer MEMORY.md.
 Dedup is handled by update_agent_memory.py (threshold 0.60).
 
 Usage:
-  python scripts/extract_phase_learnings.py <project> <slug> <story-key> [--dry-run]
+  sh scripts/extract_phase_learnings.py <project> <slug> <story-key> [--dry-run]
 
 Exit codes:
   0  entries written (or dry-run with entries)

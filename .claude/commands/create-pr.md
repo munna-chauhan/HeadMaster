@@ -57,7 +57,7 @@ Detect build tool from codebase:
 - `go.mod` → `go build ./...`
 - `pyproject.toml` / `setup.py` → `pytest --collect-only`
 
-Read override from config: `python scripts/config_utils.py get pipeline.build_command`
+Read override from config: `sh scripts/config_utils.py get pipeline.build_command`
 
 If detected → run on source branch. If build fails → HALT.
 If not detected → log WARNING, continue.

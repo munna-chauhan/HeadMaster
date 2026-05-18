@@ -68,7 +68,7 @@ xs tier override: if `tier = xs` → skip Architect, go direct to Engineer (IMPL
 ## Setup (every invocation)
 
 ```bash
-python scripts/skill_setup.py {slug}
+sh scripts/skill_setup.py {slug}
 ```
 
 Use `project`, `project_key`, `tier`, `max_loops`, `gates.design` from output. If `error` is set → HALT.

@@ -17,7 +17,7 @@ Mechanical scan via Python. Claude reads verdict only. **Never fix.**
 ## Step 1: Run scanner
 
 ```bash
-python .claude/skills/security-scan/scripts/diff_scanner.py \
+sh .claude/skills/security-scan/scripts/diff_scanner.py \
   --branch story/{STORY-KEY} \
   --base {base_branch} \
   --repo {repo_path}
