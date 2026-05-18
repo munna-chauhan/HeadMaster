@@ -51,7 +51,9 @@ def _load_impl_prefixes() -> list[str]:
         with open(config_path, encoding="utf-8") as f:
             cfg = yaml.safe_load(f) or {}
         prefixes = cfg.get("security", {}).get("impl_path_prefixes", None)
-        return prefixes if isinstance(prefixes, list) and prefixes else _DEFAULT_PREFIXES
+        if not (isinstance(prefixes, list) and prefixes):
+            return _DEFAULT_PREFIXES
+        return [str(p).rstrip("/") for p in prefixes if str(p).rstrip("/")]
     except Exception:
         return _DEFAULT_PREFIXES
 
