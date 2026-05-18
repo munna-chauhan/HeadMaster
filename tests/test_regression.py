@@ -31,7 +31,6 @@ def test_config_loading():
 
     print(f"  [OK] Active project: {active}")
     print(f"  [OK] Projects defined: {[k for k in config['projects'].keys() if k != 'active']}")
-    return True
 
 
 def test_directory_structure():
@@ -54,8 +53,6 @@ def test_directory_structure():
     assert not old_docs.exists(), f"Old docs/projects/ still exists - should be removed"
     print(f"  [OK] Old docs/projects/ cleaned up")
 
-    return True
-
 
 def test_project_paths():
     """Test project-specific paths resolve correctly"""
@@ -76,8 +73,6 @@ def test_project_paths():
 
         print(f"  [OK] {project}: paths resolve correctly")
 
-    return True
-
 
 def test_feature_discovery():
     """Test feature discovery in new structure"""
@@ -95,8 +90,6 @@ def test_feature_discovery():
             print(f"  [OK] No features yet (expected for new setup)")
     else:
         print(f"  [OK] Features directory will be created on first use")
-
-    return True
 
 
 def test_backwards_compatibility():
@@ -120,14 +113,8 @@ def test_backwards_compatibility():
         if "docs/projects/" in content:
             issues.append(f"{filepath.name}: contains 'docs/projects/'")
 
-    if issues:
-        print(f"  [FAIL] Found old path references:")
-        for issue in issues:
-            print(f"         {issue}")
-        return False
-
+    assert not issues, "Old path references found: " + "; ".join(issues)
     print(f"  [OK] No old path references found")
-    return True
 
 
 def run_all_tests():
@@ -148,8 +135,8 @@ def run_all_tests():
     results = []
     for test in tests:
         try:
-            result = test()
-            results.append((test.__name__, result))
+            test()
+            results.append((test.__name__, True))
         except Exception as e:
             print(f"  [FAIL] {e}")
             results.append((test.__name__, False))

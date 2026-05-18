@@ -63,11 +63,12 @@ def test_script_imports():
         print("Failed scripts:")
         for name, error in errors:
             print(f"  - {name}: {error}")
-        return False
-
-    return True
+    assert not errors, f"{len(errors)} script(s) failed to import"
 
 
 if __name__ == "__main__":
-    success = test_script_imports()
-    sys.exit(0 if success else 1)
+    try:
+        test_script_imports()
+        sys.exit(0)
+    except Exception:
+        sys.exit(1)

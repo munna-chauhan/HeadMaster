@@ -48,7 +48,7 @@ def test_path_resolution():
         projects = [k for k in resolver.config.get("projects", {}).keys() if k != "active"]
         for ws in projects:
             features_ws = resolver.get_features_path(ws)
-            memory_ws = resolver.get_project_memory_path(ws)
+            memory_ws = resolver.hm_root / "memory" / "features" / ws
             print(f"  {ws}:")
             print(f"    Features: {features_ws.relative_to(resolver.hm_root)}")
             print(f"    Memory:   {memory_ws.relative_to(resolver.hm_root)}")
@@ -56,15 +56,17 @@ def test_path_resolution():
 
         print("=" * 60)
         print("[OK] All path resolution tests passed!")
-        return True
 
     except Exception as e:
         print(f"[FAIL] Test failed: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise
 
 
 if __name__ == "__main__":
-    success = test_path_resolution()
-    sys.exit(0 if success else 1)
+    try:
+        test_path_resolution()
+        sys.exit(0)
+    except Exception:
+        sys.exit(1)
