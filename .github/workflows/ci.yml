@@ -26,5 +26,10 @@ jobs:
       - name: Audit agent/skill inventory
         run: sh scripts/audit_inventory.py
 
+      - name: Bootstrap project state for tests
+        run: |
+          cp config.yml.example config.yml
+          sh scripts/setup_projects.py
+
       - name: Run tests
         run: pytest scripts/tests/ tests/ -q
