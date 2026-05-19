@@ -127,7 +127,7 @@ def restore_mermaid_blocks(text: str, blocks: list) -> str:
 # Code block extraction and replacement
 # ---------------------------------------------------------------------------
 
-CODE_PLACEHOLDER = "CODE_BLOCK_{index}"
+CODE_PLACEHOLDER = "CODE_BLOCK_{index}_END"
 
 
 def extract_code_blocks(text: str):
@@ -145,11 +145,36 @@ def extract_code_blocks(text: str):
     return processed, blocks
 
 
+# Languages natively supported by Confluence code macro. Unsupported languages fall back to "none".
+_CONFLUENCE_LANGUAGES = {
+    "java", "javascript", "js", "typescript", "ts", "python", "py",
+    "xml", "html", "sql", "bash", "sh", "shell", "groovy", "scala",
+    "json", "yaml", "yml", "kotlin", "swift", "ruby", "go", "rust",
+    "cpp", "c", "csharp", "cs", "php", "perl", "none",
+}
+
+_LANG_ALIASES = {
+    "js": "javascript", "ts": "typescript", "py": "python",
+    "sh": "bash", "shell": "bash", "yml": "yaml",
+    "cs": "csharp", "hcl": "none", "terraform": "none",
+    "properties": "none", "text": "none", "txt": "none",
+    "mermaid": "none",
+}
+
+
+def _normalise_lang(lang: str) -> str:
+    lang = lang.lower().strip()
+    lang = _LANG_ALIASES.get(lang, lang)
+    return lang if lang in _CONFLUENCE_LANGUAGES else "none"
+
+
 def restore_code_blocks(text: str, blocks: list) -> str:
     for idx, (lang, code) in enumerate(blocks):
+        cf_lang = _normalise_lang(lang)
         macro = (
-            f'<ac:structured-macro ac:name="code">'
-            f'<ac:parameter ac:name="language">{lang}</ac:parameter>'
+            f'<ac:structured-macro ac:name="code" ac:schema-version="1">'
+            f'<ac:parameter ac:name="language">{cf_lang}</ac:parameter>'
+            f'<ac:parameter ac:name="breakoutMode">full-width</ac:parameter>'
             f'<ac:plain-text-body><![CDATA[{code}]]></ac:plain-text-body>'
             f'</ac:structured-macro>'
         )
@@ -247,6 +272,7 @@ def convert_markdown(text: str) -> str:
     lines = text.splitlines(keepends=True)
     result = []
     in_list = None  # 'ul' or 'ol'
+    para_buf = []   # accumulates consecutive paragraph lines
 
     def close_list():
         nonlocal in_list
@@ -254,11 +280,17 @@ def convert_markdown(text: str) -> str:
             result.append(f'</{in_list}>\n')
             in_list = None
 
+    def flush_para():
+        if para_buf:
+            result.append(f"<p>{' '.join(para_buf)}</p>\n")
+            para_buf.clear()
+
     for line in lines:
         stripped = line.rstrip("\n")
 
         # Horizontal rule
         if re.match(r"^---+$", stripped) or re.match(r"^\*\*\*+$", stripped):
+            flush_para()
             close_list()
             result.append("<hr/>\n")
             continue
@@ -266,6 +298,7 @@ def convert_markdown(text: str) -> str:
         # Headers
         m = re.match(r"^(#{1,6})\s+(.+)$", stripped)
         if m:
+            flush_para()
             close_list()
             level = len(m.group(1))
             content = _inline_md(m.group(2))
@@ -275,6 +308,7 @@ def convert_markdown(text: str) -> str:
         # Unordered list
         m = re.match(r"^[-*]\s+(.+)$", stripped)
         if m:
+            flush_para()
             if in_list != "ul":
                 close_list()
                 result.append("<ul>\n")
@@ -285,6 +319,7 @@ def convert_markdown(text: str) -> str:
         # Ordered list
         m = re.match(r"^\d+\.\s+(.+)$", stripped)
         if m:
+            flush_para()
             if in_list != "ol":
                 close_list()
                 result.append("<ol>\n")
@@ -294,20 +329,22 @@ def convert_markdown(text: str) -> str:
 
         # Blank line
         if not stripped:
+            flush_para()
             close_list()
             result.append("\n")
             continue
 
         # Already converted (macro placeholders, table HTML)
         if stripped.startswith("<") or "MERMAID_BLOCK_" in stripped or "CODE_BLOCK_" in stripped:
+            flush_para()
             close_list()
             result.append(line)
             continue
 
-        # Regular paragraph
-        close_list()
-        result.append(f"<p>{_inline_md(stripped)}</p>\n")
+        # Regular paragraph line — accumulate
+        para_buf.append(_inline_md(stripped))
 
+    flush_para()
     close_list()
     return "".join(result)
 
