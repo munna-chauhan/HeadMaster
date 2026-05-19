@@ -42,7 +42,10 @@ Run per `.claude/skills/implement/SKILL.md`. Security scan is the final step of 
 - If `{autonomous}=true` → assume, log decision inline, continue
 - If `{autonomous}=false` → AskUserQuestion with specific question
 
-PASS → Phase B.
+PASS → checkpoint phase A, then Phase B:
+```bash
+sh scripts/story_phase_complete.py {project} {slug} {STORY-KEY} checkpoint --phase A
+```
 
 FAIL (attempt < max_loops) → load failure ledger, retry with structurally different approach.
 

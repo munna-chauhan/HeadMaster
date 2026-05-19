@@ -16,12 +16,16 @@ After:  story_phase_complete start + complete = 2 subprocess calls per story.
 
 Usage:
   sh scripts/story_phase_complete.py <project> <slug> <story-key> start
+  sh scripts/story_phase_complete.py <project> <slug> <story-key> checkpoint --phase A
   sh scripts/story_phase_complete.py <project> <slug> <story-key> complete [--phases A,C,D]
   sh scripts/story_phase_complete.py <project> <slug> <story-key> fail <reason>
   sh scripts/story_phase_complete.py <project> <slug> <story-key> defer <reason>
   sh scripts/story_phase_complete.py <project> <slug> <story-key> blocked <reason>
   sh scripts/story_phase_complete.py <project> <slug> <story-key> review
   sh scripts/story_phase_complete.py <project> <slug> <story-key> qa
+
+checkpoint: appends phase to phases_completed without changing status. Safe to call mid-story
+  after each phase commit so resume can detect partial progress after a session crash.
 
 Story status is written to loop_state.json only. JIRA_BREAKDOWN*.md files are read-only content.
 """
@@ -62,6 +66,31 @@ def _update_loop_state(state_file: Path, story_key: str, phases: list, status: s
         fh.close()
 
 
+def _checkpoint_loop_state(state_file: Path, story_key: str, phase: str) -> None:
+    """Append phase to phases_completed without changing status. Idempotent."""
+    state_file.parent.mkdir(parents=True, exist_ok=True)
+    fh = open(state_file, "a+", encoding="utf-8")
+    file_lock.acquire(fh)
+    try:
+        fh.seek(0)
+        content = fh.read()
+        state = json.loads(content) if content.strip() else {}
+        stories = state.setdefault("stories", {})
+        story = stories.setdefault(story_key, {"phases_completed": [], "status": "IN_PROGRESS"})
+        completed = story.setdefault("phases_completed", [])
+        if phase not in completed:
+            completed.append(phase)
+        completed.sort()
+        story["updated"] = datetime.now(timezone.utc).isoformat()
+        fh.seek(0)
+        fh.truncate()
+        fh.write(json.dumps(state, indent=2))
+        fh.flush()
+    finally:
+        file_lock.release(fh)
+        fh.close()
+
+
 def _log(project: str, slug: str, story_key: str, action: str, detail: str = "") -> None:
     log_path = REPO_ROOT / "memory" / "features" / project / slug / "run-log.md"
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -84,6 +113,18 @@ def main() -> None:
         _update_loop_state(state_file, story_key, [], "IN_PROGRESS")
         _log(project, slug, story_key, "STORY_START")
         print(f"[story] {story_key}: started", file=sys.stderr)
+
+    elif action == "checkpoint":
+        phase = ""
+        if "--phase" in sys.argv:
+            idx = sys.argv.index("--phase")
+            phase = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else ""
+        if not phase:
+            print("checkpoint requires --phase <code>", file=sys.stderr)
+            sys.exit(1)
+        _checkpoint_loop_state(state_file, story_key, phase.strip().upper())
+        _log(project, slug, story_key, "PHASE_CHECKPOINT", f"phase={phase.strip().upper()}")
+        print(f"[story] {story_key}: checkpoint phase={phase.strip().upper()}", file=sys.stderr)
 
     elif action == "complete":
         phases_str = ""
@@ -124,7 +165,7 @@ def main() -> None:
         print(f"[story] {story_key}: in qa", file=sys.stderr)
 
     else:
-        print(f"Unknown action: {action}. Valid: start | complete | fail | defer | blocked | review | qa",
+        print(f"Unknown action: {action}. Valid: start | checkpoint | complete | fail | defer | blocked | review | qa",
               file=sys.stderr)
         sys.exit(1)
 

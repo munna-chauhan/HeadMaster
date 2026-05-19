@@ -207,7 +207,14 @@ Per IN PROGRESS story → `git checkout story/{STORY-KEY}`:
 | `git status --porcelain` not empty | Stash / reset --hard / escalate (mark FAILED, skip) |
 | `{build_cmd}` fails | Reset soft HEAD~1 / escalate (mark FAILED, skip) |
 
-Both clean → proceed.
+Both clean → read `phases_completed` from `loop_state.json` for this story:
+
+| `phases_completed` | Resume entry point |
+|--------------------|--------------------|
+| contains `"A"` | Skip Phase A — go directly to Phase B AC check |
+| empty / absent | Start from Phase A |
+
+This prevents re-running an already-committed Phase A after a mid-session crash.
 
 ---
 
