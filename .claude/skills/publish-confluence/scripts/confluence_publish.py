@@ -10,20 +10,29 @@ echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, 
 exit 127
 ":"""
 """
-confluence_publish.py — Markdown pre-processor for Confluence publishing.
+confluence_publish.py -- Markdown pre-processor and Confluence publisher.
 
-Converts a pipeline artifact (PRD, TDD) from Markdown to Confluence storage
-format. Handles:
-  - Pipeline frontmatter stripping
-  - Table conversion
-  - Mermaid diagram wrapping (code macro with label)
-  - Standard Markdown elements (headers, bold, italic, code, lists, HR)
-  - Pipeline-internal reference removal
+Actions:
+  preprocess  Convert Markdown to Confluence storage XML (local, no network)
+  fetch       Download current storage XML from a page
+  update      Replace a page's body with a storage XML file
+  create      Create a new child page from a storage XML file
+  patch       Apply a YAML manifest of surgical edits to a storage XML file
+  validate    Check storage XML for common structural issues
 
 Usage:
-  sh scripts/confluence_publish.py preprocess <input.md> [--output <out.xml>]
+  sh confluence_publish.py preprocess <input.md> [--output <out.xml>]
+  sh confluence_publish.py fetch <page-id> [--output <out.xml>]
+  sh confluence_publish.py update <page-id> <body.xml> <title>
+  sh confluence_publish.py create <parent-id> <body.xml> <title>
+  sh confluence_publish.py patch <input.xml> <manifest.yml> [--output <out.xml>]
+  sh confluence_publish.py validate <file.xml>
+
+Auth (for network actions): ATLASSIAN_DOMAIN, JIRA_USER_EMAIL, JIRA_API_TOKEN env vars.
 """
 
+import json
+import os
 import re
 import sys
 import argparse
@@ -327,6 +336,271 @@ def remove_pipeline_refs(text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Confluence HTTP helpers
+# ---------------------------------------------------------------------------
+
+def _auth():
+    domain = os.environ.get("ATLASSIAN_DOMAIN", "")
+    email = os.environ.get("JIRA_USER_EMAIL", "")
+    token = os.environ.get("JIRA_API_TOKEN", "")
+    if not (domain and email and token):
+        print("[ERROR] Missing ATLASSIAN_DOMAIN / JIRA_USER_EMAIL / JIRA_API_TOKEN", file=sys.stderr)
+        sys.exit(1)
+    return domain, (email, token)
+
+
+def _get_page(domain: str, auth: tuple, page_id: str, verify: bool = True) -> dict:
+    try:
+        import urllib3
+        if not verify:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        import requests
+    except ImportError:
+        print("[ERROR] 'requests' library not installed", file=sys.stderr)
+        sys.exit(1)
+    headers = {"Accept": "application/json"}
+    r = requests.get(
+        f"https://{domain}/wiki/api/v2/pages/{page_id}",
+        auth=auth, headers=headers, timeout=30, verify=verify,
+    )
+    if r.status_code != 200:
+        print(f"[ERROR] GET page {page_id}: HTTP {r.status_code}\n{r.text[:500]}", file=sys.stderr)
+        sys.exit(1)
+    return r.json()
+
+
+def fetch(page_id: str, output_path: str = None, verify: bool = True) -> str:
+    """Download current storage XML for a Confluence page."""
+    domain, auth = _auth()
+    try:
+        import requests
+    except ImportError:
+        print("[ERROR] 'requests' library not installed", file=sys.stderr)
+        sys.exit(1)
+    headers = {"Accept": "application/json"}
+    r = requests.get(
+        f"https://{domain}/wiki/api/v2/pages/{page_id}?body-format=storage",
+        auth=auth, headers=headers, timeout=30, verify=verify,
+    )
+    if r.status_code != 200:
+        print(f"[ERROR] fetch {page_id}: HTTP {r.status_code}\n{r.text[:500]}", file=sys.stderr)
+        sys.exit(1)
+    body = r.json().get("body", {}).get("storage", {}).get("value", "")
+    if output_path:
+        Path(output_path).write_text(body, encoding="utf-8")
+        print(f"[OK] Fetched page {page_id} -> {output_path}")
+    else:
+        tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".xml", delete=False, encoding="utf-8")
+        tmp.write(body)
+        tmp.close()
+        print(tmp.name)
+    return body
+
+
+def update(page_id: str, body_path: str, title: str, verify: bool = True) -> None:
+    """Replace a Confluence page's body with a storage XML file."""
+    domain, auth = _auth()
+    try:
+        import requests
+    except ImportError:
+        print("[ERROR] 'requests' library not installed", file=sys.stderr)
+        sys.exit(1)
+    body = Path(body_path).read_text(encoding="utf-8")
+    page = _get_page(domain, auth, page_id, verify=verify)
+    cur_version = page["version"]["number"]
+    payload = {
+        "id": page_id,
+        "status": "current",
+        "title": title,
+        "body": {"representation": "storage", "value": body},
+        "version": {"number": cur_version + 1},
+    }
+    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    r = requests.put(
+        f"https://{domain}/wiki/api/v2/pages/{page_id}",
+        auth=auth, headers=headers, data=json.dumps(payload), timeout=60, verify=verify,
+    )
+    if r.status_code not in (200, 204):
+        print(f"[ERROR] update {page_id}: HTTP {r.status_code}\n{r.text[:1500]}", file=sys.stderr)
+        sys.exit(1)
+    result = r.json()
+    new_ver = result.get("version", {}).get("number")
+    web_url = result.get("_links", {}).get("webui", "")
+    base = f"https://{domain}"
+    print(f"[OK] Updated page {page_id} to v{new_ver}: {base}/wiki{web_url}" if web_url else f"[OK] Updated page {page_id} to v{new_ver}")
+
+
+def create(parent_id: str, body_path: str, title: str, space_key: str = None, verify: bool = True) -> None:
+    """Create a new child page under parent_id from a storage XML file."""
+    domain, auth = _auth()
+    try:
+        import requests
+    except ImportError:
+        print("[ERROR] 'requests' library not installed", file=sys.stderr)
+        sys.exit(1)
+    body = Path(body_path).read_text(encoding="utf-8")
+    if not space_key:
+        # Derive space_key from parent page
+        parent = _get_page(domain, auth, parent_id, verify=verify)
+        space_key = parent.get("spaceId", "")
+    payload = {
+        "title": title,
+        "parentId": parent_id,
+        "spaceId": space_key,
+        "body": {"representation": "storage", "value": body},
+        "status": "current",
+    }
+    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    r = requests.post(
+        f"https://{domain}/wiki/api/v2/pages",
+        auth=auth, headers=headers, data=json.dumps(payload), timeout=60, verify=verify,
+    )
+    if r.status_code not in (200, 201):
+        print(f"[ERROR] create under {parent_id}: HTTP {r.status_code}\n{r.text[:1500]}", file=sys.stderr)
+        sys.exit(1)
+    result = r.json()
+    page_id = result.get("id")
+    web_url = result.get("_links", {}).get("webui", "")
+    base = f"https://{domain}"
+    print(f"[OK] Created page {page_id}: {base}/wiki{web_url}" if web_url else f"[OK] Created page {page_id}")
+
+
+def patch(input_path: str, manifest_path: str, output_path: str = None) -> str:
+    """Apply a YAML manifest of surgical edits to a Confluence storage XML file.
+
+    Manifest format (YAML list of edits):
+      - kind: cdata_swap
+        anchor: <unique string before the CDATA>
+        body: <new CDATA content>
+        label: <description for log>
+      - kind: replace_once
+        needle: <exact string to replace>
+        replacement: <replacement string>
+        label: <description for log>
+      - kind: insert_after
+        anchor: <unique string to insert after>
+        snippet: <content to insert>
+        label: <description for log>
+    """
+    try:
+        import yaml
+    except ImportError:
+        print("[ERROR] 'pyyaml' library not installed", file=sys.stderr)
+        sys.exit(1)
+
+    text = Path(input_path).read_text(encoding="utf-8")
+    edits = yaml.safe_load(Path(manifest_path).read_text(encoding="utf-8"))
+
+    for edit in edits:
+        kind = edit.get("kind")
+        label = edit.get("label", kind)
+        if kind == "cdata_swap":
+            text = _patch_cdata_swap(text, edit["anchor"], edit["body"], label)
+        elif kind == "replace_once":
+            text = _patch_replace_once(text, edit["needle"], edit["replacement"], label)
+        elif kind == "insert_after":
+            text = _patch_insert_after(text, edit["anchor"], edit["snippet"], label)
+        else:
+            print(f"[ERROR] Unknown patch kind: {kind!r}", file=sys.stderr)
+            sys.exit(1)
+
+    if output_path:
+        Path(output_path).write_text(text, encoding="utf-8")
+        print(f"[OK] Patched: {output_path}")
+    else:
+        tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".xml", delete=False, encoding="utf-8")
+        tmp.write(text)
+        tmp.close()
+        print(tmp.name)
+    return text
+
+
+def _patch_cdata_swap(text: str, anchor: str, new_body: str, label: str) -> str:
+    idx = text.find(anchor)
+    if idx < 0:
+        print(f"[ERROR] [{label}] anchor not found", file=sys.stderr)
+        sys.exit(1)
+    if text.count(anchor) != 1:
+        print(f"[ERROR] [{label}] anchor not unique ({text.count(anchor)} matches)", file=sys.stderr)
+        sys.exit(1)
+    cdata_start = text.find("<![CDATA[", idx)
+    cdata_end = text.find("]]>", cdata_start)
+    if cdata_start < 0 or cdata_end < 0:
+        print(f"[ERROR] [{label}] CDATA brackets not found after anchor", file=sys.stderr)
+        sys.exit(1)
+    print(f"  OK  {label}")
+    return text[:cdata_start + len("<![CDATA[")] + new_body + text[cdata_end:]
+
+
+def _patch_replace_once(text: str, needle: str, replacement: str, label: str) -> str:
+    n = text.count(needle)
+    if n != 1:
+        print(f"[ERROR] [{label}] expected exactly 1 match, got {n}", file=sys.stderr)
+        sys.exit(1)
+    print(f"  OK  {label}")
+    return text.replace(needle, replacement, 1)
+
+
+def _patch_insert_after(text: str, anchor: str, snippet: str, label: str) -> str:
+    n = text.count(anchor)
+    if n != 1:
+        print(f"[ERROR] [{label}] expected exactly 1 match, got {n}", file=sys.stderr)
+        sys.exit(1)
+    print(f"  OK  {label}")
+    return text.replace(anchor, anchor + snippet, 1)
+
+
+def validate(file_path: str) -> bool:
+    """Check a Confluence storage XML file for structural issues.
+
+    Checks:
+      - UTF-8 validity
+      - Balanced CDATA markers
+      - Balanced <ac:structured-macro> tags
+      - local-id uniqueness
+    """
+    path = Path(file_path)
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as e:
+        print(f"[FAIL] UTF-8 decode error: {e}", file=sys.stderr)
+        return False
+
+    errors = []
+
+    # CDATA balance
+    opens = text.count("<![CDATA[")
+    closes = text.count("]]>")
+    if opens != closes:
+        errors.append(f"Unbalanced CDATA: {opens} open, {closes} close")
+
+    # ac:structured-macro balance
+    macro_opens = len(re.findall(r"<ac:structured-macro\b", text))
+    macro_closes = text.count("</ac:structured-macro>")
+    if macro_opens != macro_closes:
+        errors.append(f"Unbalanced ac:structured-macro: {macro_opens} open, {macro_closes} close")
+
+    # local-id uniqueness
+    local_ids = re.findall(r'local-id="([^"]+)"', text)
+    seen: set = set()
+    dupes: set = set()
+    for lid in local_ids:
+        if lid in seen:
+            dupes.add(lid)
+        seen.add(lid)
+    if dupes:
+        errors.append(f"Duplicate local-id values: {sorted(dupes)}")
+
+    if errors:
+        for e in errors:
+            print(f"[FAIL] {e}", file=sys.stderr)
+        return False
+
+    print(f"[OK] {file_path}: validation passed")
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
 
@@ -381,18 +655,58 @@ def preprocess(input_path: str, output_path: str = None) -> str:
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Confluence Markdown pre-processor")
-    parser.add_argument("action", choices=["preprocess"], help="Action to perform")
-    parser.add_argument("input", help="Input Markdown file path")
-    parser.add_argument("--output", help="Output file path (default: temp file)")
+    parser = argparse.ArgumentParser(description="Confluence Markdown publisher")
+    sub = parser.add_subparsers(dest="action", required=True)
+
+    p_pre = sub.add_parser("preprocess", help="Convert Markdown to Confluence storage XML")
+    p_pre.add_argument("input", help="Input Markdown file")
+    p_pre.add_argument("--output", help="Output path (default: temp file)")
+
+    p_fetch = sub.add_parser("fetch", help="Download page storage XML")
+    p_fetch.add_argument("page_id", help="Confluence page ID")
+    p_fetch.add_argument("--output", help="Output path (default: temp file)")
+    p_fetch.add_argument("--no-verify", action="store_true", help="Disable TLS verification (corporate proxies)")
+
+    p_upd = sub.add_parser("update", help="Replace page body")
+    p_upd.add_argument("page_id", help="Confluence page ID")
+    p_upd.add_argument("body", help="Storage XML file path")
+    p_upd.add_argument("title", help="Page title")
+    p_upd.add_argument("--no-verify", action="store_true")
+
+    p_cre = sub.add_parser("create", help="Create new child page")
+    p_cre.add_argument("parent_id", help="Parent page ID")
+    p_cre.add_argument("body", help="Storage XML file path")
+    p_cre.add_argument("title", help="Page title")
+    p_cre.add_argument("--space-key", help="Confluence space key (derived from parent if omitted)")
+    p_cre.add_argument("--no-verify", action="store_true")
+
+    p_patch = sub.add_parser("patch", help="Apply surgical edits via YAML manifest")
+    p_patch.add_argument("input", help="Input storage XML file")
+    p_patch.add_argument("manifest", help="YAML manifest of edits")
+    p_patch.add_argument("--output", help="Output path (default: temp file)")
+
+    p_val = sub.add_parser("validate", help="Check storage XML for structural issues")
+    p_val.add_argument("input", help="Storage XML file to validate")
+
     args = parser.parse_args()
 
-    if args.action == "preprocess":
-        try:
+    try:
+        if args.action == "preprocess":
             preprocess(args.input, args.output)
-        except Exception as e:
-            print(f"[ERROR] {e}", file=sys.stderr)
-            sys.exit(1)
+        elif args.action == "fetch":
+            fetch(args.page_id, args.output, verify=not args.no_verify)
+        elif args.action == "update":
+            update(args.page_id, args.body, args.title, verify=not args.no_verify)
+        elif args.action == "create":
+            create(args.parent_id, args.body, args.title, space_key=args.space_key, verify=not args.no_verify)
+        elif args.action == "patch":
+            patch(args.input, args.manifest, args.output)
+        elif args.action == "validate":
+            ok = validate(args.input)
+            sys.exit(0 if ok else 1)
+    except Exception as e:
+        print(f"[ERROR] {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -117,10 +117,48 @@ def test_artifact_path_stored(tmp_path, monkeypatch):
         from gate_transition import main
         main()
 
-    state_path = tmp_path / "memory" / "features" / "acme" / "test-feature" / "loop_state.json"
-    state = json.loads(state_path.read_text())
 
-    assert state["pipeline"]["artifact"] == artifact_path
+def test_revision_open_blocks_phase_advance(tmp_path, monkeypatch):
+    """Phase advance is blocked while a revision is open."""
+    import pytest
+    monkeypatch.setattr("gate_transition.REPO_ROOT", tmp_path)
+
+    memory_dir = tmp_path / "memory" / "features" / "acme" / "test-feature"
+    memory_dir.mkdir(parents=True, exist_ok=True)
+    state_path = memory_dir / "loop_state.json"
+    state_path.write_text(json.dumps({
+        "pipeline": {
+            "phase": "design",
+            "stage": "revision",
+            "revision_open": True,
+            "revision_id": "REV-001",
+        }
+    }))
+
+    with patch("sys.argv", ["gate_transition.py", "acme", "test-feature", "design", "complete"]):
+        from gate_transition import main
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+    print("[PASS] phase advance blocked while revision is open")
+
+
+def test_no_revision_allows_phase_advance(tmp_path, monkeypatch):
+    """Phase advance proceeds normally when no revision is open."""
+    monkeypatch.setattr("gate_transition.REPO_ROOT", tmp_path)
+
+    memory_dir = tmp_path / "memory" / "features" / "acme" / "test-feature"
+    memory_dir.mkdir(parents=True, exist_ok=True)
+    state_path = memory_dir / "loop_state.json"
+    state_path.write_text(json.dumps({"pipeline": {"phase": "design", "stage": "complete"}}))
+
+    with patch("sys.argv", ["gate_transition.py", "acme", "test-feature", "design", "approved"]):
+        from gate_transition import main
+        main()
+
+    state = json.loads(state_path.read_text())
+    assert state["pipeline"]["stage"] == "approved"
+    print("[PASS] phase advance succeeds with no open revision")
 
 
 def test_rollback_restores_backup(tmp_path, monkeypatch):

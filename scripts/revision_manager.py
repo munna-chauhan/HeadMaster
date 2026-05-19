@@ -146,6 +146,10 @@ def cmd_reopen(project: str, slug: str, stage: str, scope: str = "standard", mes
     log_path = REPO_ROOT / "docs" / "features" / project / slug / "REVISION_NOTES.md"
     rev_id = _next_rev_id(log_path)
 
+    # Artifact keys NOT in scope (for current_revision out-of-scope list)
+    all_artifact_keys = list(state.get("artifacts", {}).keys())
+    out_of_scope = [k for k in all_artifact_keys if k not in affected_keys]
+
     # Update pipeline block
     state.setdefault("pipeline", {})
     state["pipeline"].update({
@@ -156,8 +160,25 @@ def cmd_reopen(project: str, slug: str, stage: str, scope: str = "standard", mes
         "revision_stage":    stage,
         "revision_cascade":  cascade,
         "revision_opened":   now.isoformat(),
+        "current_revision":  {
+            "rev_id":               rev_id,
+            "stage":                stage,
+            "artifacts_in_scope":   affected_keys,
+            "artifacts_out_of_scope": out_of_scope,
+            "opened":               now.isoformat(),
+        },
     })
     state["last_updated"] = now.isoformat()
+
+    # Append to revisions history
+    state.setdefault("revisions", []).append({
+        "rev_id":  rev_id,
+        "stage":   stage,
+        "scope":   scope,
+        "opened":  now.isoformat(),
+        "closed":  None,
+        "message": message,
+    })
 
     _save_state(state_file, state)
 
@@ -246,9 +267,15 @@ def cmd_close(project: str, slug: str, rev_id: str) -> None:
         sys.exit(1)
 
     # Remove revision flags
-    for key in ("revision_open", "revision_id", "revision_stage", "revision_cascade", "revision_opened"):
+    for key in ("revision_open", "revision_id", "revision_stage", "revision_cascade", "revision_opened", "current_revision"):
         pipeline.pop(key, None)
+    today_iso = datetime.now(timezone.utc).date().isoformat()
     state["last_updated"] = datetime.now(timezone.utc).isoformat()
+    # Update revisions[] history entry
+    for entry in state.get("revisions", []):
+        if entry.get("rev_id") == rev_id and entry.get("closed") is None:
+            entry["closed"] = today_iso
+            break
     _save_state(state_file, state)
 
     # REVISION_NOTES.md: mark entry CLOSED
@@ -306,8 +333,19 @@ def main() -> None:
             sys.exit(1)
         cmd_close(sys.argv[2], sys.argv[3], sys.argv[4])
 
+    elif cmd == "current-revision":
+        if len(sys.argv) < 4:
+            print("Usage: revision_manager.py current-revision <project> <slug>")
+            sys.exit(1)
+        state_file = REPO_ROOT / "memory" / "features" / sys.argv[2] / sys.argv[3] / "loop_state.json"
+        if not state_file.exists():
+            print(json.dumps({"current_revision": None}))
+        else:
+            cr = _load_state(state_file).get("pipeline", {}).get("current_revision")
+            print(json.dumps({"current_revision": cr}))
+
     else:
-        print(f"Unknown command: {cmd}. Valid: reopen | check | close")
+        print(f"Unknown command: {cmd}. Valid: reopen | check | close | current-revision")
         sys.exit(1)
 
 

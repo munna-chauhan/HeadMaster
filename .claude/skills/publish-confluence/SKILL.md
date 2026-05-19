@@ -61,11 +61,13 @@ If user enters anything other than `y` or `Y`: abort, log `Publish cancelled`.
 sh .claude/skills/publish-confluence/scripts/confluence_publish.py update <page-id> <processed-file> "<title>"
 ```
 
-**New page in folder or under parent (`--folder-id` or `--parent-id`):**
+**Create new page (`--folder-id` or `--parent-id`):**
 
 ```bash
-sh .claude/skills/publish-confluence/scripts/confluence_publish.py create "<title>" <processed-file> <parent-or-folder-id>
+sh .claude/skills/publish-confluence/scripts/confluence_publish.py create <parent-id> <processed-file> "<title>"
 ```
+
+Add `--no-verify` on Syndigo workstations (corporate TLS proxy).
 
 ### Step 5: Output
 
