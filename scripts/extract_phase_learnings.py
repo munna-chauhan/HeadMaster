@@ -77,7 +77,7 @@ def _append_memory(agent: str, entry: str, dry_run: bool) -> None:
         print(f"  [dry-run] {agent}: {entry}")
         return
     result = subprocess.run(
-        [sys.executable, str(script), agent, "append", entry],
+        ["sh", str(script), agent, "append", entry],
         cwd=str(REPO_ROOT),
         capture_output=True,
         text=True,

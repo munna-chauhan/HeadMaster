@@ -75,7 +75,7 @@ def main():
         compress_script = REPO_ROOT / "scripts" / "compress.py"
         if compress_script.exists():
             subprocess.Popen(
-                [sys.executable, str(compress_script), "--consolidate-memory"],
+                ["sh", str(compress_script), "--consolidate-memory"],
                 cwd=str(REPO_ROOT),
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
