@@ -67,7 +67,7 @@ sh .claude/skills/publish-confluence/scripts/confluence_publish.py update <page-
 sh .claude/skills/publish-confluence/scripts/confluence_publish.py create <parent-id> <processed-file> "<title>"
 ```
 
-Add `--no-verify` on Syndigo workstations (corporate TLS proxy).
+Add `--no-verify` if the host has a corporate TLS proxy that intercepts HTTPS.
 
 ### Step 5: Output
 

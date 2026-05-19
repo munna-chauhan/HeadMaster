@@ -9,7 +9,7 @@ done
 echo "[HeadMaster] No python interpreter found" >&2
 exit 127
 ":"""
-"""Tests for audit_skill_contracts.py."""
+"""Tests for skill contract audit (merged into audit_inventory.py)."""
 import sys
 import tempfile
 from pathlib import Path
@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from audit_skill_contracts import audit, _implemented_commands, _skill_commands
+from audit_inventory import audit_contracts as audit, _implemented_commands, _skill_commands
 
 _SCRIPT_PREPROCESS_ONLY = (
     'import argparse\n'

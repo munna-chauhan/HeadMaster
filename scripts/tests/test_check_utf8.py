@@ -9,7 +9,7 @@ done
 echo "[HeadMaster] No python interpreter found" >&2
 exit 127
 ":"""
-"""Tests for check_utf8.py."""
+"""Tests for encoding/mojibake detection (merged into secret_scanner.py)."""
 import sys
 import tempfile
 from pathlib import Path
@@ -17,7 +17,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from check_utf8 import has_mojibake, _MARKER
+from secret_scanner import _scan_encoding, _MOJIBAKE_MARKER as _MARKER
+from pathlib import Path as _Path
+
+def has_mojibake(path: Path) -> bool:
+    content = path.read_text(encoding="utf-8") if path.exists() else ""
+    return bool(_scan_encoding(path, content))
 
 _TMP = Path(tempfile.mkdtemp())
 
