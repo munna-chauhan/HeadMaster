@@ -72,7 +72,7 @@ def main() -> None:
     setup_script = REPO_ROOT / "scripts" / "setup_projects.py"
     if setup_script.exists():
         try:
-            subprocess.run([sys.executable, str(setup_script)], cwd=str(REPO_ROOT),
+            subprocess.run(["sh", str(setup_script)], cwd=str(REPO_ROOT),
                            capture_output=True, timeout=5, check=False)
         except Exception:
             pass

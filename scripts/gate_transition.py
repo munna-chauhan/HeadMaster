@@ -357,6 +357,12 @@ def main() -> None:
             backup_file = state_file.with_suffix(".json.bak")
             backup_file.write_text(content, encoding="utf-8")
 
+        # Block phase advance while a revision is open
+        if state.get("pipeline", {}).get("revision_open"):
+            rev_id = state["pipeline"].get("revision_id", "unknown")
+            print(f"[gate] BLOCKED: revision {rev_id} is open — close it before advancing phase", file=sys.stderr)
+            sys.exit(1)
+
         # Update pipeline key atomically
         state["pipeline"] = {
             "phase": phase,

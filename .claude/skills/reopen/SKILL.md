@@ -105,8 +105,27 @@ Next steps:
 
 ## Closing a Revision
 
-Revisions are closed automatically by downstream skills on completion. Manual close:
+Use `/reopen {slug} close {rev_id}` or call directly:
 
 ```bash
 sh scripts/revision_manager.py close {project} {slug} {rev_id}
 ```
+
+Close transitions:
+1. Clears `pipeline.current_revision` from loop_state.json
+2. Marks `revisions[].closed` with today's date
+3. Updates REVISION_NOTES.md: `OPEN` → `CLOSED [{date}]`
+4. Unblocks gate_transition — phase advance is permitted again
+
+---
+
+## Design Review Gate (when stage = design)
+
+When reopening a `design` stage, before any TDD edits land:
+
+1. Run `tdd-reviewer` on the current TDD artifacts in scope (read `pipeline.current_revision.artifacts_in_scope`)
+2. Provide: REVISION_NOTES.md scope section + current TDD file content
+3. `tdd-reviewer` must return PASS or CONDITIONAL before Engineer stage proceeds
+4. Record verdict in loop_state.json: `pipeline.revision_review_verdict`
+
+Skip this gate for `planning`, `breakdown`, `execute` stages.

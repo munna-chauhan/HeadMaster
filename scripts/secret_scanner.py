@@ -12,8 +12,12 @@ exit 127
 """
 Secret scanner for HeadMaster pipeline.
 
-Scans files or git staged changes for leaked secrets (API keys, tokens, passwords).
-Returns non-zero exit code if secrets found — blocks commit.
+Scans files or git staged changes for leaked secrets and encoding issues.
+Returns non-zero exit code if any findings — blocks commit.
+
+Checks:
+  - Leaked secrets (API keys, tokens, passwords, connection strings)
+  - Mojibake (CP1252 round-trip UTF-8 corruption)
 
 Usage:
     sh scripts/secret_scanner.py --staged          # Scan staged files
@@ -74,6 +78,36 @@ _DEFAULT_PATTERNS = [
     ("Connection String", r"(?i)(postgres|mysql|mongodb|redis)://\S+:\S+@\S+", "Database connection string"),
     ("Bearer Token", r"(?i)bearer\s+[A-Za-z0-9_\-.]{20,}", "Bearer authorization token"),
 ]
+
+# ---------------------------------------------------------------------------
+# Encoding check (mojibake detection)
+# ---------------------------------------------------------------------------
+
+# b'\xe2\x80' decoded as CP1252 yields the 2-char prefix of every common
+# CP1252-round-trip mojibake marker (right/left quotes, dashes, ellipsis).
+# Built at runtime so this file stays clean ASCII.
+_MOJIBAKE_MARKER = b"\xe2\x80".decode("cp1252")
+_ENCODING_EXTENSIONS = frozenset({
+    ".py", ".md", ".yml", ".yaml", ".json", ".txt", ".sh", ".xml"
+})
+
+
+def _scan_encoding(path: Path, content: str) -> list:
+    """Return mojibake findings for a file whose content is already decoded."""
+    if path.suffix not in _ENCODING_EXTENSIONS:
+        return []
+    findings = []
+    for line_num, line in enumerate(content.splitlines(), 1):
+        if _MOJIBAKE_MARKER in line:
+            findings.append(Finding(
+                file=str(path),
+                line_num=line_num,
+                pattern_name="Encoding/Mojibake",
+                snippet=line.strip()[:80],
+            ))
+            break  # one finding per file is enough to flag it
+    return findings
+
 
 # Values that are obviously test/example placeholders — never flag these
 # Only match as whole words to avoid false negatives on real secrets
@@ -147,6 +181,7 @@ def scan_file(file_path: str) -> List[Finding]:
                     snippet=snippet,
                 ))
 
+    findings.extend(_scan_encoding(path, content))
     return findings
 
 

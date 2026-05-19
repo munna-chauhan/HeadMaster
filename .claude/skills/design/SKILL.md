@@ -77,6 +77,18 @@ Read `.claude/workflows/{tier}.yml` for `stages.tdd.sections` and `stages.tdd_re
 
 If `<message>`: log as focus hint.
 
+**Revision mode check** — run after skill_setup:
+
+```bash
+sh scripts/revision_manager.py current-revision {project} {slug}
+```
+
+If `current_revision` is non-null:
+- Narrow all stage work to `artifacts_in_scope` only
+- Read `docs/features/{project}/{slug}/REVISION_NOTES.md` (latest open REV-N section) to understand what changed and why
+- Skip Architect stage unless `pipeline.design_blocker = DESIGN_GAP` or `revision_stage` is `design` with structural scope
+- Skip artifacts in `artifacts_out_of_scope` — do not re-review or re-emit them
+
 **Tier determines design depth:**
 - **xs** → Skip Architect stage. Write IMPLEMENTATION_BRIEF.md (5 sections). No TDD review.
 - **s/m/l** → Full Architect + Engineer + Review stages. TDD.md sections: s=8, m=10, l=11.

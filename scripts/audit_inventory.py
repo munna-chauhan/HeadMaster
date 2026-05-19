@@ -9,18 +9,17 @@ done
 echo "[HeadMaster] No python interpreter found (tried python3, py3, python, py, and common Windows install dirs)" >&2
 exit 127
 ":"""
-"""Audit agent + skill counts against README.md and CLAUDE.md.
+"""Audit HeadMaster inventory: agent/skill counts and SKILL.md contract drift.
 
 Usage:
-  sh scripts/audit_inventory.py          # check only, exit 1 on drift
-  sh scripts/audit_inventory.py --fix    # update counts in-place, exit 0
+  sh scripts/audit_inventory.py          # check counts + contracts, exit 1 on drift
+  sh scripts/audit_inventory.py --fix    # auto-fix counts (contracts drift reported only)
 
 Checks:
-  - .claude/agents/*.md  (excludes references/ subdir)
-  - .claude/skills/*/SKILL.md
-  Counts must match every occurrence of "N agents" and "N skills" in
-  README.md and .claude/CLAUDE.md.
+  1. Agent/skill counts match README.md and .claude/CLAUDE.md
+  2. Every command referenced in SKILL.md bash blocks exists in the script's argparse
 """
+import ast
 import re
 import sys
 from pathlib import Path
@@ -34,6 +33,88 @@ CLAUDE_MD  = REPO_ROOT / ".claude" / "CLAUDE.md"
 
 TARGET_FILES = [README, CLAUDE_MD]
 
+
+# ---------------------------------------------------------------------------
+# Contract audit (SKILL.md vs script implementations)
+# ---------------------------------------------------------------------------
+
+# Positional subcommand after `sh <path>.py` — must start with a letter
+_CMD = re.compile(r'\bsh\s+([\w./\-]+\.py)\s+([a-zA-Z][a-zA-Z0-9_\-]*)')
+
+
+def _implemented_commands(path: Path) -> set:
+    """Return subcommand names implemented in a script via argparse or sys.argv dispatch."""
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except Exception:
+        return set()
+    found: set = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            for kw in node.keywords:
+                if kw.arg == "choices" and isinstance(kw.value, (ast.List, ast.Tuple)):
+                    for elt in kw.value.elts:
+                        if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                            found.add(elt.value)
+            func = getattr(node, "func", None)
+            if func and getattr(func, "attr", None) == "add_parser":
+                if node.args and isinstance(node.args[0], ast.Constant):
+                    found.add(node.args[0].value)
+        if isinstance(node, ast.Compare) and len(node.ops) == 1:
+            if isinstance(node.ops[0], ast.Eq):
+                for side in (node.left, node.comparators[0]):
+                    if isinstance(side, ast.Constant) and isinstance(side.value, str):
+                        found.add(side.value)
+            if isinstance(node.ops[0], ast.In):
+                container = node.comparators[0]
+                if isinstance(container, (ast.Tuple, ast.List)):
+                    for elt in container.elts:
+                        if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                            found.add(elt.value)
+    return found
+
+
+def _skill_commands(skill_md: Path) -> list:
+    """Return [(script_rel, action), ...] from bash blocks in a SKILL.md."""
+    text = skill_md.read_text(encoding="utf-8")
+    results = []
+    in_code = False
+    for line in text.splitlines():
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            continue
+        if in_code:
+            for m in _CMD.finditer(line):
+                results.append((m.group(1), m.group(2)))
+    return results
+
+
+def audit_contracts(repo_root: Path) -> list:
+    """Return list of {skill, script, missing, error?} dicts."""
+    findings = []
+    skills_dir = repo_root / ".claude" / "skills"
+    if not skills_dir.exists():
+        return findings
+    for skill_md in sorted(skills_dir.glob("*/SKILL.md")):
+        by_script: dict = {}
+        for script_rel, action in _skill_commands(skill_md):
+            by_script.setdefault(script_rel, set()).add(action)
+        for script_rel, actions in by_script.items():
+            script_path = repo_root / script_rel
+            if not script_path.exists():
+                findings.append({"skill": skill_md.parent.name, "script": script_rel,
+                                  "missing": sorted(actions), "error": "script not found"})
+                continue
+            missing = sorted(actions - _implemented_commands(script_path))
+            if missing:
+                findings.append({"skill": skill_md.parent.name, "script": script_rel,
+                                  "missing": missing})
+    return findings
+
+
+# ---------------------------------------------------------------------------
+# Count audit (agents + skills)
+# ---------------------------------------------------------------------------
 
 def count_agents() -> int:
     return len([
@@ -102,17 +183,30 @@ def audit(fix: bool) -> list[str]:
 
 def main() -> None:
     fix = "--fix" in sys.argv
+    failed = False
+
+    # 1. Count check
     print(f"audit_inventory: agents={count_agents()}, skills={count_skills()}")
-
-    errors = audit(fix)
-
-    if errors:
-        for e in errors:
+    count_errors = audit(fix)
+    if count_errors:
+        for e in count_errors:
             print(f"  DRIFT: {e}")
-        sys.exit(1)
+        failed = True
+    else:
+        print("  ok: counts match")
 
-    print("  ok: counts match")
-    sys.exit(0)
+    # 2. Contract check
+    contract_findings = audit_contracts(REPO_ROOT)
+    if contract_findings:
+        print("\naudit_contracts:")
+        for f in contract_findings:
+            note = f" ({f['error']})" if "error" in f else ""
+            print(f"  DRIFT: {f['skill']}: {f['script']}{note} — missing: {', '.join(f['missing'])}")
+        failed = True
+    else:
+        print("  ok: skill contracts match")
+
+    sys.exit(1 if failed else 0)
 
 
 if __name__ == "__main__":
